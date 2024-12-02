@@ -1,0 +1,13 @@
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - npm install
+  build:
+    commands:
+      - echo Running tests...
+      - npm test
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes
