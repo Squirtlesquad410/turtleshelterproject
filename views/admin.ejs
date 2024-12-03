@@ -32,7 +32,7 @@
 
 .admin-banner {
     position: fixed;  /* Fix it to the top of the page */
-    top: 0;
+    top: 102px;
     left: 0;
     width: 100%;  /* Cover the full width */
     height: 40px;  /* Set the height of the banner */
@@ -42,6 +42,10 @@
     font-weight: bold;
     font-size: 14px;
     z-index: 9999;  /* Ensure it stays on top of other content */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-top: -40px;
 }
 
         /* Navbar Styles */
@@ -140,11 +144,21 @@
     </style>
 </head>
 <body>
+    <!--Banner that appears if logged in as admin,
+    that way you can make sure you have admin permissions-->
+    <% if (isAdmin) { %>
+        <div class="admin-banner">
+            <p>Viewing page as admin</p>
+        </div>
+    <% } %>
      <!-- Navbar -->
      <br><br>
      <nav class="navbar">
         <ul>
             <li><a href="/">Home Page</a></li>
+            <br>
+            <li><a href="/volunteer">Volunteer</a></li>
+            <br>
             <li><a href="/signout">Sign Out</a></li>
         </ul>
     </nav>
