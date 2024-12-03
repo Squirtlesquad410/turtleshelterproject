@@ -44,7 +44,7 @@ const knex = require("knex")({
     connection: {
         host: process.env.RDS_HOSTNAME || "localhost",
         user: process.env.RDS_USERNAME || "postgres",
-        password: process.env.RDS_PASSWORD || "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: process.env.RDS_PASSWORD || "wIltrac15$", // CHANGE BACK BEFORE PUSH
         database: process.env.RDS_DB_NAME || "turtleshelterproject",
         port: process.env.RDS_PORT || 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -126,11 +126,8 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
 app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     try {
+        const isLoggedIn = req.session.isLoggedIn || false;
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-
-        if (!isAdmin) {
-            return res.status(403).send('Access denied');
-        }
 
         // Get the current page from the query string, default to page 1
         const currentPage = parseInt(req.query.page) || 1;
@@ -238,6 +235,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
 
         // Render the maintain-events page with events, pagination data, and filter values
         res.render('maintain-events', {
+            isLoggedIn,
             isAdmin,
             events,
             currentPage,
@@ -256,8 +254,21 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
-
-
+// POST route to delete an event
+app.post('/delete-event/:id', (req, res) => {
+    const event_id = req.params.id;
+  
+    knex('event_info')
+      .where('event_id', event_id)
+      .del() // Deletes the event with the specified ID
+      .then(() => {
+        res.redirect('/maintain-events'); // Redirect to a relevant page after deletion
+      })
+      .catch(error => {
+        console.error('Error deleting event:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  });
 
 
 // GET route for maintain-users page
