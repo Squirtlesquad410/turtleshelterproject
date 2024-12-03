@@ -9,6 +9,7 @@
     "array-flatten": "^1.1.1",
     "assert": "^2.1.0",
     "async": "^3.2.6",
+    "autoprefixer": "^10.4.20",
     "balanced-match": "^1.0.2",
     "body-parser": "^1.20.3",
     "brace-expansion": "^1.1.11",
@@ -88,6 +89,8 @@
     "pg-protocol": "^1.7.0",
     "pg-types": "^2.2.0",
     "pgpass": "^1.0.5",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0",
     "postgres-array": "^2.0.0",
     "postgres-bytea": "^1.0.0",
     "postgres-date": "^1.0.7",
@@ -110,6 +113,7 @@
     "statuses": "^2.0.1",
     "supports-color": "^7.2.0",
     "supports-preserve-symlinks-flag": "^1.0.0",
+    "tailwindcss": "^3.4.16",
     "tarn": "^3.0.2",
     "tildify": "^2.0.0",
     "toidentifier": "^1.0.1",
@@ -124,6 +128,7 @@
   },
   "scripts": {
     "test": "mocha tests/*.js",
+    "build": "postcss public/styles.css -o public/output.css",
     "start": "node index.js",
     "postinstall": "npm install dotenv"
   },
