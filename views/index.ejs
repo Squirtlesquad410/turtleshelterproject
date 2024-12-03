@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turtle Shelter Project</title>
     <style>
-          .admin-banner {
-        position: fixed;  /* Fix it to the top of the page */
-        top: 0;
-        left: 0;
-        width: 100%;  /* Cover the full width */
-        height: 40px;  /* Set the height of the banner */
-        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
-        color: white;
-        text-align: center;
-        font-weight: bold;
-        font-size: 14px;
-        z-index: 9999;  /* Ensure it stays on top of other content */
-    }
+   .admin-banner {
+   position: fixed;  /* Fix it to the top of the page */
+   top: 0;
+   left: 0;
+   width: 100%;  /* Cover the full width */
+   height: 40px;  /* Set the height of the banner */
+   background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
+   color: white;
+   text-align: center;
+   font-weight: bold;
+   font-size: 14px;
+   z-index: 9999;  /* Ensure it stays on top of other content */
+}
     </style>
  </head>
  <body>
@@ -33,9 +33,12 @@
        <br><br>
        <nav class="navbar">
          <ul>
+            <li><a href="/request-an-event">Request Event</a></li>
+            <li><a href="/volunteer">Volunteer</a></li>
             <!--ONLY SHOW the login button if the user isn't logged in-->
              <% if (!isLoggedIn) { %>
             <li><a href="/signin">Sign in</a></li>
+            <br>
             <% } %>
 
              <!--ONLY SHOW Admin Page Link if the user is logged on-->

@@ -124,16 +124,41 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
 app.get('/maintain-events', checkAuthenticationStatus, (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('maintain-events', { isAdmin });
+    res.render('maintain-events', { isLoggedIn, isAdmin });
 });
 
 
 
 // GET route for maintain-users page
 app.get('/maintain-users', checkAuthenticationStatus, (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('maintain-users', { isAdmin });
+    res.render('maintain-users', { isLoggedIn, isAdmin });
+});
+
+// GET route for Event Request Form page (for volunteers)
+app.get('/request-an-event', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    
+    res.render('request-an-event', { 
+        isLoggedIn: isLoggedIn,
+        isAdmin: isAdmin 
+    });
+});
+
+
+// GET route for volunteer.ejs view
+app.get('/volunteer', (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+
+    res.render('volunteer', {
+        isLoggedIn: isLoggedIn,
+        isAdmin: isAdmin
+    });
 });
 
 
