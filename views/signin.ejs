@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in Page</title>
+    <style>
+        /* Reset default margins and paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .navbar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .message-box {
+            background-color: #ffcccc;
+            color: #990000;
+            padding: 10px;
+            border: 1px solid #990000;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            color: #990000;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            color: #ff0000;
+        }
+
+        label {
+            font-size: 1em;
+            margin-bottom: 8px;
+            display: inline-block;
+            color: #555;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: #724caf;
+            color: #fff;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Home Page</a></li>
+        </ul>
+    </nav>
+   
+    <!-- Centered Login Form -->
+    <div class="login-container">
+
+    <!--Display Login Message if not Authenticated-->
+    <% if (message) { %>
+        <div class="message-box">
+            <span class="close-btn">&times;</span> <!--"X" button to close pop-up message when not logged in-->
+            <p><%= message %></p>
+        </div>
+    <% } %>
+
+        <h2>Sign in</h2>
+
+        <!-- Login Form -->
+        <form id="loginForm" action="/signin" method="POST">
+            <input type="text" id="username" name="username" placeholder="Enter username..." autofocus required><br>
+
+            <input type="password" id="password" name="password" placeholder="Enter password..." required><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        // Functionality to close the message box that pops up when not authenticated
+        const closeBtn = document.querySelector('.close-btn');
+
+        // Add event listener to my "close" button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                // Find the parent message box and remove it.
+                const messageBox = closeBtn.closest('.message-box');
+                messageBox.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

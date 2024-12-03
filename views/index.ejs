@@ -5,9 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turtle Shelter Project</title>
+    <style>
+          .admin-banner {
+        position: fixed;  /* Fix it to the top of the page */
+        top: 0;
+        left: 0;
+        width: 100%;  /* Cover the full width */
+        height: 40px;  /* Set the height of the banner */
+        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 9999;  /* Ensure it stays on top of other content */
+    }
+    </style>
  </head>
  <body>
+   <!--Banner that appears if logged in as admin,
+    that way you can make sure you have admin permissions-->
+   <% if (isAdmin) { %>
+      <div class="admin-banner">
+          <p>Viewing page as admin</p>
+      </div>
+  <% } %>
+       <!-- Navbar -->
+       <br><br>
+       <nav class="navbar">
+         <ul>
+            <!--ONLY SHOW the login button if the user isn't logged in-->
+             <% if (!isLoggedIn) { %>
+            <li><a href="/signin">Sign in</a></li>
+            <% } %>
+
+             <!--ONLY SHOW Admin Page Link if the user is logged on-->
+             <% if (isLoggedIn) { %>
+               <li><a href="/admin">Admin Page</a></li>
+               <li><a href="/signout">Sign Out</a></li>
+            <% } %>
+         </ul>
+     </nav>
+     <br><br>
     <h1>If you are reading this, the deployment worked. Good job nerd.</h1>
+    <br>
     <h1>Hello super diddy.</h1>
     <h1>Testing if the github autodeploy works. PLEASE SUPER DIDDY PLEASE</h1>
  </body>
