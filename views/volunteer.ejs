@@ -83,12 +83,12 @@ label {
 
             <!--If they want to be contacted by email (text input)-->
             <label for="email">Enter Your Email:</label>
-            <input type="text" style="width: 200px;" id="email" name="email" placeholder="Enter email if you would like to be contacted via email" required>
+            <input type="text" style="width: 325px;" id="email" name="email" placeholder="Enter email if you would like to be contacted via email" required>
             <br><br>
 
             <!--User Phone Number (number input)-->
             <label for="phone">What is a good phone number to contact you at?:</label>
-            <input type="number" id="phone" name="phone" placeholder="Enter your phone number" style="width: 150px;" required>
+            <input type="number" id="phone" name="phone" placeholder="Enter your phone number" style="width: 175px;" required>
             <br><br>
 
             <!--Street Address (text input)-->
@@ -112,8 +112,8 @@ label {
             <br><br>
 
             <!--Monthly Hours Available (drop-down maybe?, that way people can't put in like 100000 hours)-->
-            <label for="num_people">How long would you like the event to be?:</label>
-            <input type="DROPDOWN" id="people" name="people" placeholder="i.e. 2 hours, 4.5 hours, etc." min="1" max="24" style="width: 200px;" required>
+            <label for="monthly_hours_available">How many hours are you available per month?:</label>
+            <input type="number" id="monthly_hours_available" name="monthly_hours_available" placeholder="Enter the number of hours you are available per month" min="1" max="500" style="width: 350px;" required>
             <br><br>
 
             <!--Finding Source (How did you hear about the project. Drop down.)-->
@@ -139,16 +139,16 @@ label {
             <br><br>
 
             <!--Willing to Teach Sewing? (Checkbox)-->
-            <label for="willing_to_teach_sewing">Are you willing to teach sewing?:</label>
-            <br>
+            <label for="willing_to_teach_sewing"><b>Are you willing to teach sewing?:</b></label>
             <input type="checkbox" id="willing_to_teach_sewing" name="willing_to_teach_sewing" value="Y" required>
-            <label for="willing_to_teach_sewing" style="display: inline;">Yes (if checked)</label>
+            <label for="willing_to_teach_sewing" style="display: inline;">Yes</label>
+            <br><br>
 
-            <!--Willing to Teach LEAD? (Checkbox)-->
-            <label for="willing_to_lead">Would you be willing to lead an event?:</label>
-            <br>
+            <!--Willing to LEAD? (Checkbox)-->
+            <label for="willing_to_lead"><b>Would you be willing to lead an event?:</b></label>
             <input type="checkbox" id="willing_to_lead" name="willing_to_lead" value="Y" required>
-            <label for="willing_to_lead" style="display: inline;">Yes (if checked)</label>
+            <label for="willing_to_lead" style="display: inline;">Yes</label>
+            <br><br>
             
             <!--Submit Button-->
             <br><br>
