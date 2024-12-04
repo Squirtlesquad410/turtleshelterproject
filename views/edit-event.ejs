@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request an Event</title>
+    <title>Edit Event Record</title>
     <style>
 body {
     font-family: 'Poppins', sans-serif;
@@ -15,7 +15,7 @@ label {
     display: block;
     font-size: 18px;
     font-weight: 500;
-    color: #000000;
+    color: #333;
     margin-bottom: 5px;
 }
 
@@ -43,25 +43,20 @@ label {
         <p>Viewing page as admin</p>
     </div>
     <% } %>
-    <br><br>
-    
-    <!-- Navbar -->
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home Page</a></li>
-            <li><a href="/volunteer">Request Event</a></li>
-    
-        <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
-        <% if (isLoggedIn && isAdmin) { %>
-            <li><a href="/admin">Admin Page</a></li>
-            <li><a href="/signout">Sign Out</a></li>
-        <% } %>
 
-            <!-- Show Sign In button only if not logged in -->
-            <% if (!isLoggedIn) { %>
-                <li><a href="/signin">Sign In</a></li>
-            <% } %>
-        </ul>
+    <!-- Navbar -->
+    <br><br>
+    <nav class="navbar">
+    <ul>
+        <li><a href="/">Home Page</a></li>
+        <li><a href="/volunteer">Request Event</a></li>
+  
+      <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
+      <% if (isLoggedIn && isAdmin) { %>
+        <li><a href="/admin">Admin Page</a></li>
+        <li><a href="/signout">Sign Out</a></li>
+      <% } %>
+    </ul>
     </nav>
 
     <form action="request-an-event">

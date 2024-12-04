@@ -314,6 +314,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         // Render the maintain-events page with events, pagination data, and filter values
         res.render('maintain-events', {
             isLoggedIn,
+            isLoggedIn,
             isAdmin,
             events,
             currentPage,
@@ -331,6 +332,30 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         res.status(500).send('An error occurred while fetching events.');
     }
 });
+
+// GET route for edit-event.ejs
+app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
+    knex.select()
+    .from("event_info")
+    .then()
+                
+
+
+    )
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('edit-event', { isLoggedIn, isAdmin });
+});
+
+
+// GET route for add-event.ejs
+app.get('/add-event', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('add-event', { isLoggedIn, isAdmin });
+});
+
+
 
 // POST route to delete an event
 app.post('/delete-event/:id', (req, res) => {
@@ -377,6 +402,23 @@ app.get('/volunteer', (req, res) => {
         isLoggedIn: isLoggedIn,
         isAdmin: isAdmin
     });
+});
+
+
+// GET route for add-volunteer.ejs
+app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('add-volunteer', { isLoggedIn, isAdmin });
+});
+
+
+
+// GET route for edit-volunteer.ejs
+app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('edit-volunteer', { isLoggedIn, isAdmin });
 });
 
 
