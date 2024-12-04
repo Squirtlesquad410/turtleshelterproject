@@ -78,12 +78,14 @@ app.get('/', (req,res) => {
 // Route for Login Page
 app.get('/signin', (req, res) => {
     // Check if there is a message in the session and pass it to the view
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     const message = req.session.message || null;
     //Clear the message from the session after sending it
     delete req.session.message;
 
     // Render the view
-    res.render('signin', { message });
+    res.render('signin', { message, isAdmin, isLoggedIn });
 });
 
 const username=process.env.DB_USERNAME
@@ -161,8 +163,9 @@ app.get('/signout', (req, res) => {
 // Route for Admin Page
 app.get('/admin', checkAuthenticationStatus, (req, res) => {
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const isLoggedIn = req.session.isLoggedIn || false;
     // Check if the user is authenticated (in a session)
-        res.render('admin', { isAdmin });    // Render the page is admin is logged in
+        res.render('admin', { isAdmin, isLoggedIn });    // Render the page is admin is logged in
 });
 
 // Route for Add Admin Page
