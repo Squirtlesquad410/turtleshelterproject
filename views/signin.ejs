@@ -22,20 +22,6 @@
             color: #333;
         }
 
-        .navbar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .navbar a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
-        }
 
         .login-container {
             background-color: #fff;
@@ -98,7 +84,7 @@
         button[type="submit"] {
             width: 100%;
             padding: 14px;
-            background-color: #724caf;
+            background-color: #228b22;
             color: #fff;
             font-size: 1.2em;
             border: none;
@@ -114,11 +100,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home Page</a></li>
-        </ul>
-    </nav>
+    <%- include('partials/navbar') %>
    
     <!-- Centered Login Form -->
     <div class="login-container">
