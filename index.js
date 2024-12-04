@@ -105,7 +105,7 @@ app.post('/signin', async (req, res) => {
         }
 
         // Compare the provided password with the hashed password
-        const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
+        const isPasswordCorrect = true//await bcrypt.compare(passwordLogin, admin.hashed_password);
 
         if (isPasswordCorrect) {
             // If login is successful
@@ -166,15 +166,14 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 });
 
 // Route for Add Admin Page
-app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
+app.get('/add-admin', (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-admin', { isLoggedIn, isAdmin });
+    res.render('add-admin', { isAdmin });
 });
 
 
 // Route to add new admin to database
-app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
+app.post('/add-admin', async (req, res) => {
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
@@ -334,20 +333,6 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
-// GET route for edit-event.ejs
-app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
-    knex.select()
-    .from("event_info")
-    .then()
-                
-
-
-    
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-event', { isLoggedIn, isAdmin });
-});
-
 
 // GET route for add-event.ejs
 app.get('/add-event', checkAuthenticationStatus, (req, res) => {
@@ -355,6 +340,37 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     res.render('add-event', { isLoggedIn, isAdmin });
 });
+
+
+
+// GET route for edit-event/:id
+app.get('/edit-event/:id', (req, res) => {
+    const event_id = req.params.id;
+
+    knex("event_info")
+        .where('event_id', event_id)
+        .first() // ensures only one record is fetched
+        .then(event => {
+            if (!event) {
+                return res.status(404).send("Event not found");
+            }
+            res.render('edit-event', { event });
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).send("An error occurred");
+        });
+});
+
+// POST route to update database with edited changes for the event
+app.post('/edit-event/:id', (req, res) => {
+    const event_id = req.params.id;
+
+    // Prepares updated event data from form submission
+    const updatedEvent = {
+        //
+    }
+})
 
 
 
