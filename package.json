@@ -11,6 +11,7 @@
     "async": "^3.2.6",
     "autoprefixer": "^10.4.20",
     "balanced-match": "^1.0.2",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "brace-expansion": "^1.1.11",
     "bytes": "^3.1.2",

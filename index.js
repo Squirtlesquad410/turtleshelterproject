@@ -51,14 +51,15 @@ const knex = require("knex")({
     }
 });
 
-knex.raw('SELECT 1')
-  .then(() => {
-    console.log("Database connection successful!");
-  })
-  .catch((err) => {
-    console.error("Database connection error:", err);
-  });
 
+const bcrypt = require('bcrypt');
+
+
+const hashPassword = async (plainTextPassword) => {
+  const saltRounds = 10; // Higher = more secure but slower
+  const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
+  return hashedPassword;
+};
 
 //
 // -----> put all routes below this line
@@ -128,16 +129,47 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
         res.render('admin', { isAdmin });    // Render the page is admin is logged in
 });
 
+// Route for Add Admin Page
+app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('add-admin', { isLoggedIn, isAdmin });
+});
+
+
+// Route to add new admin to database
+app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
+    try {
+        // Extract data from the form
+        const { email, first_name, last_name, username, password } = req.body;
+
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Insert into the database
+        await knex('admins').insert({
+            email,
+            first_name,
+            last_name,
+            username,
+            hashed_password: hashedPassword
+        });
+
+        // Redirect to the admin page or confirmation
+        res.redirect('/add-admin');
+    } catch (error) {
+        console.error('Error adding admin:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
 app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     try {
+        const isLoggedIn = req.session.isLoggedIn || false;
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-
-        if (!isAdmin) {
-            return res.status(403).send('Access denied');
-        }
 
         // Get the current page from the query string, default to page 1
         const currentPage = parseInt(req.query.page) || 1;
@@ -178,6 +210,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
                 'e.jen_story',
                 'e.contribute_materials_cost'
             )
+            .orderBy('eo.event_date')
             .limit(itemsPerPage)
             .offset(offset);
 
@@ -245,6 +278,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
 
         // Render the maintain-events page with events, pagination data, and filter values
         res.render('maintain-events', {
+            isLoggedIn,
             isAdmin,
             events,
             currentPage,
@@ -263,8 +297,21 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
-
-
+// POST route to delete an event
+app.post('/delete-event/:id', (req, res) => {
+    const event_id = req.params.id;
+  
+    knex('event_info')
+      .where('event_id', event_id)
+      .del() // Deletes the event with the specified ID
+      .then(() => {
+        res.redirect('/maintain-events'); // Redirect to a relevant page after deletion
+      })
+      .catch(error => {
+        console.error('Error deleting event:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  });
 
 
 // GET route for maintain-users page
