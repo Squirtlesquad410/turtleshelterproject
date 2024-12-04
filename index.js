@@ -51,7 +51,13 @@ const knex = require("knex")({
     }
 });
 
+const bcrypt = require('bcrypt');
 
+const hashPassword = async (plainTextPassword) => {
+  const saltRounds = 10; // Higher = more secure but slower
+  const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
+  return hashedPassword;
+};
 
 //
 // -----> put all routes below this line
@@ -121,6 +127,40 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
         res.render('admin', { isAdmin });    // Render the page is admin is logged in
 });
 
+// Route for Add Admin Page
+app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('add-admin', { isLoggedIn, isAdmin });
+});
+
+
+// Route to add new admin to database
+app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
+    try {
+        // Extract data from the form
+        const { email, first_name, last_name, username, password } = req.body;
+
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Insert into the database
+        await knex('admins').insert({
+            email,
+            first_name,
+            last_name,
+            username,
+            hashed_password: hashedPassword
+        });
+
+        // Redirect to the admin page or confirmation
+        res.redirect('/add-admin');
+    } catch (error) {
+        console.error('Error adding admin:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
