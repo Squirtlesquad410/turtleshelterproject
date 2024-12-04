@@ -78,12 +78,14 @@ app.get('/', (req,res) => {
 // Route for Login Page
 app.get('/signin', (req, res) => {
     // Check if there is a message in the session and pass it to the view
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     const message = req.session.message || null;
     //Clear the message from the session after sending it
     delete req.session.message;
 
     // Render the view
-    res.render('signin', { message });
+    res.render('signin', { message, isAdmin, isLoggedIn });
 });
 
 const username=process.env.DB_USERNAME
@@ -161,14 +163,16 @@ app.get('/signout', (req, res) => {
 // Route for Admin Page
 app.get('/admin', checkAuthenticationStatus, (req, res) => {
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const isLoggedIn = req.session.isLoggedIn || false;
     // Check if the user is authenticated (in a session)
-        res.render('admin', { isAdmin });    // Render the page is admin is logged in
+        res.render('admin', { isAdmin, isLoggedIn });    // Render the page is admin is logged in
 });
 
 // Route for Add Admin Page
 app.get('/add-admin', (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-admin', { isAdmin });
+    const isLoggedIn = req.session.isLoggedIn || false;
+    res.render('add-admin', { isAdmin, isLoggedIn });
 });
 
 
@@ -341,17 +345,6 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
 });
 
 
-// GET route for edit-event.ejs
-app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
-    knex.select()
-    .from("event_info")
-    .then()
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-event', { isLoggedIn, isAdmin });
-});
-
-
 // GET route for add-event.ejs
 app.get('/add-event', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
@@ -362,33 +355,137 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
 
 
 // GET route for edit-event/:id
-app.get('/edit-event/:id', (req, res) => {
-    const event_id = req.params.id;
-
-    knex("event_info")
-        .where('event_id', event_id)
-        .first() // ensures only one record is fetched
-        .then(event => {
-            if (!event) {
-                return res.status(404).send("Event not found");
+// GET route for edit-event.ejs
+// GET route to edit an event
+app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const id = req.params.id;
+    // Fetch the main event info
+    knex('event_info')
+        .where('event_id', id)
+        .first()
+        .then(events => {
+            if (!events) {
+                return res.status(404).send('Event not found');
             }
-            res.render('edit-event', { event });
+            // Fetch the venue and event_date_options in parallel
+            return Promise.all([
+                knex('venues').where('venue_id', events.venue_id).first(),
+                knex('event_date_options').where('event_id', events.event_id)
+            ]).then(([venues, event_date_options]) => {
+                // Render the edit-event form with all required data
+                res.render('edit-event', {
+                    isLoggedIn,
+                    isAdmin,
+                    events,
+                    venues,
+                    event_date_options
+                });
+            });
         })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send("An error occurred");
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            res.status(500).send('Internal Server Error');
         });
 });
-
-// POST route to update database with edited changes for the event
-app.post('/edit-event/:id', (req, res) => {
-    const event_id = req.params.id;
-
-    // Prepares updated event data from form submission
-    const updatedEvent = {
-        //
-    }
-})
+app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const {
+        event_description,
+        notes,
+        organization_name,
+        organizer_first_name,
+        organizer_last_name,
+        organizer_phone,
+        organizer_email,
+        street_address,
+        city,
+        state,
+        zip,
+        space_size,
+        event_type,
+        event_date,
+        start_time,
+        end_time,
+        estimated_attendance,
+        num_children_under_10,
+        num_teens,
+        num_help_set_up,
+        num_sewers,
+        sewing_ability_id,
+        num_sewing_machines,
+        num_sergers,
+        jen_story,
+        contribute_materials_cost,
+        event_status
+    } = req.body;
+    // First, update event_info table
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            event_description,
+            notes,
+            organization_name,
+            organizer_first_name,
+            organizer_last_name,
+            organizer_phone,
+            organizer_email,
+            event_type,
+            estimated_attendance,
+            num_children_under_10,
+            num_teens,
+            num_help_set_up,
+            num_sewers,
+            sewing_ability_id,
+            num_sewing_machines,
+            num_sergers,
+            jen_story: jen_story ? 'Y' : 'N',
+            contribute_materials_cost: contribute_materials_cost ? 'Y' : 'N',
+            event_status
+        })
+        .then(() => {
+            // Now, get the venue_id from the event_info record
+            knex('event_info')
+                .where('event_id', eventId)
+                .select('venue_id')
+                .first() // Get the first record (only one event record)
+                .then((event) => {
+                    if (event && event.venue_id) {
+                        // Use the venue_id from the event_info record to update the venues table
+                        const venueId = event.venue_id;
+                        knex('venues')
+                            .where('venue_id', venueId)  // Update the venue using the retrieved venue_id
+                            .update({
+                                street_address,
+                                city,
+                                state,
+                                zip,
+                                space_size
+                            })
+                            .then(() => {
+                                // After both updates are successful, redirect or render a success page
+                                res.redirect('/maintain-events/');
+                            })
+                            .catch(error => {
+                                console.error('Error updating venue:', error);
+                                res.status(500).send('Error updating venue');
+                            });
+                    } else {
+                        console.error('No venue_id found for this event');
+                        res.status(400).send('No venue_id found for this event');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error retrieving venue_id from event_info:', error);
+                    res.status(500).send('Error retrieving venue_id');
+                });
+        })
+        .catch(error => {
+            console.error('Error updating event:', error);
+            res.status(500).send('Error updating event');
+        });
+});
 
 
 

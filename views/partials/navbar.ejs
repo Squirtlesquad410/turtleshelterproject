@@ -1,0 +1,116 @@
+<style>
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #228b22; /* Turtle green */
+        color: white;
+        padding: 10px 20px;
+        z-index: 1000; /* Ensure it sits above everything else */
+        display: flex;
+        flex-wrap: wrap; /* Allow links to wrap to the next line if needed */
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        overflow-x: auto; /* Add horizontal scroll if content overflows */
+        }
+    
+        .navbar h2 {
+            margin: 0;
+            font-weight: bold;
+            color: white; /* Ensure the text color is white */
+        }
+    
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            
+            margin-right: 40px; 
+            font-size: large;
+        }
+    
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+    .slide-out-menu {
+        position: fixed;
+        top: 0;
+        right: -200px; /* Start off-screen */
+        width: 200px;
+        height: 100vh;
+        background-color: #333;
+        color: white;
+        transition: right 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start; /* Align items at the top */
+        padding-top: 20px; /* Adds some space from the top */
+    }
+
+    /* Show the menu when hovering on Admin link or the menu itself */
+    #slideOut:hover + #slideOutMenu,
+    #slideOutMenu:hover {
+        right: 0; /* Slide in the menu */
+    }
+
+    /* Style the menu items */
+    .slide-out-menu ul {
+        padding: 0;
+        list-style-type: none;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Ensure uniform height for each menu item and prevent text wrapping */
+    .slide-out-menu ul li {
+        margin-bottom: 15px; /* Space between menu items */
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    /* Style the links */
+    .slide-out-menu ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        padding: 10px 20px; /* Adds padding inside the link */
+        display: block; /* Make the link fill the whole list item */
+        text-align: center; /* Center the text inside each link */
+    }
+
+    /* Hover effect for links */
+    .slide-out-menu ul li a:hover {
+        background-color: #444; /* Darken the background on hover */
+    }
+</style>
+
+<div class="navbar">
+    <h2><a href="/">TURTLE SHELTER PROJECT</a></h2>
+    <div class="banner">
+        <a href="#">About Us</a>
+        <a href="#">Jen's Story</a>
+        <a href="#">Volunteer</a>
+        <a href="/donate">Donate</a>
+        <a href="/request-an-event">Request Event</a>
+        
+        <% if (!isLoggedIn) { %>
+            <a href="/signin">Login</a>
+        <% } %>
+
+        <% if (isLoggedIn) { %>
+            <a href="/signout">Sign Out</a>
+            <a id="slideOut" href="#">Admin Page</a>
+            <!-- Slide-out menu -->
+            <div id="slideOutMenu" class="slide-out-menu">
+                <ul>
+                    <li><a href="/maintain-events">Maintain Events</a></li>
+                    <li><a href="/maintain-users">Maintain Users</a></li>
+                    <li><a href="/maintain-volunteers">Maintain Volunteers</a></li>
+                    <li><a href="/add-admin">Add Admin</a></li>
+                </ul>
+            </div>
+        <% } %>
+    </div>
+</div>

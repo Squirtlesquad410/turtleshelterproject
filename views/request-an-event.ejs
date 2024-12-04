@@ -3,140 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request an Event</title>
+    <title>Document</title>
     <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    /* Body styling */
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
-        background-size: 400% 400%;
-        height: 100vh;
-        display: block;
-        color: white;
-        transition: all 0.3s ease-in-out;
-        padding-top: 200px;
-        padding-left: 20px;
-    }
-
-    label {
-        display: block;
-        font-size: 18px;
-        font-weight: 500;
-        color: #000000;
-        margin-bottom: 5px;
-    }
-
-    .admin-banner {
-        position: fixed;  /* Fix it to the top of the page */
-        top: 40px;
-        left: 0;
-        width: 100%;  /* Cover the full width */
-        height: 40px;  /* Set the height of the banner */
-        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
-        color: white;
-        text-align: center;
-        font-weight: bold;
-        font-size: 14px;
-        z-index: 9999;  /* Ensure it stays on top of other content */
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        padding-top: -40px;
-    }
-
-            /* Navbar Styles */
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
     
-        /* Header styling */
+        /* Space below the navbar */
+        .content {
+            padding-top: 80px; /* Adjust this value to match the navbar height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+             /* Full viewport height */
+        }
+    
+        /* Form container styling */
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+        }
+    
         h1 {
-            font-size: 3.5em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: -100px;
+            text-align: center;
+            color: #333;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
             margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
         }
-
-        /* Paragraph styling */
-        p {
-            font-size: 1.2em;
-            font-weight: 500;
-            line-height: 1.6;
-            margin-top: 20px;
-            color: #f7f7f7;
-            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
+    
+        textarea {
+            resize: vertical;
         }
-
-        /* Button styling */
-        .btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #ff5733;
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
             color: white;
-            font-size: 1.2em;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-weight: 600;
             border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            margin: 0 auto;
+            text-align: center;
         }
-
-        .btn:hover {
-            background-color: #ff3e1d;
-            transform: scale(1.05);
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
         }
-    </style>
-</head>
-<body>
-    <div class="navbar" style="z-index: 10; position: sticky; top: 0; height: auto; font-size: xx-large; color: white; padding: 10px; padding-left: 20px;">
-        <div style="display: flex; flex-direction: row; align-items: center; align-content: center;">
-           <h1 style="font-weight: bold; width: 100%;"><a href="/">TURTLE SHELTER PROJECT</a></h1>
-           <div class="banner" style="display: flex; align-items: end; flex-direction: row; gap: 40px; padding-right: 20px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">
-              <p style="font-size: large; white-space: nowrap;">About Us</p>
-              <p style="font-size: large; white-space: nowrap;">Jen's Story</p>
-              <p style="font-size: large;">Volunteer</p>
-              <p style="font-size: large; white-space: nowrap;"><a href="/request-an-event">Request Event</a></p>
-              <% if (!isLoggedIn) { %>
-                 <p style="font-size: large;"><a href="/signin">Login</a></p>
-              <% } %>
-              <% if (isLoggedIn) { %>
-                 <p style="font-size: large; white-space: nowrap;"><a href="/admin">Admin Page</a></p>
-                 <p style="font-size: large; white-space: nowrap;"><a href="/signout">Sign Out</a></p>
-              <% } %>
-           </div>
-        </div>
-     </div>
     
-<<<<<<< HEAD
-=======
-    <!-- Navbar -->
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home Page</a></li>
-            <li><a href="/volunteer">Volunteer</a></li>
-            <li><a href="/request-an-event">Request Event</a></li>
-    
-        <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
-        <% if (isLoggedIn && isAdmin) { %>
-            <li><a href="/admin">Admin Page</a></li>
-            <li><a href="/signout">Sign Out</a></li>
-        <% } %>
-
-            <!-- Show Sign In button only if not logged in -->
-            <% if (!isLoggedIn) { %>
-                <li><a href="/signin">Sign In</a></li>
-            <% } %>
-        </ul>
-    </nav>
-
->>>>>>> f5eb330 (sigma)
+    <%- include('partials/navbar') %>
     <form action="/request-an-event" method="POST">
         <h1>Event Attendance</h1>
         <div class="input-container">
@@ -205,136 +146,84 @@
                 </select>
                 <br><br>
             </fieldset>
-            <br><br><br><br>
-
-            <!--Event Type (Sewing, Non-Sewing or Both) (Radio Input)-->
-            <div class="event_type">
-                <label for="event_type" style="font-weight: bold;">Would you like to do Sewing, Non-Sewing, or Both during the event?:</label>
-                <label for="event_type">
-                    <input type="radio" name="sewing" value="S"> Sewing
-                </label>
-                <label>
-                    <input type="radio" name="non_sewing" value="N"> Non-Sewing
-                </label>
-                <label>
-                    <input type="radio" name="both" value="B"> Both
-                </label>
-                <br><br>
-            </div>
-
-            <!--Event Date/Time Preferences-->
-
-            <!--NOTE FOR TRACE: How can we make the "date_preference_order" work with this?-->
-            <div>
-                <!--Date Option #1-->
-                <fieldset>
-                    <label for="date_preference_order"><b>Priority: </b></label>
-                    <input type="number" id="date_preference_order" name="date_preference_order" value="1" required>
-                    <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
-                    <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
+            
                     <br><br>
-                    <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" required>
+                    <div class="event_type">
+                        <label for="event_type">Will there be sewing, no sewing or both at the event?:</label>
+                        <select id="event_type" name="event_type" required>
+                            <option value="sewing">Sewing</option>
+                            <option value="non-sewing">Non-sewing</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+        <!--Event Date/Time Preferences-->
+                    <div>
+                        <!--Date Option #1-->
+                            <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
+                            <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
+                            <br><br>
+                            <label for="start_time">Event Start time:</label>
+                            <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" required>
+                            <br><br>
+                            <label for="end_time">Event End time:</label>
+                            <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" required>
+                        <br>
+                    </div>
+
+                        <h2>Attendee Information</h2>
+                        <!--How many people will attend (number input)-->
+                        <label for="estimated_attendance">How many people will be in attendance? (can be a rough estimate):</label>
+                        <input type="number" id="estimated_attendance" name="estimated_attendance" placeholder="Enter estimated attendance" min="0" required style="width: 185px;">
+                        <br><br>
+                        <!--How many participants under 10 years old?-->
+                        <label for="num_children_under_10">How many attendees are under 10 years old?:</label>
+                        <input type="number" id="num_children_under_10" name="num_children_under_10" placeholder="Enter number of participants under 10" min="0" required style="width: 250px;">
+                        <br><br>
+                        <!--How many participants are between 10-18 years old?-->
+                        <label for="num_teens">How many attendees are between 10-18 years old?:</label>
+                        <input type="number" id="num_teens" name="num_teens" placeholder="Enter number of participants between 10-18" min="0" required style="width: 275px;">
+                        <br><br>
+                        <!--How many people can come an hour early to help set up?-->
+                        <label for="num_help_set_up">How many attendees can come in early to help set up?:</label>
+                        <input type="number" id="num_help_set_up" name="num_help_set_up" placeholder="Enter number of participants that can help set up" min="0" required style="width: 315px;">
+                        <br><br>
+                        <!--How many people can sew?-->
+                        <label for="num_sewers">How many attendees can sew (rough estimate is fine)?:</label>
+                        <input type="number" id="num_sewers" name="num_sewers" placeholder="Enter number of participants that can sew" min="0" required style="width: 265px;">
+                        <br><br>
+                        <!--Average Sewing Ability (drop-down)-->
+                        <label for="sewing_ability_id">Select your (AVG?) sewing ability...*********:</label>
+                        <select id="sewing_ability_id" name="sewing_ability_id" required>
+                            <option value="1">No sewing; can cut, pin, and mark vest components</option>
+                            <option value="2">Beginning sewing; just learning to use a sewing machine</option>
+                            <option value="3">Basic sewing; can sew a straight stitch</option>
+                            <option value="4">Advanced sewing; can handle challenging sewing tasks</option>
+                        </select>
+                        <br><br>
+                        <!--Number of Sewing Machines-->
+                        <label for="num_sewing_machines">How many sewing machines do you (NEED/HAVE?):</label>
+                        <input type="number" id="num_sewing_machines" name="num_sewing_machines" placeholder="Enter number of sewing machines" min="0" required style="width: 225px;">
+                        <br><br>
+                        <!--Number of Sergers-->
+                        <label for="num_sergers">How many sewing machines do you (NEED/HAVE?):</label>
+                        <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="0" required style="width: 185px;">
+                        <br><br>
+
                     <br><br>
-                    <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" required>
-                </fieldset>
-                <br>
-
-                <!--Date Option #2-->
-                <fieldset>
-                    <label for="event_date2"><b>What date is your 2nd preference? (optional):</b></label>
-                    <input type="date" id="event_date2" name="event_date2" placeholder="Enter date" >
+                    <!--Would you like Jen to share her story? (boolean/checkbox input)-->
+                    <label for="jen_story">Would you like Jen to share her story?</label>
+                    <input type="checkbox" id="jen_story" name="jen_story" value="Y" >
+                    <label for="jen_story" style="display: inline;">Yes</label>
                     <br><br>
-                    <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time2" name="start_time2" placeholder="Enter start time" style="width: 100px;" >
+                    <!--Are you willing to contribute to the cost of materials (For the vests)?-->
+                    <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
+                    <br>
+                    <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" >
+                    <label for="contribute_materials_cost" style="display: inline;">Yes</label>
                     <br><br>
-                    <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time2" name="end_time2" placeholder="Enter end time" style="width: 100px;" >
-                </fieldset>
-                <br>
-
-                <!--Date Option #3-->
-                <fieldset>
-                    <label for="event_date3"><b>What date is your 3rd preference? (optional):</b></label>
-                    <input type="date" id="event_date3" name="event_date3" placeholder="Enter date" >
-                    <br><br>
-                    <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time3" name="start_time3" placeholder="Enter start time" style="width: 100px;" >
-                    <br><br>
-                    <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time2" name="end_time2" placeholder="Enter end time" style="width: 100px;" >
-                </fieldset>
-                <br>
-            </div>
-
-            <fieldset>
-                <h2>Attendee Information</h2>
-                <!--How many people will attend (number input)-->
-                <label for="estimated_attendance">How many people will be in attendance? (can be a rough estimate):</label>
-                <input type="number" id="estimated_attendance" name="estimated_attendance" placeholder="Enter estimated attendance" min="1" required style="width: 185px;">
-                <br><br>
-
-                <!--How many participants under 10 years old?-->
-                <label for="num_children_under_10">How many attendees are under 10 years old?:</label>
-                <input type="number" id="num_children_under_10" name="num_children_under_10" placeholder="Enter number of participants under 10" min="1" required style="width: 250px;">
-                <br><br>
-
-                <!--How many participants are between 10-18 years old?-->
-                <label for="num_teens">How many attendees are between 10-18 years old?:</label>
-                <input type="number" id="num_teens" name="num_teens" placeholder="Enter number of participants between 10-18" min="1" required style="width: 275px;">
-                <br><br>
-
-                <!--How many people can come an hour early to help set up?-->
-                <label for="num_help_set_up">How many attendees can come in early to help set up?:</label>
-                <input type="number" id="num_help_set_up" name="num_help_set_up" placeholder="Enter number of participants that can help set up" min="1" required style="width: 315px;">
-                <br><br>
-
-                <!--How many people can sew?-->
-                <label for="num_sewers">How many attendees can sew (rough estimate is fine)?:</label>
-                <input type="number" id="num_sewers" name="num_sewers" placeholder="Enter number of participants that can sew" min="1" required style="width: 265px;">
-                <br><br>
-
-                <!--Average Sewing Ability (drop-down)-->
-                <label for="sewing_ability_id">Select your (AVG?) sewing ability...*********:</label>
-                <select id="sewing_ability_id" name="sewing_ability_id" required>
-                    <option value="1">No sewing; can cut, pin, and mark vest components</option>
-                    <option value="2">Beginning sewing; just learning to use a sewing machine</option>
-                    <option value="3">Basic sewing; can sew a straight stitch</option>
-                    <option value="4">Advanced sewing; can handle challenging sewing tasks</option>
-                </select>
-                <br><br>
-
-                <!--Number of Sewing Machines-->
-                <label for="num_sewing_machines">How many sewing machines do you (NEED/HAVE?):</label>
-                <input type="number" id="num_sewing_machines" name="num_sewing_machines" placeholder="Enter number of sewing machines" min="1" required style="width: 225px;">
-                <br><br>
-
-                <!--Number of Sergers-->
-                <label for="num_sergers">How many sewing machines do you (NEED/HAVE?):</label>
-                <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="1" required style="width: 185px;">
-                <br><br>
-            </fieldset>
-            <br><br>
-
-            <!--Would you like Jen to share her story? (boolean/checkbox input)-->
-            <label for="jen_story">Would you like Jen to share her story?</label>
-            <input type="checkbox" id="jen_story" name="jen_story" value="Y" >
-            <label for="jen_story" style="display: inline;">Yes</label>
-            <br><br>
-
-            <!--Are you willing to contribute to the cost of materials (For the vests)?-->
-            <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
-            <br>
-            <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" >
-            <label for="contribute_materials_cost" style="display: inline;">Yes</label> 
-        
-            <br><br>
-
-            <!--Submit Button-->
-            <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
-        </div>
-    </form>
-    <br><br>
+                    <!--Submit Button-->
+                    <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
+                </div>
+            </form>
 </body>
 </html>

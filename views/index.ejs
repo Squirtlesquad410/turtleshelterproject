@@ -6,44 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/output.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Turtle Shelter Project</title>
     <style>
-      .banner p:hover {
-         cursor: pointer;
-         color: lightgray;
-      }
+
     </style>
  </head>
  <body>
-   
-   <div class="navbar" style="z-index: 10; position: sticky; top: 0; height: auto; font-size: xx-large; color: white; padding: 10px; padding-left: 20px;">
-      <div style="display: flex; flex-direction: row; align-items: center; align-content: center;">
-         <h1 style="font-weight: bold; width: 100%;"><a href="/">TURTLE SHELTER PROJECT</a></h1>
-         <div class="banner" style="display: flex; align-items: end; flex-direction: row; gap: 40px; padding-right: 20px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">
-            <p style="font-size: large; white-space: nowrap;">About Us</p>
-            <p style="font-size: large; white-space: nowrap;"><a href="/jen">Jen's Story</a></p>
-            <p style="font-size: large;">Volunteer</p>
-            <p style="font-size: large; white-space: nowrap;"><a href="/request-an-event">Request Event</a></p>
-            <% if (!isLoggedIn) { %>
-               <p style="font-size: large;"><a href="/signin">Sign in</a></p>
-            <% } %>
-            <% if (isLoggedIn) { %>
-               <p style="font-size: large; white-space: nowrap;"><a href="/admin">Admin Page</a></p>
-               <p style="font-size: large; white-space: nowrap;"><a href="/signout">Sign Out</a></p>
-            <% } %>
+      <%- include('partials/navbar') %>
+      
+      <!-- Image positioned dynamically below the navbar -->
+      <div style="position: relative;">
+         <div class="landing-image" style="position: absolute; top: 0;">
+            <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
          </div>
       </div>
-   </div>
-   
-   <!-- Image positioned dynamically below the navbar -->
-   <div class="landing-image" style="position: absolute; top: 0;">
-      <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
-   </div>
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+         <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
+         <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
+      </div>
 
-   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-      <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
-      <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
-  </div>
-  
  </body>
  </html>
