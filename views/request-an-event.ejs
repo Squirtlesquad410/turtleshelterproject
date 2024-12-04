@@ -64,7 +64,7 @@ label {
         </ul>
     </nav>
 
-    <form action="request-an-event">
+    <form action="/request-an-event" method="POST">
         <h1>Event Attendance</h1>
         <div class="input-container">
             <!--Labels for input boxes for the form
@@ -72,11 +72,11 @@ label {
             for normalization (it will make it a lot easier to know what's being referenced
             and where this input is going)-->
 
-            <!--What is the event title/description/purpose?-->
+            <!-- What is the event title/description/purpose? -->
             <label for="event_description">Enter the Name/Title for your Event:</label>
             <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" required autofocus style="width: 150px;">
             <br><br>
-
+        
             <!--Additional Notes about the Event-->
             <label for="notes">Include any additional information about the event that may be helpful:</label>
             <textarea id="notes" name="notes" placeholder="Enter additional information" required style="width: 550px; height: 150px;"></textarea>
@@ -116,7 +116,7 @@ label {
 
                 <!--Venue ZIP Code (number input)-->
                 <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
-                <input type="number" id="zip" name="zip" placeholder="Enter ZIP Code" min="1" required>
+                <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" min="1" required>
                 <br><br>
 
                 <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
@@ -155,7 +155,9 @@ label {
             <div>
                 <!--Date Option #1-->
                 <fieldset>
-                    <label for="date_preference_order"><b>What date would you most prefer to have the event on? (if available):</b></label>
+                    <label for="date_preference_order"><b>Priority: </b></label>
+                    <input type="number" id="date_preference_order" name="date_preference_order" value="1" required>
+                    <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
                     <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
                     <br><br>
                     <label for="start_time">Event Start time:</label>
@@ -168,27 +170,27 @@ label {
 
                 <!--Date Option #2-->
                 <fieldset>
-                    <label for="event_date"><b>What date is your 2nd preference? (optional):</b></label>
-                    <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
+                    <label for="event_date2"><b>What date is your 2nd preference? (optional):</b></label>
+                    <input type="date" id="event_date2" name="event_date2" placeholder="Enter date" >
                     <br><br>
                     <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" required>
+                    <input type="time" id="start_time2" name="start_time2" placeholder="Enter start time" style="width: 100px;" >
                     <br><br>
                     <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" required>
+                    <input type="time" id="end_time2" name="end_time2" placeholder="Enter end time" style="width: 100px;" >
                 </fieldset>
                 <br>
 
                 <!--Date Option #3-->
                 <fieldset>
-                    <label for="event_date"><b>What date is your 3rd preference? (optional):</b></label>
-                    <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
+                    <label for="event_date3"><b>What date is your 3rd preference? (optional):</b></label>
+                    <input type="date" id="event_date3" name="event_date3" placeholder="Enter date" >
                     <br><br>
                     <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" required>
+                    <input type="time" id="start_time3" name="start_time3" placeholder="Enter start time" style="width: 100px;" >
                     <br><br>
                     <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" required>
+                    <input type="time" id="end_time2" name="end_time2" placeholder="Enter end time" style="width: 100px;" >
                 </fieldset>
                 <br>
             </div>
@@ -244,15 +246,16 @@ label {
 
             <!--Would you like Jen to share her story? (boolean/checkbox input)-->
             <label for="jen_story">Would you like Jen to share her story?</label>
-            <input type="checkbox" id="jen_story" name="jen_story" value="Y" required>
+            <input type="checkbox" id="jen_story" name="jen_story" value="Y" >
             <label for="jen_story" style="display: inline;">Yes</label>
             <br><br>
 
             <!--Are you willing to contribute to the cost of materials (For the vests)?-->
             <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
             <br>
-            <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" required>
-            <label for="contribute_materials_cost" style="display: inline;">Yes</label>
+            <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" >
+            <label for="contribute_materials_cost" style="display: inline;">Yes</label> 
+        
             <br><br>
 
             <!--Submit Button-->
