@@ -42,9 +42,9 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "localhost",
+        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "Moturquoise21!!!!!!!!!", // CHANGE BACK BEFORE PUSH
+        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -192,7 +192,7 @@ app.post('/add-admin', async (req, res) => {
         });
 
         // Redirect to the admin page or confirmation
-        res.redirect('/add-admin');
+        res.redirect('/admin');
     } catch (error) {
         console.error('Error adding admin:', error);
         res.status(500).send('Internal Server Error');
@@ -399,81 +399,95 @@ app.get('/maintain-users', checkAuthenticationStatus, (req,res) => {
 });
 
 // GET route for Event Request Form page (for volunteers)
-app.get('/request-an-event', (req,res) => {
+app.get('/request-an-event', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
-    
-    res.render('request-an-event', { 
-        isLoggedIn: isLoggedIn,
-        isAdmin: isAdmin 
-    });
+    res.render('request-an-event',{isLoggedIn,isAdmin});
 });
-app.post('/request-an-event', (req, res) => {
-    // Extract form values from req.body
-    const {
-        organization_name,
-        organizer_phone,
-        organizer_email,
-        sewing, // Y if sewing is selected
-        non_sewing, // N if non-sewing is selected
-        both, // B if both are selected
-        estimated_attendance,
-        num_children_under_10,
-        num_teens,
-        num_help_set_up,
-        num_sewers,
-        sewing_ability_id,
-        event_date,
-        start_time,
-        street_address,
-        city,
-        state,
-        zip,
-        people, // Event duration
-        jen_story, // Checkbox value
-    } = req.body;
-
-    // Determine event_type from the radio inputs
-    let event_type = null;
-    if (sewing) event_type = sewing;
-    if (non_sewing) event_type = non_sewing;
-    if (both) event_type = both;
-
-    // Insert the new event into the database
-    knex('event_info')
-        .insert({
-            organization_name,
-            organizer_phone,
-            organizer_email,
-            event_type, // Maps to Y, N, or B
-            estimated_attendance: parseInt(estimated_attendance),
-            num_children_under_10: parseInt(num_children_under_10),
-            num_teens: parseInt(num_teens),
-            num_help_set_up: parseInt(num_help_set_up),
-            num_sewers: parseInt(num_sewers),
-            sewing_ability_id: parseInt(sewing_ability_id),
-            event_date, // Assuming this column stores dates as strings or date types
-            start_time, // Assuming time as a string or time type
+app.post('/request-an-event', async (req, res) => {  
+        const {
             street_address,
             city,
             state,
-            zip: parseInt(zip), // Convert ZIP to an integer
-            duration_hours: parseInt(people), // Renamed to match duration meaning
-            jen_story: jen_story === 'Yes', // Convert checkbox to boolean
-        })
-        .then(() => {
-            // Redirect to a success page or back to the main page
-            res.redirect('/events'); // Adjust as needed
-        })
-        .catch((error) => {
-            console.error('Error adding event:', error);
+            zip,
+            organization_name,
+            event_description,
+            organizer_email,
+            event_type,
+            estimated_attendance,
+            num_children_under_10,
+            num_teens,
+            num_help_set_up,
+            num_sewers,
+            sewing_ability_id,
+            num_sewing_machines,
+            num_sergers,
+            jen_story,
+            contribute_materials_cost,
+            event_status,
+            event_date,
+            start_time,
+            end_time,
+        } = req.body;
+    
+        try {
+            await knex.transaction(async (trx) => {
+                // Step 1: Insert into the venues table
+                const [insertedVenue] = await trx('venues')
+                    .insert({
+                        street_address,
+                        city,
+                        state,
+                        zip: parseInt(zip),
+                    })
+                    .returning('venue_id'); // Adjust based on your table schema
+    
+                const venue_id = typeof insertedVenue === 'object' ? insertedVenue.venue_id : insertedVenue;
+    
+                // Step 2: Insert into the event_info table
+                const [insertedEvent] = await trx('event_info')
+                    .insert({
+                        venue_id, // Reference the new venue_id
+                        organization_name,
+                        event_description,
+                        organizer_email,
+                        event_type,
+                        estimated_attendance: parseInt(estimated_attendance),
+                        num_children_under_10: parseInt(num_children_under_10),
+                        num_teens: parseInt(num_teens),
+                        num_help_set_up: parseInt(num_help_set_up),
+                        num_sewers: parseInt(num_sewers),
+                        sewing_ability_id: parseInt(sewing_ability_id),
+                        num_sewing_machines,
+                        num_sergers,
+                        jen_story: jen_story === 'Yes',
+                        contribute_materials_cost,
+                        event_status,
+                    })
+                    .returning('event_id');
+    
+                console.log('Event Created:', insertedEvent);
+    
+                // Step 3: Insert into the event_date_options table
+                await trx('event_date_options').insert({
+                    event_id: typeof insertedEvent === 'object' ? insertedEvent.event_id : insertedEvent,
+                    event_date,
+                    start_time,
+                    end_time,
+                });
+            });
+    
+            res.redirect('/admin');
+        } catch (error) {
+            console.error('Error creating event:', error);
             res.status(500).send('Internal Server Error');
-        });
-});
+        }
+    });
+    
 
 
 // GET route for volunteer.ejs view
-app.get('/volunteer', (req, res) => {
+app.get('/volunteer',checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
 
@@ -482,48 +496,51 @@ app.get('/volunteer', (req, res) => {
         isAdmin: isAdmin
     });
 });
-app.post('/volunteer', (req, res) => {
-    // Extract form values from req.body
-    const first_name = req.body.first_name;
-    const last_name = req.body.last_name;
-    const email = req.body.email;
-    const phone = req.body.phone;
-    const street_address = req.body.street_address;
-    const city = req.body.city;
-    const state = req.body.state;
-    const zip = req.body.zip;
-    const num_hours = req.body.num_hours; // Assuming you have a `num_hours` field for available hours
-    const finding_source = parseInt(req.body.finding_source); // Convert to integer
-    const sewing_ability_id = parseInt(req.body.sewing_ability_id); // Convert to integer
-    const willing_to_teach_sewing = req.body.willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
-    const willing_to_lead = req.body.willing_to_lead === 'Y'; // Convert checkbox to boolean
+app.post('/volunteer', async (req, res) => {
+    // Extract form values from req.body with destructuring
+    const {
+        first_name,
+        last_name,
+        email,
+        phone,
+        city,
+        monthly_hours_available, // Assuming you have a `num_hours` field for available hours
+        finding_source,
+        sewing_ability_id,
+        willing_to_teach_sewing,
+        willing_to_lead,
+    } = req.body;
 
-    // Insert the new volunteer into the database
-    knex('volunteer_info')
-        .insert({
+    // Convert required fields to the correct types
+    const parsedFindingSource = parseInt(finding_source, 10);
+    const parsedSewingAbilityId = parseInt(sewing_ability_id, 10);
+    const parsedNumHours = parseInt(monthly_hours_available, 10);
+    const teachSewing = willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
+    const lead = willing_to_lead === 'Y'; // Convert checkbox to boolean
+
+    try {
+        // Insert the new volunteer into the database
+        await knex('volunteer_info').insert({
             vol_first_name: first_name,
             vol_last_name: last_name,
             vol_email: email,
             vol_phone: phone,
-            street_address: street_address,
             city: city,
-            // state: state,
-            // zip: zip,
-            monthly_hours_available: num_hours,
-            finding_source: finding_source,
-            sewing_ability_id: sewing_ability_id,
-            willing_to_teach_sewing: willing_to_teach_sewing,
-            willing_to_lead: willing_to_lead,
-
-        })
-        .then(() => {
-            res.redirect('/'); // Redirect to a thank you page or a volunteer list page after adding
-        })
-        .catch(error => {
-            console.error('Error adding Volunteer:', error);
-            res.status(500).send('Internal Server Error');
+            monthly_hours_available: parsedNumHours,
+            finding_source: parsedFindingSource,
+            sewing_ability_id: parsedSewingAbilityId,
+            willing_to_teach_sewing: teachSewing,
+            willing_to_lead: lead,
         });
+
+        // Redirect to the home page or a thank-you page
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error adding Volunteer:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
 });
+
 
 
 
