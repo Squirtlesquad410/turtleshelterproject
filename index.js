@@ -215,7 +215,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         const itemsPerPage = 10; // Number of events per page
 
         // Extract filters from the query string
-        const { address, description, organization, city, state, zip,event_date } = req.query;
+        const { address, description, organization, city, state, zip, event_date, event_status } = req.query;
 
         // Calculate the offset for pagination
         const offset = (currentPage - 1) * itemsPerPage;
@@ -276,6 +276,9 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             // Ensure the date is in the format YYYY-MM-DD for comparison
             query = query.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
         }
+        if (event_status) {
+            query = query.whereRaw('LOWER(e.event_status) LIKE ?', [`%${event_status.toLowerCase()}%`]);
+        }
 
         // Execute the query to fetch the filtered and paginated events
         const events = await query;
@@ -311,6 +314,9 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         if (event_date) {
             countQuery = countQuery.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
         }
+        if (event_status) {
+            countQuery = countQuery.whereRaw('LOWER(e.event_status) LIKE ?', [`%${event_status.toLowerCase()}%`]);
+        }
 
         const totalEvents = await countQuery.first();
         const totalPages = Math.ceil(totalEvents.count / itemsPerPage);
@@ -329,7 +335,8 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             cityFilter: city,
             stateFilter: state,
             zipFilter: zip,
-            dateFilter: event_date
+            dateFilter: event_date,
+            eventStatusFilter: event_status
         });
     } catch (err) {
         console.error('Error fetching events:', err);
@@ -860,6 +867,46 @@ app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
     res.render('edit-volunteer', { isLoggedIn, isAdmin });
 });
 
+
+// GET route for edit-admin.ejs
+app.get('/edit-admin/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+    knex.select("email",
+                "first_name",
+                "last_name",
+                "username"
+                )
+        .from("admins")
+        .where("email", req.params.id)
+        .then(admins => {
+            res.render('edit-admin', { isLoggedIn, isAdmin, admins });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({err});
+        });
+});
+
+// POST route for edit-admin.ejs
+app.post('/edit-admin/:id', (req, res) => {
+    const {
+        email,
+        first_name,
+        last_name,
+        username
+    } = req.body;
+    
+    knex("admins")
+    .where("email", id)
+    .update({
+        email,
+        first_name,
+        last_name,
+        username
+    });
+    res.redirect('/maintain-users');
+});
 
 
 app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));

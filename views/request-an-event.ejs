@@ -77,78 +77,77 @@
             background-color: #196619;
         }
     
-        /* Align radio buttons with labels */
-        .event_type {
-            font-family: Arial, sans-serif; /* Optional for cleaner styling */
-        }
+    <%- include('partials/navbar') %>
+    <form action="/request-an-event" method="POST">
+        <h1>Event Attendance</h1>
+        <div class="input-container">
+            <!--Labels for input boxes for the form
+            NOTE: num_people should be changed to meet the column name in the database
+            for normalization (it will make it a lot easier to know what's being referenced
+            and where this input is going)-->
 
+            <!-- What is the event title/description/purpose? -->
+            <label for="event_description">Enter the Name/Title for your Event:</label>
+            <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" required autofocus style="width: 150px;">
+            <br><br>
+        
+            <!--Additional Notes about the Event-->
+            <label for="notes">Include any additional information about the event that may be helpful:</label>
+            <textarea id="notes" name="notes" placeholder="Enter additional information" required style="width: 550px; height: 150px;"></textarea>
+            <br><br>
 
-    </style>
-    
-      
-      <body>
-        <%- include('partials/navbar') %>
-      
-        <div class="content">
-            <form action="/request-an-event" method="POST">
-                <h1>Event Attendance</h1>
-                <div class="input-container">
-                    <!--Labels for input boxes for the form
-                    NOTE: num_people should be changed to meet the column name in the database
-                    for normalization (it will make it a lot easier to know what's being referenced
-                    and where this input is going)-->
-                    <!-- What is the event title/description/purpose? -->
-                    <label for="event_description">Enter the Name/Title for your Event:</label>
-                    <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" required autofocus style="width: 150px;">
-                    <br><br>
-                    <!--Additional Notes about the Event-->
-                    <label for="notes">Include any additional information about the event that may be helpful:</label>
-                    <textarea id="notes" name="notes" placeholder="Enter additional information" required style="width: 550px; height: 150px;"></textarea>
-                    <br><br>
-                    <!--Organization Name (text input)-->
-                    <label for="organization_name">Enter Your Organization Name (or your own full name):</label>
-                    <input type="text" id="organization_name" name="organization_name" placeholder="Enter first name" required>
-                    <br><br>
-                    <!--Organizer Phone Number (number input)-->
-                    <label for="organizer_phone">What is a good phone number to contact you at?:</label>
-                    <input type="number" id="organizer_phone" name="organizer_phone" placeholder="Enter your phone number" style="width: 175px;" required>
-                    <br><br>
-                    <!--Organizer email (text input)-->
-                    <label for="organizer_email">Enter Organization Email (optional):</label>
-                    <input type="text" style="width: 275px;" id="organizer_email" name="organizer_email" placeholder="Enter organization email" required>
-                    <br><br>
-                        <h2>What's the address of the event? (Event Venue or Home Address)</h2>
-                        <!--Venue Street Address (text input)-->
-                        <label for="street_address">Please enter the street address of the event:</label>
-                        <input type="text" id="street_address" name="street_address" placeholder="Enter street address" required style="width: 250px;">
-                        <br><br>
-                        <!--Venue City (text input)-->
-                        <label for="city">Please enter the event city:</label>
-                        <input type="text" id="city" name="city" placeholder="Enter city" required>
-                        <br><br>
-                        <!--Venue State (text input)-->
-                        <label for="state">Please enter the event state (i.e, CA):</label>
-                        <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
-                        <br><br>
-                        <!--Venue ZIP Code (number input)-->
-                        <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
-                        <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" min="0" required>
-                        <br><br>
-                        <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
-                        <label for="space_size">Select the size of your venue (estimated):</label>
-                        <select id="space_size" name="space_size" required>
-                            <option value="1">Sigma Room -- 600 sq. ft</option>
-                            <option value="2">Large Garage -- 600-1000 sq. ft</option>
-                            <option value="3">Basketball Court -- 4000-6000 sq. ft</option>
-                            <option value="4">Banquet Hall -- 3000-10000 sq. ft</option>
-                            <option value="5">Warehouse -- 10000-15000</option>
-                            <option value="6">Events Center -- 20000-50000+ sq. ft</option>
-                            <option value="7">The Entire Earth -- 5.48 quadrillion sq. ft</option>
-                        </select>
-                        <br><br>
+            <!--Organization Name (text input)-->
+            <label for="organization_name">Enter Your Organization Name (or your own full name):</label>
+            <input type="text" id="organization_name" name="organization_name" placeholder="Enter first name" required>
+            <br><br>
+            
+            <!--Organizer Phone Number (number input)-->
+            <label for="organizer_phone">What is a good phone number to contact you at?:</label>
+            <input type="number" id="organizer_phone" name="organizer_phone" placeholder="Enter your phone number" style="width: 175px;" required>
+            <br><br>
 
-                    <br><br><br><br>
-                    <!--Event Type (Sewing, Non-Sewing or Both) (Radio Input)-->
+            <!--Organizer email (text input)-->
+            <label for="organizer_email">Enter Organization Email (optional):</label>
+            <input type="text" style="width: 275px;" id="organizer_email" name="organizer_email" placeholder="Enter organization email" required>
+            <br><br>
+            
+            <fieldset>
+                <h2>What's the address of the event? (Event Venue or Home Address)</h2>
+                <!--Venue Street Address (text input)-->
+                <label for="street_address">Please enter the street address of the event:</label>
+                <input type="text" id="street_address" name="street_address" placeholder="Enter street address" required style="width: 250px;">
+                <br><br>
+
+                <!--Venue City (text input)-->
+                <label for="city">Please enter the event city:</label>
+                <input type="text" id="city" name="city" placeholder="Enter city" required>
+                <br><br>
+
+                <!--Venue State (text input)-->
+                <label for="state">Please enter the event state (i.e, CA):</label>
+                <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
+                <br><br>
+
+                <!--Venue ZIP Code (number input)-->
+                <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
+                <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" min="1" required>
+                <br><br>
+
+                <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
+                <label for="space_size">Select the size of your venue (estimated):</label>
+                <select id="space_size" name="space_size" required>
+                    <option value="1">Sigma Room -- 600 sq. ft</option>
+                    <option value="2">Large Garage -- 600-1000 sq. ft</option>
+                    <option value="3">Basketball Court -- 4000-6000 sq. ft</option>
+                    <option value="4">Banquet Hall -- 3000-10000 sq. ft</option>
+                    <option value="5">Warehouse -- 10000-15000</option>
+                    <option value="6">Events Center -- 20000-50000+ sq. ft</option>
+                    <option value="7">The Entire Earth -- 5.48 quadrillion sq. ft</option>
+                </select>
+                <br><br>
+            </fieldset>
+            
+                    <br><br>
                     <div class="event_type">
                         <label for="event_type">Will there be sewing, no sewing or both at the event?:</label>
                         <select id="event_type" name="event_type" required>

@@ -18,7 +18,7 @@
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
             background-size: 300% 300%;
-            animation: gradientAnimation 1s ease infinite;
+            animation: gradientAnimation 30s ease infinite;
             height: 100vh;
             justify-content: center;
             align-items: center;
@@ -105,15 +105,25 @@
     <input type="text" id="city" name="city" placeholder="City" value="<%= cityFilter || '' %>">
 
     <label for="state">State:</label>
-    <input type="text" id="state" name="state" placeholder="State" value="<%= stateFilter || '' %>">
+    <input type="text" id="state" name="state" placeholder="State" value="<%= stateFilter || '' %>" pattern="[A-Z]{2}" maxlength="2">
 
     <label for="zip">ZIP Code:</label>
-    <input type="text" id="zip" name="zip" placeholder="ZIP" value="<%= zipFilter || '' %>">
+    <input type="number" id="zip" name="zip" placeholder="ZIP" value="<%= zipFilter || '' %>" pattern="\d*" maxlength="5">
 
-        <label for="event_date">Event Date:</label>
-        <input type="date" id="event_date" name="event_date" value="<%= dateFilter %>">
+    <label for="event_date">Event Date:</label>
+    <input type="date" id="event_date" name="event_date" value="<%= dateFilter %>">
 
+    <label for="event_status">Event Status:</label>
+    <select id="event_status" name="event_status" value="<%= eventStatusFilter || '' %>">
+        <option value="" <%= !eventStatusFilter ? 'selected' : '' %>>--Select--</option>
+        <option value="requested" <%= eventStatusFilter === 'requested' ? 'selected' : '' %>>Requested</option>
+        <option value="approved" <%= eventStatusFilter === 'approved' ? 'selected' : '' %>>Approved</option>
+        <option value="completed" <%= eventStatusFilter === 'selected' ? 'selected' : '' %>>Completed</option>
+    </select>
+
+    <br><br>
     <button type="submit">Apply Filters</button>
+    <button onclick="reloadPage(event)">Clear Filters</button>
 </form>
         <table>
             <thead>
@@ -283,5 +293,20 @@
             <a href="/add-event"><button>Add New Event</button></a>
         </div>
         
+        <script>
+            function reloadPage(event) {
+                event.preventDefault();
+
+                // Redirects to main page
+                window.location.href = '/maintain-events';
+            }
+
+
+            // Restrict State input to uppercase letters only, and auto-capitalize
+    document.getElementById('state').addEventListener('input', function(event) {
+        // Automatically capitalize the input and remove non-uppercase letters
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+    });
+          </script>
 </body>
 </html>

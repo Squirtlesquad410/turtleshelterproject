@@ -105,13 +105,13 @@
                     <tbody>
                         <% admins.forEach(admin => { %>
                             <!-- Main Row -->
-                            <tr class="clickable-row" data-id="<%= admin.admin_id %>">
+                            <tr class="clickable-row" data-id="<%= admin.email %>">
                                 <td><%= admin.first_name %></td>
                                 <td><%= admin.last_name %></td>
                                 <td><%= admin.email %></td>
                                 <td><%= admin.username %></td>
                                 <td>
-                                    <form action="/edit-admin/<%= admin.admin_id %>" method="GET" style="display:inline;">
+                                    <form action="/edit-admin/<%= admin.email %>" method="GET" style="display:inline;">
                                         <button type="submit">Edit</button>
                                       </form>
                                       <form action="/delete-admin/<%= admin.email %>" method="POST" style="display:inline;">
