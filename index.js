@@ -42,12 +42,12 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "localhost",//"awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "wIltrac15$",//"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
-        ssl: { rejectUnauthorized: false, }
+        //ssl: { rejectUnauthorized: false, }
     },
 });
 
@@ -245,8 +245,13 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             .select(
                 'e.event_id',
                 knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
                 'e.organization_name',
                 'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
                 'e.organizer_email',
                 'e.event_type',
                 'e.estimated_attendance',
@@ -368,8 +373,7 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
 
 
 
-// GET route for edit-event/:id
-// GET route for edit-event.ejs
+
 // GET route to edit an event
 app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
@@ -434,6 +438,7 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         contribute_materials_cost,
         event_status
     } = req.body;
+
     // First, update event_info table
     knex('event_info')
         .where('event_id', eventId)
@@ -459,47 +464,69 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             event_status
         })
         .then(() => {
-            // Now, get the venue_id from the event_info record
-            knex('event_info')
+            // Get the venue_id from the event_info record
+            return knex('event_info')
                 .where('event_id', eventId)
                 .select('venue_id')
-                .first() // Get the first record (only one event record)
-                .then((event) => {
-                    if (event && event.venue_id) {
-                        // Use the venue_id from the event_info record to update the venues table
-                        const venueId = event.venue_id;
-                        knex('venues')
-                            .where('venue_id', venueId)  // Update the venue using the retrieved venue_id
-                            .update({
-                                street_address,
-                                city,
-                                state,
-                                zip,
-                                space_size
-                            })
-                            .then(() => {
-                                // After both updates are successful, redirect or render a success page
-                                res.redirect('/maintain-events/');
-                            })
-                            .catch(error => {
-                                console.error('Error updating venue:', error);
-                                res.status(500).send('Error updating venue');
+                .first();
+        })
+        .then(event => {
+            if (event && event.venue_id) {
+                const venueId = event.venue_id;
+
+                // Update the venues table
+                return knex('venues')
+                    .where('venue_id', venueId)
+                    .update({
+                        street_address,
+                        city,
+                        state,
+                        zip,
+                        space_size
+                    });
+            } else {
+                throw new Error('No venue_id found for this event');
+            }
+        })
+        .then(() => {
+            // Optionally update the event_date_options table
+            if (event_date || start_time || end_time) {
+                // Check if a record exists for this event in the event_date_options table
+                return knex('event_date_options')
+                    .where('event_id', eventId)
+                    .first()
+                    .then(existingRecord => {
+                        if (existingRecord) {
+                            // Update the record if it exists
+                            return knex('event_date_options')
+                                .where('event_id', eventId)
+                                .update({
+                                    event_date,
+                                    start_time,
+                                    end_time
+                                });
+                        } else {
+                            // Insert a new record if it doesn't exist
+                            return knex('event_date_options').insert({
+                                event_id: eventId,
+                                event_date,
+                                start_time,
+                                end_time
                             });
-                    } else {
-                        console.error('No venue_id found for this event');
-                        res.status(400).send('No venue_id found for this event');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error retrieving venue_id from event_info:', error);
-                    res.status(500).send('Error retrieving venue_id');
-                });
+                        }
+                    });
+            }
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/maintain-events');
         })
         .catch(error => {
-            console.error('Error updating event:', error);
-            res.status(500).send('Error updating event');
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
         });
 });
+
 
 
 
@@ -733,6 +760,9 @@ app.post('/request-an-event', async (req, res) => {
             zip,
             organization_name,
             event_description,
+            organizer_first_name,
+            organizer_last_name,
+            organizer_phone,
             organizer_email,
             event_type,
             estimated_attendance,
@@ -771,6 +801,9 @@ app.post('/request-an-event', async (req, res) => {
                         venue_id, // Reference the new venue_id
                         organization_name,
                         event_description,
+                        organizer_first_name,
+                        organizer_last_name,
+                        organizer_phone,
                         organizer_email,
                         event_type,
                         estimated_attendance: parseInt(estimated_attendance),
