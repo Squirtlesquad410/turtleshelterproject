@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Admin</title>
+</head>
+<body>
+    <!--Banner that appears if logged in as admin,
+    that way you can make sure you have admin permissions-->
+   <% if (isAdmin) { %>
+    <div class="admin-banner">
+        <p>Viewing page as admin</p>
+    </div>
+    <% } %>
+
+    <!-- Navbar -->
+    <br><br>
+    <nav class="navbar">
+    <ul>
+        <li><a href="/">Home Page</a></li>
+        <li><a href="/volunteer">Volunteer</a></li>
+        <li><a href="/request-an-event">Request Event</a></li>
+  
+      <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
+      <% if (isLoggedIn && isAdmin) { %>
+        <li><a href="/admin">Admin Page</a></li>
+        <li><a href="/signout">Sign Out</a></li>
+      <% } %>
+    </ul>
+    </nav>
+
+    <!--Form for edit admin functionality-->
+    <form action="/edit-admin/:id" method="POST">
+        <fieldset>
+            <legend>
+                <!--Section to Edit Email-->
+                <label for="email">Admin Email:</label>
+                <input type="text" id="email" name="email" value="<%= myadmins[0].email %>">
+
+                <!--Section to Edit First Name-->
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="<%= myadmins[0].first_name %>">
+
+                <!--Section to Edit Last Name-->
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="<%= myadmins[0].last_name %>">
+
+                <!--Section to Edit Username-->
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="<%= myadmins[0].username %>">
+
+                
+                
+            </legend>
+        </fieldset>
+        <br>
+
+        <!--Button to save changes-->
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

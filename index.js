@@ -764,5 +764,45 @@ app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
 });
 
 
+// GET route for edit-admin.ejs
+app.get('/edit-admin/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+    knex.select("email",
+                "first_name",
+                "last_name",
+                "username"
+                )
+        .from("admins")
+        .where("email", req.params.id)
+        .then(admins => {
+            res.render('edit-admin', { isLoggedIn, isAdmin });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({err});
+        });
+});
+
+// POST route for edit-admin.ejs
+app.post('/edit-admin/:id', (req, res) => {
+    const {
+        email,
+        first_name,
+        last_name,
+        username
+    } = req.body;
+    
+    knex("admins")
+    .where("email", id)
+    .update({
+        email,
+        first_name,
+        last_name,
+        username
+    });
+    res.redirect('/maintain-users');
+});
+
 
 app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));
