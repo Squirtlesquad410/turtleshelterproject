@@ -4,6 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Admin</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Body styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
+        background-size: 400% 400%;
+        height: 100vh;
+        display: block;
+        color: white;
+        transition: all 0.3s ease-in-out;
+        padding-top: 200px;
+        padding-left: 20px;
+    }
+
+    label {
+        display: block;
+        font-size: 18px;
+        font-weight: 500;
+        color: #000000;
+        margin-bottom: 5px;
+    }
+
+    .admin-banner {
+        position: fixed;  /* Fix it to the top of the page */
+        top: 40px;
+        left: 0;
+        width: 100%;  /* Cover the full width */
+        height: 40px;  /* Set the height of the banner */
+        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 9999;  /* Ensure it stays on top of other content */
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-top: -40px;
+    }
+
+            /* Navbar Styles */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px 20px;
+        z-index: 10;
+    }
+
+    .navbar ul {
+        list-style: none;
+        text-align: center;
+    }
+
+    .navbar ul li {
+        display: inline-block;
+        margin: 0 15px;
+        position: relative; /* Needed for dropdown */
+    }
+
+    .navbar ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .navbar ul li a:hover {
+        color: #1e90ff;
+    }
+
+    /* Dropdown Menu */
+    .navbar ul li.dropdown:hover .dropdown-menu {
+        display: block; /* Show the dropdown menu when hovering */
+    }
+
+        /* Header styling */
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: -100px;
+            margin-bottom: 20px;
+        }
+
+        /* Paragraph styling */
+        p {
+            font-size: 1.2em;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-top: 20px;
+            color: #f7f7f7;
+            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Button styling */
+        .btn {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: #ff5733;
+            color: white;
+            font-size: 1.2em;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ff3e1d;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
     <!--Banner that appears if logged in as admin,
@@ -29,31 +155,30 @@
       <% } %>
     </ul>
     </nav>
+    <br><br>
 
+    <h1>Edit Admin >:)</h1>
     <!--Form for edit admin functionality-->
     <form action="/edit-admin/:id" method="POST">
-        <fieldset>
-            <legend>
                 <!--Section to Edit Email-->
                 <label for="email">Admin Email:</label>
-                <input type="text" id="email" name="email" value="<%= myadmins[0].email %>">
+                <input type="text" id="email" name="email" value="<%= admins[0].email %>">
+                <br><br>
 
                 <!--Section to Edit First Name-->
                 <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" value="<%= myadmins[0].first_name %>">
+                <input type="text" id="first_name" name="first_name" value="<%= admins[0].first_name %>">
+                <br><br>
 
                 <!--Section to Edit Last Name-->
                 <label for="last_name">Last Name:</label>
-                <input type="text" id="last_name" name="last_name" value="<%= myadmins[0].last_name %>">
+                <input type="text" id="last_name" name="last_name" value="<%= admins[0].last_name %>">
+                <br><br>
 
                 <!--Section to Edit Username-->
                 <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="<%= myadmins[0].username %>">
-
-                
-                
-            </legend>
-        </fieldset>
+                <input type="text" id="username" name="username" value="<%= admins[0].username %>">
+                <br><br>              
         <br>
 
         <!--Button to save changes-->
