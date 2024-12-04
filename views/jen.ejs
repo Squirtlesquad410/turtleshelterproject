@@ -24,39 +24,6 @@
             flex: 1; /* Pushes the footer to the bottom if content is less */
         }
 
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #228B22; /* Turtle green */
-            color: white;
-            padding: 10px 20px;
-            z-index: 1000;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .navbar h2 {
-            margin: 0;
-            font-weight: bold;
-            color: white;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-left: 15px;
-            margin-right: 40px;
-            font-size: large;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
-        }
 
         .container {
             max-width: 800px;
@@ -116,28 +83,14 @@
 </head>
 <body>
     <!-- Navbar -->
-    <div class="navbar">
-        <h2><a href="/">TURTLE SHELTER PROJECT</a></h2>
-        <div class="banner">
-          <a href="#">About Us</a>
-          <a href="#">Jen's Story</a>
-          <a href="#">Volunteer</a>
-          <a href="/request-an-event">Request Event</a>
-          <% if (!isLoggedIn) { %>
-          <a href="/signin">Login</a>
-          <% } %>
-          <% if (isLoggedIn) { %>
-          <a href="/admin">Admin Page</a>
-          <a href="/signout">Sign Out</a>
-          <% } %>
-        </div>
-    </div>
+    <%- include('partials/navbar') %>
+    
 
     <!-- Main Content -->
     <div class="content">
         <div class="container">
             <h1>Jen's Story</h1>
-            <img src="Jen/Jen.png" alt="Jen's Picture" style="max-width: 100%; height: auto; border-radius: 10px;">
+            <img src="/images/Jen.png" alt="Jen's Picture" style="max-width: 100%; height: auto; border-radius: 10px;">
             <p>
                 My addiction led me to being homeless on several occasions throughout my life, and during that time I personally knew seven people who froze to death. When I first learned about this lifesaving technology, my mind flooded with ideas on how many people's lives this could save. I'd recently been homeless during an extreme winter. It had been one of the coldest winters Utah had suffered in a long time, so the misery of surviving the bitter cold was still very fresh in my mind.
             </p>
@@ -175,6 +128,10 @@
             <!-- Instagram Link -->
             <a href="https://www.instagram.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
                 <i class="fab fa-instagram" style="font-size: 2rem;"></i>
+            </a>
+            <!-- Youtube Link -->
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-youtube" style="font-size: 2rem;"></i>
             </a>
         </div>
     </footer>
