@@ -105,7 +105,7 @@ app.post('/signin', async (req, res) => {
         }
 
         // Compare the provided password with the hashed password
-        const isPasswordCorrect = true//await bcrypt.compare(passwordLogin, admin.hashed_password);
+        const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
 
         if (isPasswordCorrect) {
             // If login is successful
@@ -193,7 +193,7 @@ app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
         });
 
         // Redirect to the admin page or confirmation
-        res.redirect('/add-admin');
+        res.redirect('/admin');
     } catch (error) {
         console.error('Error adding admin:', error);
         res.status(500).send('Internal Server Error');
