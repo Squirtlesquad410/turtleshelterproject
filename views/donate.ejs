@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate | Turtle Shelter Project</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #228B22;
+            color: white;
+            padding: 10px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 1rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: #228B22;
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            flex: 1; /* Pushes the footer down */
+        }
+
+        .container h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #228B22;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .donation-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .donation-button {
+            display: inline-block;
+            background-color: #ff6f61;
+            color: white;
+            font-size: 1.2rem;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .donation-button:hover {
+            background-color: #ff4a3c;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #228B22;
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 100px;">
+        <h2>Your Support Makes a Difference</h2>
+        <p>
+            Each $30 tax-deductible donation to the Turtle Shelter Project will provide a high-tech foam vest for a youth or adult experiencing homelessness. You can tell us where you would like the vest or vests sent to, or we will send them to where there is the greatest need.
+        </p>
+        <p>
+            The Turtle Shelter Project is a 
+            <a href="https://static1.squarespace.com/static/5b5a266fcef372310148d6d6/t/5b8ed16603ce64b166f94ba9/1536086378062/501c3+p1.jpeg" target="_blank" style="color: #228B22; text-decoration: underline;">
+                501 (c)(3) non-profit, EIN82-103503
+            </a>
+        </p>
+        <p>
+            <strong>You can mail a check to:</strong><br>
+            Turtle Shelter Project<br>
+            PO Box 382<br>
+            Kaysville, Utah 84037
+        </p>
+        <p>
+            <strong>Or donate securely online:</strong>
+        </p>
+        <div class="donation-section">
+            <a href="https://www.paypal.com/donate" target="_blank" class="donation-button">Donate Now</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 1rem; font-family: 'Poppins', sans-serif; color: white; text-align: center;">
+                TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+                <a href="mailto:turtleshelterproject@gmail.com" style="color: white; text-decoration: none; font-weight: bold;">turtleshelterproject@gmail.com</a>
+            </p>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <!-- Facebook Link -->
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-facebook-square" style="font-size: 2rem;"></i>
+            </a>
+            <!-- Instagram Link -->
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-instagram" style="font-size: 2rem;"></i>
+            </a>
+            <!-- Youtube Link -->
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-youtube" style="font-size: 2rem;"></i>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
+

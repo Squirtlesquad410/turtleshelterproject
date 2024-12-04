@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jen's Story</title>
+    <!-- Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure the body takes the full height of the viewport */
+        }
+
+        .content {
+            flex: 1; /* Pushes the footer to the bottom if content is less */
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 20px 20px; /* Add padding to push content down */
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin: 40px 0;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 600;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: justify;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            color: #444;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #228B22; /* Turtle green */
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
+    
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="container">
+            <h1>Jen's Story</h1>
+            <img src="/images/Jen.png" alt="Jen's Picture" style="max-width: 100%; height: auto; border-radius: 10px;">
+            <p>
+                My addiction led me to being homeless on several occasions throughout my life, and during that time I personally knew seven people who froze to death. When I first learned about this lifesaving technology, my mind flooded with ideas on how many people's lives this could save. I'd recently been homeless during an extreme winter. It had been one of the coldest winters Utah had suffered in a long time, so the misery of surviving the bitter cold was still very fresh in my mind.
+            </p>
+            <p>
+                While I was homeless I remember feeling the chill all the way to my bones. I couldn't even think or function. It completely zapped me of my energy so much that I was losing my will to live. Everything felt beyond overwhelming. Simple tasks, like finding a bathroom, seemed to feel like huge obstacles. The crazy thing about it was: I had a car I was living in; I had a storage unit I could hang out in during the day and at night; and I had an income that was sufficient for my needs. But being homeless completely broke me - even with all of the resources I had available to me.
+            </p>
+            <p>
+                I began thinking that if homelessness crushed me, even with all that I had, then what would it do to someone who had much less, or even nothing? I wanted to do something to help people with this burden. When I learned about foam clothing, I knew without a doubt that God was telling me - "THIS IS HOW YOU CAN HELP!"
+            </p>
+            <p>
+                After a lot of prayer and asking God to put the right people in my path, I started talking to everyone about my desire to make foam clothing for the homeless. Eventually, I told the right person and that is how I met Marian Edmonds-Allen. At the time Marian, an ordained minister, was the executive director for the Utah Pride Center. Prior to that she had served as the Executive Director of OUTreach Resource Centers and in 2015 was named a Petra Fellow for her work with LGBTQ homeless youth.
+            </p>
+            <p>
+                Marian was particularly interested in my idea for getting foam clothing into the hands of the homeless and arranged a meeting to hear more. But it was still just an idea. The truth is I had no idea how to make the project happen, and at the time I had only been clean and sober for 7 months. Things were put on hold for a while because Marian took a new job at Parity in New York and resigned from the Pride Center. I had been in drug rehab, but I needed to finish getting clean, sober, and stable. My recovery sponsor kept telling me that this was God's project, not mine, and I needed to let go and let God make this happen in HIS time.
+            </p>
+            <p>
+                After about 2 years, in January 2017, God led me to Angela Roth. Angela is someone who not only knows how to create a pattern but can sew like a rock star! Coincidentally, when I met her she had been praying for an opportunity to use her sewing and patterning talents to do something truly meaningful for people with a genuine need. We teamed up and started the Turtle Shelter Project!
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 1rem; font-family: 'Poppins', sans-serif; color: white; text-align: center;">
+                TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+                <a href="mailto:turtleshelterproject@gmail.com" style="color: white; text-decoration: none; font-weight: bold;">turtleshelterproject@gmail.com</a>
+            </p>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <!-- Facebook Link -->
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-facebook-square" style="font-size: 2rem;"></i>
+            </a>
+            <!-- Instagram Link -->
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-instagram" style="font-size: 2rem;"></i>
+            </a>
+            <!-- Youtube Link -->
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+                <i class="fab fa-youtube" style="font-size: 2rem;"></i>
+            </a>
+        </div>
+    </footer>
+    
+    
+    
+    
+</body>
+</html>

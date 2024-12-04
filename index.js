@@ -65,6 +65,20 @@ const hashPassword = async (plainTextPassword) => {
 // -----> put all routes below this line
 //
 
+app.get('/jen', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("jen", { isLoggedIn, isAdmin });
+});
+
+app.get('/donate', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("donate", { isLoggedIn, isAdmin });
+});
+
+
+
 app.get('/', (req,res) => {
     // Pass whether the user is logged in or not and if they are admin or not through session variables.
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
