@@ -42,9 +42,9 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "localhost", //"awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "wIltrac15$", //"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -86,12 +86,13 @@ app.get('/signin', (req, res) => {
     res.render('signin', { message });
 });
 
-
+const username=process.env.DB_USERNAME
+const password=process.env.DB_PASSWORD
 
 // Logic for verifying username and password
 app.post('/signin', async (req, res) => {
-    const usernameLogin = req.body.username;
-    const passwordLogin = req.body.password;
+    const usernameLogin = username//req.body.username || ;
+    const passwordLogin = password // req.body.password || ;
 
     try {
         // Query the database to find the user by username
@@ -391,6 +392,68 @@ app.get('/request-an-event', (req,res) => {
         isAdmin: isAdmin 
     });
 });
+app.post('/request-an-event', (req, res) => {
+    // Extract form values from req.body
+    const {
+        organization_name,
+        organizer_phone,
+        organizer_email,
+        sewing, // Y if sewing is selected
+        non_sewing, // N if non-sewing is selected
+        both, // B if both are selected
+        estimated_attendance,
+        num_children_under_10,
+        num_teens,
+        num_help_set_up,
+        num_sewers,
+        sewing_ability_id,
+        event_date,
+        start_time,
+        street_address,
+        city,
+        state,
+        zip,
+        people, // Event duration
+        jen_story, // Checkbox value
+    } = req.body;
+
+    // Determine event_type from the radio inputs
+    let event_type = null;
+    if (sewing) event_type = sewing;
+    if (non_sewing) event_type = non_sewing;
+    if (both) event_type = both;
+
+    // Insert the new event into the database
+    knex('event_info')
+        .insert({
+            organization_name,
+            organizer_phone,
+            organizer_email,
+            event_type, // Maps to Y, N, or B
+            estimated_attendance: parseInt(estimated_attendance),
+            num_children_under_10: parseInt(num_children_under_10),
+            num_teens: parseInt(num_teens),
+            num_help_set_up: parseInt(num_help_set_up),
+            num_sewers: parseInt(num_sewers),
+            sewing_ability_id: parseInt(sewing_ability_id),
+            event_date, // Assuming this column stores dates as strings or date types
+            start_time, // Assuming time as a string or time type
+            street_address,
+            city,
+            state,
+            zip: parseInt(zip), // Convert ZIP to an integer
+            duration_hours: parseInt(people), // Renamed to match duration meaning
+            jen_story: jen_story === 'Yes', // Convert checkbox to boolean
+        })
+        .then(() => {
+            // Redirect to a success page or back to the main page
+            res.redirect('/events'); // Adjust as needed
+        })
+        .catch((error) => {
+            console.error('Error adding event:', error);
+            res.status(500).send('Internal Server Error');
+        });
+});
 
 
 // GET route for volunteer.ejs view
@@ -403,6 +466,49 @@ app.get('/volunteer', (req, res) => {
         isAdmin: isAdmin
     });
 });
+app.post('/volunteer', (req, res) => {
+    // Extract form values from req.body
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    const email = req.body.email;
+    const phone = req.body.phone;
+    const street_address = req.body.street_address;
+    const city = req.body.city;
+    const state = req.body.state;
+    const zip = req.body.zip;
+    const num_hours = req.body.num_hours; // Assuming you have a `num_hours` field for available hours
+    const finding_source = parseInt(req.body.finding_source); // Convert to integer
+    const sewing_ability_id = parseInt(req.body.sewing_ability_id); // Convert to integer
+    const willing_to_teach_sewing = req.body.willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
+    const willing_to_lead = req.body.willing_to_lead === 'Y'; // Convert checkbox to boolean
+
+    // Insert the new volunteer into the database
+    knex('volunteer_info')
+        .insert({
+            vol_first_name: first_name,
+            vol_last_name: last_name,
+            vol_email: email,
+            vol_phone: phone,
+            street_address: street_address,
+            city: city,
+            // state: state,
+            // zip: zip,
+            monthly_hours_available: num_hours,
+            finding_source: finding_source,
+            sewing_ability_id: sewing_ability_id,
+            willing_to_teach_sewing: willing_to_teach_sewing,
+            willing_to_lead: willing_to_lead,
+
+        })
+        .then(() => {
+            res.redirect('/'); // Redirect to a thank you page or a volunteer list page after adding
+        })
+        .catch(error => {
+            console.error('Error adding Volunteer:', error);
+            res.status(500).send('Internal Server Error');
+        });
+});
+
 
 
 // GET route for add-volunteer.ejs
