@@ -166,15 +166,15 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 });
 
 // Route for Add Admin Page
-app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-admin', { isLoggedIn, isAdmin });
+app.get('/add-admin', (req, res) => {
+    //const isLoggedIn = req.session.isLoggedIn || false;
+    // const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('add-admin');
 });
 
 
 // Route to add new admin to database
-app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
+app.post('/add-admin', async (req, res) => {
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
@@ -332,20 +332,6 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         console.error('Error fetching events:', err);
         res.status(500).send('An error occurred while fetching events.');
     }
-});
-
-// GET route for edit-event.ejs
-app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
-    knex.select()
-    .from("event_info")
-    .then()
-                
-
-
-    
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-event', { isLoggedIn, isAdmin });
 });
 
 
