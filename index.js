@@ -42,9 +42,9 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "localhost", //"awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "wIltrac15$", //"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -342,7 +342,7 @@ app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
                 
 
 
-    )
+    
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     res.render('edit-event', { isLoggedIn, isAdmin });
