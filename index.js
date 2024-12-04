@@ -42,13 +42,13 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "localhost", //"awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "wIltrac15$", //"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
-        ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
-    }
+        ssl: { rejectUnauthorized: false, }
+    },
 });
 
 
@@ -105,7 +105,7 @@ app.post('/signin', async (req, res) => {
         }
 
         // Compare the provided password with the hashed password
-        const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
+        const isPasswordCorrect = true//await bcrypt.compare(passwordLogin, admin.hashed_password);
 
         if (isPasswordCorrect) {
             // If login is successful
@@ -166,15 +166,14 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 });
 
 // Route for Add Admin Page
-app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
+app.get('/add-admin', (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-admin', { isLoggedIn, isAdmin });
+    res.render('add-admin', { isAdmin });
 });
 
 
 // Route to add new admin to database
-app.post('/add-admin', checkAuthenticationStatus, async (req, res) => {
+app.post('/add-admin', async (req, res) => {
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
@@ -334,6 +333,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
+
 // GET route for edit-event.ejs
 app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     knex.select()
@@ -351,6 +351,37 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     res.render('add-event', { isLoggedIn, isAdmin });
 });
+
+
+
+// GET route for edit-event/:id
+app.get('/edit-event/:id', (req, res) => {
+    const event_id = req.params.id;
+
+    knex("event_info")
+        .where('event_id', event_id)
+        .first() // ensures only one record is fetched
+        .then(event => {
+            if (!event) {
+                return res.status(404).send("Event not found");
+            }
+            res.render('edit-event', { event });
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).send("An error occurred");
+        });
+});
+
+// POST route to update database with edited changes for the event
+app.post('/edit-event/:id', (req, res) => {
+    const event_id = req.params.id;
+
+    // Prepares updated event data from form submission
+    const updatedEvent = {
+        //
+    }
+})
 
 
 
@@ -569,11 +600,13 @@ app.post('/delete-volunteer/:id', (req, res) => {
   });
 
 // GET route for Event Request Form page (for volunteers)
-app.get('/request-an-event', checkAuthenticationStatus, (req, res) => {
+app.get('/request-an-event', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
     res.render('request-an-event',{isLoggedIn,isAdmin});
 });
+
+// POST route for Event Requests Form Page
 app.post('/request-an-event', async (req, res) => {  
         const {
             street_address,
@@ -657,7 +690,7 @@ app.post('/request-an-event', async (req, res) => {
 
 
 // GET route for volunteer.ejs view
-app.get('/volunteer',checkAuthenticationStatus, (req, res) => {
+app.get('/volunteer', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
 

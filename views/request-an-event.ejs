@@ -5,65 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request an Event</title>
     <style>
-body {
-    font-family: 'Poppins', sans-serif;
-    padding: 20px;
-    background-color: #f3f4f6;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-label {
-    display: block;
-    font-size: 18px;
-    font-weight: 500;
-    color: #000000;
-    margin-bottom: 5px;
-}
+    /* Body styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
+        background-size: 400% 400%;
+        height: 100vh;
+        display: block;
+        color: white;
+        transition: all 0.3s ease-in-out;
+        padding-top: 200px;
+        padding-left: 20px;
+    }
 
-.admin-banner {
-   position: fixed;  /* Fix it to the top of the page */
-   top: 0;
-   left: 0;
-   width: 100%;  /* Cover the full width */
-   height: 40px;  /* Set the height of the banner */
-   background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
-   color: white;
-   text-align: center;
-   font-weight: bold;
-   font-size: 14px;
-   z-index: 9999;  /* Ensure it stays on top of other content */
-}
+    label {
+        display: block;
+        font-size: 18px;
+        font-weight: 500;
+        color: #000000;
+        margin-bottom: 5px;
+    }
 
+    .admin-banner {
+        position: fixed;  /* Fix it to the top of the page */
+        top: 40px;
+        left: 0;
+        width: 100%;  /* Cover the full width */
+        height: 40px;  /* Set the height of the banner */
+        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
+        color: white;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 9999;  /* Ensure it stays on top of other content */
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-top: -40px;
+    }
+
+            /* Navbar Styles */
+    
+        /* Header styling */
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: -100px;
+            margin-bottom: 20px;
+        }
+
+        /* Paragraph styling */
+        p {
+            font-size: 1.2em;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-top: 20px;
+            color: #f7f7f7;
+            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Button styling */
+        .btn {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: #ff5733;
+            color: white;
+            font-size: 1.2em;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ff3e1d;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
-    <!--Banner that appears if logged in as admin,
-    that way you can make sure you have admin permissions-->
-   <% if (isAdmin) { %>
-    <div class="admin-banner">
-        <p>Viewing page as admin</p>
-    </div>
-    <% } %>
-    <br><br>
+    <div class="navbar" style="z-index: 10; position: sticky; top: 0; height: auto; font-size: xx-large; color: white; padding: 10px; padding-left: 20px;">
+        <div style="display: flex; flex-direction: row; align-items: center; align-content: center;">
+           <h1 style="font-weight: bold; width: 100%;"><a href="/">TURTLE SHELTER PROJECT</a></h1>
+           <div class="banner" style="display: flex; align-items: end; flex-direction: row; gap: 40px; padding-right: 20px; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">
+              <p style="font-size: large; white-space: nowrap;">About Us</p>
+              <p style="font-size: large; white-space: nowrap;">Jen's Story</p>
+              <p style="font-size: large;">Volunteer</p>
+              <p style="font-size: large; white-space: nowrap;"><a href="/request-an-event">Request Event</a></p>
+              <% if (!isLoggedIn) { %>
+                 <p style="font-size: large;"><a href="/signin">Login</a></p>
+              <% } %>
+              <% if (isLoggedIn) { %>
+                 <p style="font-size: large; white-space: nowrap;"><a href="/admin">Admin Page</a></p>
+                 <p style="font-size: large; white-space: nowrap;"><a href="/signout">Sign Out</a></p>
+              <% } %>
+           </div>
+        </div>
+     </div>
     
-    <!-- Navbar -->
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home Page</a></li>
-            <li><a href="/volunteer">Request Event</a></li>
-    
-        <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
-        <% if (isLoggedIn && isAdmin) { %>
-            <li><a href="/admin">Admin Page</a></li>
-            <li><a href="/signout">Sign Out</a></li>
-        <% } %>
-
-            <!-- Show Sign In button only if not logged in -->
-            <% if (!isLoggedIn) { %>
-                <li><a href="/signin">Sign In</a></li>
-            <% } %>
-        </ul>
-    </nav>
-
     <form action="/request-an-event" method="POST">
         <h1>Event Attendance</h1>
         <div class="input-container">
@@ -262,5 +312,6 @@ label {
             <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
         </div>
     </form>
+    <br><br>
 </body>
 </html>

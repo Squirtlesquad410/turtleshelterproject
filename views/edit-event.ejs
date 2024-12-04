@@ -59,7 +59,7 @@ label {
     </ul>
     </nav>
 
-    <form action="request-an-event">
+    <form action="/edit-event/<%= event.event_id %>" method="POST">
         <h1>Event Attendance</h1>
         <div class="input-container">
             <!--Labels for input boxes for the form
@@ -133,13 +133,13 @@ label {
             <div class="event_type">
                 <label for="event_type" style="font-weight: bold;">Would you like to do Sewing, Non-Sewing, or Both during the event?:</label>
                 <label for="event_type">
-                    <input type="radio" name="sewing" value="S"> Sewing
+                    <input type="radio" name="sewing" value="Sewing"> Sewing
                 </label>
                 <label>
-                    <input type="radio" name="non_sewing" value="N"> Non-Sewing
+                    <input type="radio" name="non_sewing" value="Non-sewing"> Non-Sewing
                 </label>
                 <label>
-                    <input type="radio" name="both" value="B"> Both
+                    <input type="radio" name="both" value="Both"> Both
                 </label>
                 <br><br>
             </div>
@@ -251,7 +251,7 @@ label {
             <br><br>
 
             <!--Submit Button-->
-            <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
+            <button type="submit"><b>Save Changes</b></button>
         </div>
     </form>
 </body>
