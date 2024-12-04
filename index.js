@@ -399,11 +399,13 @@ app.get('/maintain-users', checkAuthenticationStatus, (req,res) => {
 });
 
 // GET route for Event Request Form page (for volunteers)
-app.get('/request-an-event', checkAuthenticationStatus, (req, res) => {
+app.get('/request-an-event', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
     res.render('request-an-event',{isLoggedIn,isAdmin});
 });
+
+// POST route for Event Requests Form Page
 app.post('/request-an-event', async (req, res) => {  
         const {
             street_address,
@@ -487,7 +489,7 @@ app.post('/request-an-event', async (req, res) => {
 
 
 // GET route for volunteer.ejs view
-app.get('/volunteer',checkAuthenticationStatus, (req, res) => {
+app.get('/volunteer', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
 

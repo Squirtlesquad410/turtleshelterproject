@@ -146,11 +146,12 @@
     <nav class="navbar">
     <ul>
         <li><a href="/">Home Page</a></li>
+        <li><a href="/request-an-event">Request Event</a></li>
+
   
       <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
       <% if (isLoggedIn && isAdmin) { %>
         <li><a href="/admin">Admin Page</a></li>
-        <li><a href="/request-an-event">Request Event</a></li>
         <li><a href="/signout">Sign Out</a></li>
       <% } %>
 
