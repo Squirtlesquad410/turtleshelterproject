@@ -42,9 +42,9 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "localhost", // "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "wIltrac15$", //"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -52,7 +52,7 @@ const knex = require("knex")({
 });
 
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 
 const hashPassword = async (plainTextPassword) => {
@@ -86,26 +86,61 @@ app.get('/signin', (req, res) => {
     res.render('signin', { message });
 });
 
-// defining username and password variables
-const myUsername = process.env.DB_USERNAME;
-const myPassword = process.env.DB_PASSWORD;
+
 
 // Logic for verifying username and password
-app.post('/signin', (req, res) => {
+app.post('/signin', async (req, res) => {
     const usernameLogin = req.body.username;
     const passwordLogin = req.body.password;
 
-    // Check if submitted credentials match login info stored in the .env file
-    if (usernameLogin === myUsername && passwordLogin === myPassword) {
-        // if successful login do THIS
-        req.session.isLoggedIn = true;  // sets session variable to true with correct login
-        req.session.userRole = 'admin';
-        res.redirect('/admin');     // goes to the admin page if login is correct
-    } else {
-        // If failed login
-        res.status(403).send('<h1>403 Forbidden <3</h1>');
+    try {
+        // Query the database to find the user by username
+        const admin = await knex('admins').where('username', usernameLogin).first();
+
+        if (!admin) {
+            // If the username does not exist, send an error message
+            req.session.message = 'Invalid username or password.';
+            return res.redirect('/signin');
+        }
+
+        // Compare the provided password with the hashed password
+        const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
+
+        if (isPasswordCorrect) {
+            // If login is successful
+            req.session.isLoggedIn = true; // Mark the session as logged in
+            req.session.userRole = 'admin'; // Set the user role
+            req.session.username = admin.username; // Optional: Store the username
+            res.redirect('/admin'); // Redirect to the admin page
+        } else {
+            // If the password is incorrect
+            req.session.message = 'Invalid username or password.';
+            res.redirect('/signin');
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
+
+
+
+// // Logic for verifying username and password
+// app.post('/signin', (req, res) => {
+//     const usernameLogin = req.body.username;
+//     const passwordLogin = req.body.password;
+
+//     // Check if submitted credentials match login info stored in the .env file
+//     if (usernameLogin === myUsername && passwordLogin === myPassword) {
+//         // if successful login do THIS
+//         req.session.isLoggedIn = true;  // sets session variable to true with correct login
+//         req.session.userRole = 'admin';
+//         res.redirect('/admin');     // goes to the admin page if login is correct
+//     } else {
+//         // If failed login
+//         res.status(403).send('<h1>403 Forbidden <3</h1>');
+//     }
+// });
 
 
 // GET Route to SIGN OUT (logs admin out of session in this case)
