@@ -19,49 +19,10 @@ label {
     margin-bottom: 5px;
 }
 
-.admin-banner {
-   position: fixed;  /* Fix it to the top of the page */
-   top: 0;
-   left: 0;
-   width: 100%;  /* Cover the full width */
-   height: 40px;  /* Set the height of the banner */
-   background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
-   color: white;
-   text-align: center;
-   font-weight: bold;
-   font-size: 14px;
-   z-index: 9999;  /* Ensure it stays on top of other content */
-}
-
     </style>
 </head>
 <body>
-    <!--Banner that appears if logged in as admin,
-    that way you can make sure you have admin permissions-->
-   <% if (isAdmin) { %>
-    <div class="admin-banner">
-        <p>Viewing page as admin</p>
-    </div>
-    <% } %>
-
-    <!-- Navbar -->
-    <br><br>
-    <nav class="navbar">
-    <ul>
-        <li><a href="/">Home Page</a></li>
-  
-      <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
-      <% if (isLoggedIn && isAdmin) { %>
-        <li><a href="/admin">Admin Page</a></li>
-        <li><a href="/signout">Sign Out</a></li>
-      <% } %>
-
-        <!-- Show Sign In button only if not logged in -->
-        <% if (!isLoggedIn) { %>
-            <li><a href="/signin">Sign In</a></li>
-        <% } %>
-    </ul>
-    </nav>
+    <%- include('partials/navbar') %>
 
     <form action="volunteer">
         <h1>Volunteer Here!</h1>

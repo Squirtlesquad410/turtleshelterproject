@@ -12,42 +12,6 @@
             padding: 0;
         }
     
-        /* Navbar styling */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #228b22; /* Turtle green */
-            color: white;
-            padding: 10px 20px;
-            z-index: 1000; /* Ensure it sits above everything else */
-            display: flex;
-            flex-wrap: wrap; /* Allow links to wrap to the next line if needed */
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            overflow-x: auto; /* Add horizontal scroll if content overflows */
-        }
-    
-        .navbar h2 {
-            margin: 0;
-            font-weight: bold;
-            color: white; /* Ensure the text color is white */
-        }
-    
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-left: 15px;
-            margin-right: 40px; 
-            font-size: large;
-        }
-    
-        .navbar a:hover {
-            text-decoration: underline;
-        }
-    
         /* Space below the navbar */
         .content {
             padding-top: 80px; /* Adjust this value to match the navbar height */
@@ -123,22 +87,7 @@
     
       
       <body>
-        <div class="navbar">
-          <h2><a href="/">TURTLE SHELTER PROJECT</a></h2>
-          <div class="banner">
-            <a href="#">About Us</a>
-            <a href="#">Jen's Story</a>
-            <a href="#">Volunteer</a>
-            <a href="/request-an-event">Request Event</a>
-            <% if (!isLoggedIn) { %>
-            <a href="/signin">Login</a>
-            <% } %>
-            <% if (isLoggedIn) { %>
-            <a href="/admin">Admin Page</a>
-            <a href="/signout">Sign Out</a>
-            <% } %>
-          </div>
-        </div>
+        <%- include('partials/navbar') %>
       
         <div class="content">
           <form action="/request-an-event" method="POST">

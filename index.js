@@ -171,7 +171,8 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
 // Route for Add Admin Page
 app.get('/add-admin', (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-admin', { isAdmin });
+    const isLoggedIn = req.session.isLoggedIn || false;
+    res.render('add-admin', { isAdmin, isLoggedIn });
 });
 
 

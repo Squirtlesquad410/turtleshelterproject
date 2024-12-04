@@ -6,24 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/output.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Turtle Shelter Project</title>
     <style>
-       
+
     </style>
  </head>
  <body>
-   
-   <%- include('partials/navbar') %>
-   
-   <!-- Image positioned dynamically below the navbar -->
-   <div class="landing-image" style="position: absolute; top: 0;">
-      <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
-   </div>
+      <%- include('partials/navbar') %>
+      
+      <!-- Image positioned dynamically below the navbar -->
+      <div style="position: relative;">
+         <div class="landing-image" style="position: absolute; top: 0;">
+            <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
+         </div>
+      </div>
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+         <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
+         <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
+      </div>
 
-   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-      <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
-      <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
-  </div>
-  
  </body>
  </html>
