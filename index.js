@@ -44,7 +44,7 @@ const knex = require("knex")({
     connection: {
         host: process.env.RDS_HOSTNAME || "localhost",
         user: process.env.RDS_USERNAME || "postgres",
-        password: process.env.RDS_PASSWORD || "Sigmaturtles410!" // CHANGE BACK BEFORE PUSH
+        password: process.env.RDS_PASSWORD || "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: process.env.RDS_DB_NAME || "turtleshelterproject",
         port: process.env.RDS_PORT || 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
@@ -168,6 +168,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
                 'e.jen_story',
                 'e.contribute_materials_cost'
             )
+            .orderBy('eo.event_date')
             .limit(itemsPerPage)
             .offset(offset);
 
