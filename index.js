@@ -42,15 +42,22 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: process.env.RDS_HOSTNAME || "localhost",
-        user: process.env.RDS_USERNAME || "postgres",
-        password: process.env.RDS_PASSWORD || "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
-        database: process.env.RDS_DB_NAME || "turtleshelterproject",
-        port: process.env.RDS_PORT || 5432,
+        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        user: "postgres",
+        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        database: "turtleshelterproject",
+        port: 5432,
         ssl: process.env.DB_SSL ? {rejectUnauthorized: false} : false
     }
 });
 
+knex.raw('SELECT 1')
+  .then(() => {
+    console.log("Database connection successful!");
+  })
+  .catch((err) => {
+    console.error("Database connection error:", err);
+  });
 
 
 //
