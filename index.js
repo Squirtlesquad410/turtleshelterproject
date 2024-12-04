@@ -52,7 +52,7 @@ const knex = require("knex")({
 });
 
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 
 const hashPassword = async (plainTextPassword) => {
