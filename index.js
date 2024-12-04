@@ -337,6 +337,17 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
 });
 
 
+// GET route for edit-event.ejs
+app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
+    knex.select()
+    .from("event_info")
+    .then()
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    res.render('edit-event', { isLoggedIn, isAdmin });
+});
+
+
 // GET route for add-event.ejs
 app.get('/add-event', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
@@ -393,13 +404,203 @@ app.post('/delete-event/:id', (req, res) => {
       });
   });
 
+  // get request for maintain-users page
+  app.get('/maintain-users', checkAuthenticationStatus, async (req,res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
 
-// GET route for maintain-users page
-app.get('/maintain-users', checkAuthenticationStatus, (req,res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('maintain-users', { isLoggedIn, isAdmin });
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { first_name,
+            last_name,
+            email,
+            username,
+            } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Start building the base query
+        let query = knex('admins as a')
+            .select(
+                'a.admin_id',
+                'a.first_name',
+                'a.last_name',
+                'a.email',
+                'a.username',
+            )
+            .orderBy('a.last_name')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+
+        // Execute the query to fetch the filtered and paginated events
+        const admins = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('admins as a')
+
+           
+            .count('a.admin_id as count');
+
+        const totalAdmins = await countQuery.first();
+        const totalPages = Math.ceil(totalAdmins.count / itemsPerPage);
+
+        // Render the maintain-events page with events, pagination data, and filter values
+        res.render('maintain-users', {
+            isLoggedIn,
+            isLoggedIn,
+            isAdmin,
+            admins,
+            currentPage,
+            totalPages
+        });
+    } catch (err) {
+        console.error('Error fetching admins:', err);
+        res.status(500).send('An error occurred while fetching admins.');
+    }
 });
+
+// POST route to delete a user
+app.post('/delete-admin/:id', (req, res) => {
+    const admin_id = req.params.id;
+  
+    knex('admins')
+      .where('email', admin_id)
+      .del() // Deletes the adminwith the specified ID
+      .then(() => {
+        res.redirect('/maintain-users'); // Redirect to a relevant page after deletion
+      })
+      .catch(error => {
+        console.error('Error deleting admin:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  });
+
+// GET route for maintain-volunteers page
+app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { vol_first_name,
+            vol_last_name,
+            city,
+            willing_to_teach_sewing,
+            willing_to_lead } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Start building the base query
+        let query = knex('volunteer_info as v')
+            .join('sewing_ability as sa', 'v.sewing_ability_id', 'sa.sewing_ability_id')
+            .select(
+                'v.vol_id',
+                'v.vol_first_name',
+                'v.vol_last_name',
+                'v.vol_email',
+                'v.vol_phone',
+                'v.city',
+                'sa.sewing_ability_description',
+                'v.willing_to_teach_sewing',
+                'v.willing_to_lead',
+                'v.finding_source',
+                'v.monthly_hours_available'
+            )
+            .orderBy('v.vol_last_name')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+        // Apply filters if they exist
+        if (vol_first_name) {
+            query = query.whereRaw('LOWER(v.vol_first_name) LIKE ?', [`%${vol_first_name.toLowerCase()}%`]);
+        }
+        if (vol_last_name) {
+            query = query.whereRaw('LOWER(v.vol_last_name) LIKE ?', [`%${vol_last_name.toLowerCase()}%`]);
+        }
+        if (city) {
+            query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (willing_to_teach_sewing) {
+            query = query.whereRaw('LOWER(v.willing_to_teach_sewing) LIKE ?', [`%${willing_to_teach_sewing.toLowerCase()}%`]);
+        }
+        if (willing_to_lead) {
+            query = query.whereRaw('LOWER(v.willing_to_lead) LIKE ?', [`%${willing_to_lead.toLowerCase()}%`]);
+        }
+
+        // Execute the query to fetch the filtered and paginated events
+        const volunteers = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('volunteer_info as v')
+
+            .join('sewing_ability as sa', 'v.sewing_ability_id', 'sa.sewing_ability_id')
+            .count('v.vol_id as count');
+
+            if (vol_first_name) {
+                query = query.whereRaw('LOWER(v.vol_first_name) LIKE ?', [`%${vol_first_name.toLowerCase()}%`]);
+            }
+            if (vol_last_name) {
+                query = query.whereRaw('LOWER(v.vol_last_name) LIKE ?', [`%${vol_last_name.toLowerCase()}%`]);
+            }
+            if (city) {
+                query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+            }
+            if (willing_to_teach_sewing) {
+                query = query.whereRaw('LOWER(v.willing_to_teach_sewing) LIKE ?', [`%${willing_to_teach_sewing.toLowerCase()}%`]);
+            }
+            if (willing_to_lead) {
+                query = query.whereRaw('LOWER(v.willing_to_lead) LIKE ?', [`%${willing_to_lead.toLowerCase()}%`]);
+            }
+
+        const totalVolunteers = await countQuery.first();
+        const totalPages = Math.ceil(totalVolunteers.count / itemsPerPage);
+
+        // Render the maintain-events page with events, pagination data, and filter values
+        res.render('maintain-volunteers', {
+            isLoggedIn,
+            isLoggedIn,
+            isAdmin,
+            volunteers,
+            currentPage,
+            totalPages,
+            first_nameFilter: vol_first_name,
+            last_nameFilter: vol_last_name,
+            cityFilter: city,
+            willing_to_leadFilter: willing_to_lead,
+            willing_to_teach_sewingFilter: willing_to_teach_sewing,
+        });
+    } catch (err) {
+        console.error('Error fetching volunteers:', err);
+        res.status(500).send('An error occurred while fetching volunteers.');
+    }
+});
+
+// POST route to delete a volunteer
+app.post('/delete-volunteer/:id', (req, res) => {
+    const vol_id = req.params.id;
+  
+    knex('volunteer_info')
+      .where('vol_id', vol_id)
+      .del() // Deletes the adminwith the specified ID
+      .then(() => {
+        res.redirect('/maintain-volunteers'); // Redirect to a relevant page after deletion
+      })
+      .catch(error => {
+        console.error('Error deleting volunteer:', error);
+        res.status(500).send('Internal Server Error');
+      });
+  });
 
 // GET route for Event Request Form page (for volunteers)
 app.get('/request-an-event', (req, res) => {
