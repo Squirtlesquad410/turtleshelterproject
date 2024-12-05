@@ -92,6 +92,10 @@
     <div>
         <h1>ADD USER</h1>
         <form action="/add-user" method="POST">
+            <% if (errorMessage) { %>
+                <p style="color: red;"><%= errorMessage %></p>
+            <% } %>
+            
             <label for="email">Email:</label><br>
             <input type="email" id="email" name="email" required><br><br>
             <label for="first_name">First Name:</label><br>

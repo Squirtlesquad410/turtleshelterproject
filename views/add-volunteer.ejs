@@ -30,7 +30,17 @@ label {
             NOTE: num_people should be changed to meet the column name in the database
             for normalization (it will make it a lot easier to know what's being referenced
             and where this input is going)-->
+            <% if (errorMessage) { %>
+                <p style="color: red;"><%= errorMessage %></p>
+            <% } %>
+            <!-- Username and password fields-->
+            <label for="username">Create a username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+            <br><br>
 
+            <label for="password">Create a password:</label>
+            <input type="text" id="password" name="password" placeholder="Enter your password" required autofocus>
+            <br><br>
             <!--User First Name (text input)-->
             <label for="first_name">Enter Your First Name:</label>
             <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required autofocus>

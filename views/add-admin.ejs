@@ -98,9 +98,14 @@
 <body>
     <%- include('partials/navbar') %>
     <!-- Page Content -->
+
+    
     <div style="padding-top: 40px; padding-bottom: 80px;">
         <h1>Add Admin</h1>
         <form action="/add-admin" method="POST">
+            <% if (errorMessage) { %>
+                <p style="color: red;"><%= errorMessage %></p>
+            <% } %>
             <label for="email">Email:</label><br>
             <input type="email" id="email" name="email" required><br><br>
             <label for="first_name">First Name:</label><br>
