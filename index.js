@@ -144,6 +144,7 @@ app.post('/signin', async (req, res) => {
             if (isPasswordCorrect) {
                 // If user login is successful
                 req.session.isLoggedIn = true;
+                
                 req.session.userRole = 'user';
                 req.session.username = user.username;
                 req.session.email=user.email
@@ -213,6 +214,8 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
 app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
     const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
     const isLoggedIn = req.session.isLoggedIn || false;
+
+
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     try {
         
@@ -275,6 +278,8 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             cities,
             isUser,
             isLoggedIn,
+
+
             isAdmin
             
              // Pass session for login status check
@@ -362,7 +367,7 @@ app.post('/withdraw-event', async (req, res) => {
 
 
 // Route for Add Admin Page
-app.get('/add-admin', (req, res) => {
+app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
     res.render('add-admin', { isAdmin, isLoggedIn });
@@ -397,14 +402,61 @@ app.post('/add-admin', async (req, res) => {
 });
 
 // Route for Add user Page
-app.get('/add-user', (req, res) => {
+app.get('/add-user', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
     res.render('add-user', { isAdmin, isLoggedIn });
 });
 
+// app.post('/add-user', async (req, res) => {
+//     try {
+//         // Extract data from the form
+//         const { email, first_name, last_name, username, password } = req.body;
 
-// Route to add new admin to database
+//         // Check for existing user with the same email or username
+//         const existingUser = await knex('users')
+//             .where('email', email)
+//             .orWhere('username', username)
+//             .first();
+
+//         if (existingUser) {
+//             // Email or username already exists
+//             let errorMessage = 'An account with this ';
+//             if (existingUser.email === email) {
+//                 errorMessage += 'email ';
+//             }
+//             if (existingUser.username === username) {
+//                 errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+//             }
+//             errorMessage += 'already exists. Please try again with different credentials.';
+
+//             return res.status(400).render('add-user', { 
+//                 errorMessage,
+//             });
+//         }
+
+//         // Hash the password
+//         const saltRounds = 10;
+//         const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+//         // Insert into the database
+//         await knex('users').insert({
+//             email,
+//             first_name,
+//             last_name,
+//             username,
+//             hashed_password: hashedPassword
+//         });
+
+//         // Redirect to the admin page or confirmation
+//         res.redirect('/maintain-users');
+//     } catch (error) {
+//         console.error('Error adding user:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
+
+// Route to add new user to database
 app.post('/add-user', async (req, res) => {
     try {
         // Extract data from the form
@@ -1185,7 +1237,7 @@ app.post('/volunteer', async (req, res) => {
                 last_name: last_name,
                 email: email,
                 username: username,
-                password: hashedPassword,
+                hashed_password: hashedPassword,
             });
         });
         

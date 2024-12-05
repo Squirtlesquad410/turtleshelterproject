@@ -230,7 +230,8 @@
                         <% if (isLoggedIn) { %>
                             
                             <% if (event.isJoined) { %>
-                                <button                                    
+                                <button 
+                                    
                                     class="withdraw-button" 
                                     onclick="withdrawEvent(<%= event.event_id %>)">
                                     Withdraw
@@ -240,12 +241,6 @@
                                     class="join-button" 
                                     onclick="joinEvent(<%= event.event_id %>)">
                                     Join Event
-                                    
-                                </button>
-                                <button                                    
-                                    class="withdraw-button" id="withdraw-button"
-                                    onclick="withdrawEvent(<%= event.event_id %>)" hidden>
-                                    Withdraw
                                 </button>
                             <% } %>
                         <% } else { %>
@@ -288,7 +283,6 @@
             button.textContent = 'Joined';
             button.classList.add('joined');
             button.disabled = true; // Prevent multiple clicks
-            document.getElementById('withdraw-button').hidden=false
         } else {
             const errorMessage = await response.text();
             alert(errorMessage || 'Failed to join event.');
