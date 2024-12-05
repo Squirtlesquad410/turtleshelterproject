@@ -1604,5 +1604,33 @@ app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
+app.get('/view-participants/:id', checkAuthenticationStatus, async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
+
+    const eventID = parseInt(req.params.id);
+
+    try {
+        const eventParticipationData = await knex('volunteer_info as v')
+            .join('volunteer_participation as vp', 'v.vol_id', 'vp.vol_id')
+            .join('event_info as e', 'vp.event_id', 'e.event_id')
+            .select(
+                'v.vol_first_name',
+                'v.vol_last_name',
+                'v.vol_email',
+                'v.vol_phone',
+                'e.event_description',
+                'e.organization_name'
+            )
+            .where('vp.event_id', eventID);
+
+        // Pass the data to the template
+        res.render('view-participants', { eventParticipationData, isLoggedIn, isAdmin });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while fetching participant data.');
+    }
+});
+
 
 app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));
