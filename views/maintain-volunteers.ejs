@@ -185,16 +185,17 @@
             (This is like the exact same thing we did for Test 2)-->
         <form method="GET" action="/maintain-volunteers" class="filter-form">
 
-                <label for="first_name">First Name</label>
+                <label for="first_name">First Name:</label>
                 <input type="text" id="first_name" name="vol_first_name" placeholder="First Name" value="<%= first_nameFilter || '' %>">
             
-                <label for="last_name">Last Name</label>
+                <label for="last_name">Last Name:</label>
                 <input type="text" id="last_name" name="vol_last_name" placeholder="Last Name" value="<%= last_nameFilter || '' %>">
             
                 <label for="city">City:</label>
                 <input type="text" id="city" name="city" placeholder="City" value="<%= cityFilter || '' %>">
             
                 <button type="submit">Apply Filters</button>
+                <button onclick="reloadPage(event)">Clear Filters</button>
             </form>
                     <table>
                         <thead>
@@ -233,15 +234,15 @@
                                         <table>
                                             <tbody>
                                                 <tr>
-                                                    <td><strong>Phone</strong></td>
+                                                    <td><strong>Phone:</strong></td>
                                                     <td><%= volunteer.vol_phone %></td>
                                                 </tr>
                                                 <tr>
-                                                    <td><strong>Sewing Ability</strong></td>
+                                                    <td><strong>Sewing Ability:</strong></td>
                                                     <td><%= volunteer.sewing_ability_description %></td>
                                                 </tr>
                                                 <tr>
-                                                    <td><strong>Finding_Source</strong></td>
+                                                    <td><strong>Finding Source:</strong></td>
                                                     <td><%= volunteer.finding_source %></td>
                                                 </tr>
                                                 <tr>
@@ -250,7 +251,7 @@
                                                 </tr>
                                                 
                                                 <tr>
-                                                    <td><strong>Full  Address:</strong></td>
+                                                    <td><strong>Full Address:</strong></td>
                                                     <td><%= volunteer.street_address %>, <%= volunteer.city %>, <%= volunteer.state %> <%= volunteer.street_zip %>   </td>
                                                 </tr>                             
                                             </tbody>
@@ -324,6 +325,14 @@
                     <div class="add-volunteer-btn">
                         <a href="/volunteer"><button>Add New Volunteer</button></a>
                     </div>
+        <script>
+            function reloadPage(event) {
+                event.preventDefault();
+
+                // Redirects to main page
+                window.location.href = '/maintain-volunteers';
+            };
+        </script>
     </div>
     
     <br><br>
