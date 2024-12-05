@@ -136,7 +136,9 @@
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Username</th>
+                <th>Role</th>
                 <th>Actions</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -146,6 +148,7 @@
                     <td><%= admin.last_name %></td>
                     <td><%= admin.email %></td>
                     <td><%= admin.username %></td>
+                    <td><%= admin.role %></td>
                     <td>
                         <form action="/edit-admin/<%= admin.email %>" method="GET" style="display:inline;">
                             <button type="submit" style="background-color: #45a049;">Edit</button>

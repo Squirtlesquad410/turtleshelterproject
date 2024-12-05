@@ -130,6 +130,7 @@ app.post('/signin', async (req, res) => {
                 req.session.userRole = 'admin';
                 req.session.isAdmin = true;
                 req.session.username = admin.username;
+                req.session.email=admin.email
                 return res.redirect('/admin');
             }
         }
@@ -144,6 +145,7 @@ app.post('/signin', async (req, res) => {
             if (isPasswordCorrect) {
                 // If user login is successful
                 req.session.isLoggedIn = true;
+                
                 req.session.userRole = 'user';
                 req.session.username = user.username;
                 req.session.email=user.email
@@ -213,38 +215,42 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
 app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
     const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
     const isLoggedIn = req.session.isLoggedIn || false;
+
+
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const currentDate = moment().format('YYYY-MM-DD');
+    const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+    // Fetch events for the next month
+    const events = await knex('event_info as e').join('event_date_options as eo', function() {
+        this.on('e.event_id', '=', 'eo.event_id')
+            .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+        })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+    
+        .select(
+            'e.event_id',
+            'e.event_description',
+            'eo.event_date',
+            'eo.start_time',
+            'eo.end_time',
+            knex.raw(
+                "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
+            ),
+            'v.city'
+        )
+        .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
     try {
         
-        const currentDate = moment().format('YYYY-MM-DD');
-        const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+        
         const { email } = req.session;
+        if (isUser){
         const volunteer = await knex('volunteer_info')
         .select('vol_id')
         .where('vol_email', email)
         .first();
     
         const vol_id = volunteer?.vol_id;
-        // Fetch events for the next month
-        const events = await knex('event_info as e').join('event_date_options as eo', function() {
-            this.on('e.event_id', '=', 'eo.event_id')
-                .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
-            })
-                .join('venues as v', 'e.venue_id', 'v.venue_id')
         
-            .select(
-                'e.event_id',
-                'e.event_description',
-                'eo.event_date',
-                'eo.start_time',
-                'eo.end_time',
-                knex.raw(
-                    "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
-                ),
-                'v.city'
-            )
-            .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
-
         // Check which events the volunteer has joined
         for (let event of events) {
             if (vol_id) {
@@ -256,7 +262,8 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
                 event.isJoined = false; // Not logged in, default to false
             }
         }
-
+    }
+    
 
         // Add additional formatting and flags for the frontend
         const formattedEvents = events.map(event => ({
@@ -362,19 +369,62 @@ app.post('/withdraw-event', async (req, res) => {
 
 
 // Route for Add Admin Page
-app.get('/add-admin', (req, res) => {
+app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
-    res.render('add-admin', { isAdmin, isLoggedIn });
+    let errorMessage= null
+    res.render('add-admin', { errorMessage, isAdmin, isLoggedIn });
 });
 
 
 // Route to add new admin to database
 app.post('/add-admin', async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
 
+        // Check for existing user with the same email or username
+        const existingAdminOrUser = async (email, username) => {
+            try {
+                // Check in the admins table
+                const adminMatch = await knex('admins')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Check in the users table
+                const userMatch = await knex('users')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Return true if a match is found in either table
+                return adminMatch || userMatch;
+            } catch (error) {
+            console.error('Error checking for existing admin or user:', error);
+            throw error;
+        }
+    };
+    const existingRecord = await existingAdminOrUser(email,username);
+        
+    
+        if (existingRecord) {
+            // Email or username already exists
+            let errorMessage = 'An account with this ';
+            if (existingRecord.email === email) {
+                errorMessage += 'email ';
+            }
+            if (existingRecord.username === username) {
+                errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+            }
+            errorMessage += 'already exists. Please try again with different credentials.';
+            
+            return res.status(400).render('add-admin', { 
+                errorMessage,isAdmin, isLoggedIn
+            });
+        }
         // Hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -397,19 +447,60 @@ app.post('/add-admin', async (req, res) => {
 });
 
 // Route for Add user Page
-app.get('/add-user', (req, res) => {
+app.get('/add-user', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
-    res.render('add-user', { isAdmin, isLoggedIn });
+    let errorMessage= null
+    res.render('add-user', { errorMessage, isAdmin, isLoggedIn });
 });
 
-
-// Route to add new admin to database
 app.post('/add-user', async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
 
+        // Check for existing user with the same email or username
+        // Check for existing user with the same email or username
+        const existingAdminOrUser = async (email, username) => {
+            try {
+                // Check in the admins table
+                const adminMatch = await knex('admins')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Check in the users table
+                const userMatch = await knex('users')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Return true if a match is found in either table
+                return adminMatch || userMatch;
+            } catch (error) {
+            console.error('Error checking for existing admin or user:', error);
+            throw error;
+        }
+    };
+            const existingRecord = await existingAdminOrUser(email,username);
+    
+        if (existingRecord) {
+            // Email or username already exists
+            let errorMessage = 'An account with this ';
+            if (existingRecord.email === email) {
+                errorMessage += 'email ';
+            }
+            if (existingRecord.username === username) {
+                errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+            }
+            errorMessage += 'already exists. Please try again with different credentials.';
+            
+            return res.status(400).render('add-user', { 
+                errorMessage,isAdmin, isLoggedIn
+            });
+        }
         // Hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -430,6 +521,33 @@ app.post('/add-user', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+// Route to add new user to database
+// app.post('/add-user', async (req, res) => {
+//     try {
+//         // Extract data from the form
+//         const { email, first_name, last_name, username, password } = req.body;
+
+//         // Hash the password
+//         const saltRounds = 10;
+//         const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+//         // Insert into the database
+//         await knex('users').insert({
+//             email,
+//             first_name,
+//             last_name,
+//             username,
+//             hashed_password: hashedPassword
+//         });
+
+//         // Redirect to the admin page or confirmation
+//         res.redirect('/maintain-users');
+//     } catch (error) {
+//         console.error('Error adding user:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
 
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
@@ -832,34 +950,48 @@ app.post('/delete-event/:id', (req, res) => {
             username,
             } = req.query;
 
-        // Calculate the offset for pagination
-        const offset = (currentPage - 1) * itemsPerPage;
 
         // Start building the base query
         let query = knex('admins as a')
             .select(
-                'a.admin_id',
+                'a.admin_id as id',
                 'a.first_name',
                 'a.last_name',
                 'a.email',
                 'a.username',
+                knex.raw('\'Admin\' as role')
             )
-            .orderBy('a.last_name')
+            .union([knex.from('users as u')
+            .select(
+                'u.user_id as id',
+                'u.first_name',
+                'u.last_name',
+                'u.email',
+                'u.username',
+                knex.raw('\'User\' as role')
+            )])
             .limit(itemsPerPage)
-            .offset(offset);
-
+            .offset((currentPage - 1) * itemsPerPage);
+            
+            
 
         // Execute the query to fetch the filtered and paginated events
         const admins = await query;
 
-        // Query the total number of events for pagination controls, applying the same filters
+        // Now adjust the count query to include both tables
         let countQuery = knex('admins as a')
+        .union([
+            knex('users as u')
+                .select('u.user_id') // Just a placeholder column for count
+        ])
+        .count('* as count');
 
-           
-            .count('a.admin_id as count');
+        // Get the total count of users and admins
+        const totalCountResult = await countQuery.first();
+        const totalCount = totalCountResult.count;
 
-        const totalAdmins = await countQuery.first();
-        const totalPages = Math.ceil(totalAdmins.count / itemsPerPage);
+        // Calculate total pages
+        const totalPages = Math.ceil(totalCount / itemsPerPage);
 
         // Render the maintain-events page with events, pagination data, and filter values
         res.render('maintain-users', {
@@ -1124,13 +1256,15 @@ app.post('/request-an-event', async (req, res) => {
 app.get('/volunteer', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
-
-    res.render('volunteer', {
+    let errorMessage= null
+    res.render('volunteer', { errorMessage,
         isLoggedIn: isLoggedIn,
         isAdmin: isAdmin
     });
 });
 app.post('/volunteer', async (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     // Extract form values from req.body with destructuring
     const {
         first_name,
@@ -1157,10 +1291,51 @@ app.post('/volunteer', async (req, res) => {
     const teachSewing = willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
     const lead = willing_to_lead === 'Y'; // Convert checkbox to boolean
 
+    // Check for existing user with the same email or username
+    const existingAdminOrUser = async (email, username) => {
+        try {
+            // Check in the admins table
+            const adminMatch = await knex('admins')
+                .where('email', email)
+                .orWhere('username', username)
+                .first();
+    
+            // Check in the users table
+            const userMatch = await knex('users')
+                .where('email', email)
+                .orWhere('username', username)
+                .first();
+    
+            // Return true if a match is found in either table
+            return adminMatch || userMatch;
+        } catch (error) {
+        console.error('Error checking for existing admin or user:', error);
+        throw error;
+    }
+};
+const existingRecord = await existingAdminOrUser(email,username);
+    
+
+    if (existingRecord) {
+        // Email or username already exists
+        let errorMessage = 'An account with this ';
+        if (existingRecord.email === email) {
+            errorMessage += 'email ';
+        }
+        if (existingRecord.username === username) {
+            errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+        }
+        errorMessage += 'already exists. Please try again with different credentials.';
+        
+        return res.status(400).render('volunteer', { 
+            errorMessage,isAdmin, isLoggedIn
+        });
+    }
+
     // Hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+    
     try {
         // Insert the new volunteer into the database
         await knex.transaction(async (trx) => {
@@ -1185,7 +1360,7 @@ app.post('/volunteer', async (req, res) => {
                 last_name: last_name,
                 email: email,
                 username: username,
-                password: hashedPassword,
+                hashed_password: hashedPassword,
             });
         });
         
@@ -1205,7 +1380,8 @@ app.post('/volunteer', async (req, res) => {
 app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-volunteer', { isLoggedIn, isAdmin });
+    let errorMessage= null
+    res.render('add-volunteer', { errorMessage, isLoggedIn, isAdmin });
 });
 
 
@@ -1243,7 +1419,7 @@ app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
         }
 
         // Render the edit form with the volunteer's details
-        res.render('edit-volunteer', { isLoggedIn, isAdmin, volunteer });
+        res.render('edit-volunteer', { errorMessage, isLoggedIn, isAdmin, volunteer });
     } catch (err) {
         console.error('Error fetching volunteer:', err);
         res.status(500).send('An error occurred while fetching the volunteer.');
@@ -1363,14 +1539,11 @@ app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
         if (isNaN(volunteerID)) {
             return res.status(400).send('Invalid vol_id. It must be a valid number.')
         }
-
-        const emaildata = await knex("volunteer_info as VI")
-            .join("volunteer_participation as VP", "VI.vol_id", "VP.vol_id")
-            .join("event_info as EI", "VP.event_id", "EI.event_id")
+        
+        const eventdata = await knex("event_info as EI")
             .join("event_date_options as EDO", "EI.event_id", "EDO.event_id")
             .join("venues as VEN", "EI.venue_id", "VEN.venue_id")
-            .select("VI.vol_email",
-                    "VI.vol_first_name",
+            .select(
                     "VEN.street_address",
                     "VEN.city", // The event details should be 
                     "VEN.state",    // a drop-down to select
@@ -1381,21 +1554,31 @@ app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
                     "EI.organization_name",
                     "EI.event_description"
             )
-            .where("VI.vol_id", volunteerID)
             .first();
-        if (!emaildata) {
-            return res.status(404).send("No volunteer or event data associated with vol_id")
+
+        const volunteerdata = await knex("volunteer_info")
+        .select(
+        "vol_first_name",
+        "vol_email")
+        .where("vol_id", volunteerID)
+        .first()
+
+        if (!volunteerdata || !eventdata) {
+            return res.status(404).send("No volunteer or event data associated with vol_id");
         }
 
+        eventdata.vol_first_name = volunteerdata.vol_first_name;
+        eventdata.vol_email=volunteerdata.vol_email;
+
         // Converts military time to AM/PM format
-        const timeParts = emaildata.start_time.split(':');
+        const timeParts = eventdata.start_time.split(':');
         const hours = parseInt(timeParts[0], 10);
         const minutes = timeParts[1];
         const amPM = hours >= 12 ? 'PM' : 'AM';
         const formattedTime = `${((hours + 11) % 12 + 1)}:${minutes} ${amPM}`;
 
         // Formats the event_date to a cleaner format
-        const eventDate = new Date(emaildata.event_date);
+        const eventDate = new Date(eventdata.event_date);
         const formattedDate = eventDate.toLocaleDateString('en-US', {
             weekday: 'long', // e.g., "Fri"
             month: 'short',   // e.g., "Dec"
@@ -1407,11 +1590,11 @@ app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
         res.render('send-email', {
             isAdmin,
             isLoggedIn,
-            vol_email: emaildata.vol_email,
-            subject: `Volunteer Opportunity in ${emaildata.city}, ${emaildata.state} on ${formattedDate}`,
-            volunteer_name: emaildata.vol_first_name,
-            city: emaildata.city,
-            state: emaildata.state,
+            vol_email: volunteerdata.vol_email,
+            subject: `Volunteer Opportunity in ${eventdata.city}, ${eventdata.state} on ${formattedDate}`,
+            volunteer_name: volunteerdata.vol_first_name,
+            city: eventdata.city,
+            state: eventdata.state,
             event_date: formattedDate,
             start_time: formattedTime
         });
