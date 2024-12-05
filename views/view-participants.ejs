@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Event Participants</title>
+</head>
+    <style>
+            * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background-color: #4A90E2; /* Soft blue header */
+        }
+
+        thead th {
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        /* Pagination Styling */
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .pagination a.active {
+            text-decoration: underline;
+        }
+
+        /* Add Admin Button */
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .add-admin-btn button:hover {
+            background-color: #45a049;
+        }
+
+        /* Filter Form Styling */
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .filter-form input, .filter-form select, .filter-form button {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-form button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .filter-form button:hover {
+            background-color: #45a049;
+        }
+    </style>
+<body>
+    <%- include('partials/navbar') %>
+    <%- include('partials/navbar') %>
+    <div style="padding-top: 50px;">
+        <% if (eventParticipationData.length === 0) { %>
+            <!-- If no participants, display this message and the button -->
+            <p>This event has no participants currently.</p>
+            <div style="text-align: center;">
+                <a href="/maintain-events">
+                    <button style="background-color: #4A90E2; color: white; padding: 10px; border: none;">Back to Maintain Events</button>
+                </a>
+            </div>
+        <% } else { %>
+            <!-- If there are participants, display the event and table -->
+            <% for (let iCount = 0; iCount < 1; iCount++) { %>
+                <h1>
+                    Viewing participants for <%= eventParticipationData[iCount].organization_name %>'s event: 
+                    <i><%= eventParticipationData[iCount].event_description %></i>
+                </h1>
+            <% } %>
+    
+            <table>
+                <thead>
+                    <tr>
+                        <th>Participant First Name</th>
+                        <th>Participant Last Name</th>
+                        <th>Participant Email</th>
+                        <th>Participant Phone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% eventParticipationData.forEach(event => { %>
+                        <tr>
+                            <td><%= event.vol_first_name %></td>
+                            <td><%= event.vol_last_name %></td>
+                            <td><%= event.vol_email %></td>
+                            <td><%= event.vol_phone %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <div style="text-align: center;">
+                <a href="/maintain-events">
+                    <button style="background-color: #4A90E2; color: white; padding: 10px; border: none;">Back to Maintain Events</button>
+                </a>
+            </div>
+        <% } %>
+    </div>
+    
+</body>
+</html>
