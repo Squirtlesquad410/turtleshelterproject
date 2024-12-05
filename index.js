@@ -1633,4 +1633,183 @@ app.get('/view-participants/:id', checkAuthenticationStatus, async (req, res) =>
 });
 
 
-app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));
+app.get('/pending-events', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { address, description, organization, city, state, zip, event_date, event_status } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Start building the base query
+        let query = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .select(
+                'e.event_id',
+                knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
+                'e.organization_name',
+                'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
+                'e.organizer_email',
+                'e.event_type',
+                'e.estimated_attendance',
+                'e.num_children_under_10',
+                'e.num_teens',
+                'e.num_help_set_up',
+                'e.num_sewers',
+                'sa.sewing_ability_description',
+                'e.num_sewing_machines',
+                'e.num_sergers',
+                'e.event_status',
+                knex.raw("CONCAT(v.street_address, ', ', v.city, ', ', v.state, ' ', v.ZIP) AS full_address"),
+                'e.notes',
+                'e.jen_story',
+                'e.contribute_materials_cost',
+            )
+            .where('e.event_status', 'pending')
+            .orderBy('eo.event_date')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+        // Apply filters if they exist
+        if (address) {
+            query = query.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            query = query.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            query = query.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            query = query.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            query = query.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            // Ensure the date is in the format YYYY-MM-DD for comparison
+            query = query.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+
+        // Execute the query to fetch the filtered and paginated events
+        const events = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .count('e.event_id as count');
+
+        if (address) {
+            countQuery = countQuery.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            countQuery = countQuery.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            countQuery = countQuery.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            countQuery = countQuery.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            countQuery = countQuery.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            countQuery = countQuery.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            countQuery = countQuery.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+
+        const totalEvents = await countQuery.first();
+        const totalPages = Math.ceil(totalEvents.count / itemsPerPage);
+
+        // Render the maintain-events page with events, pagination data, and filter values
+        res.render('pending-events', {
+            isLoggedIn,
+            isLoggedIn,
+            isAdmin,
+            events,
+            currentPage,
+            totalPages,
+            addressFilter: address,
+            descriptionFilter: description,
+            organizationFilter: organization,
+            cityFilter: city,
+            stateFilter: state,
+            zipFilter: zip,
+            dateFilter: event_date,
+        });
+    } catch (err) {
+        console.error('Error fetching events:', err);
+        res.status(500).send('An error occurred while fetching events.');
+    }
+});
+
+app.post('/approve-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const event_status ='approved'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            event_status
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/pending-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+app.post('/decline-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const event_status ='declined'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            event_status
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/maintain-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+
+app.listen(port, () => console.log('The server has started.'));
