@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send an Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 70%;
+            height: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .email-template {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <div class="container">
+        <div class="email-template">
+            <strong>Mail to:</strong> <i><%= vol_email %></i><br><br>
+            <strong>Subject:</strong> Volunteer Opportunity in <%= city %> on <%= event_date %><br><br>
+            Hi <%= volunteer_name %>,<br><br>
+            This is Jen from the Turtle Shelter Project. Thank you again so much for your willingness to volunteer with us! We have an upcoming event in <%= city %>, <%= state %> that will take place on <%= event_date %>, at <%= start_time %>.<br><br>
+            We would love to know if you're available to participate with us!<br><br>
+            Please let us know if you can make it by responding to this email.<br><br>
+            Thank you,<br>
+            Jen<br><br>
+            <i>The Turtle Shelter Project</i>
+            <br>
+            <i>turtleshelterproject@gmail.com</i>
+            <br>
+            <i>(801)-872-3190</i>
+            <br>
+            <!--JUN I need you to insert logo here-->
+            <img src="/images/landingpage.png" alt="TSP Logo" width="50px" height="50px">
+        </div>
+        <a href="https://mail.google.com/mail/u/0/#inbox?compose=new" 
+        target="_blank">
+            <button type="button">Send Email</button>
+        </a>
+    </div>
+</body>
+</html>

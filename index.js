@@ -908,5 +908,71 @@ app.post('/edit-admin/:id', (req, res) => {
     res.redirect('/maintain-users');
 });
 
+app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const isLoggedIn = req.session.isLoggedIn || false;
+
+        const volunteerID = parseInt(req.params.id, 10)
+        if (isNaN(volunteerID)) {
+            return res.status(400).send('Invalid vol_id. It must be a valid number.')
+        }
+
+        const emaildata = await knex("volunteer_info as VI")
+            .join("volunteer_participation as VP", "VI.vol_id", "VP.vol_id")
+            .join("event_info as EI", "VP.event_id", "EI.event_id")
+            .join("event_date_options as EDO", "EI.event_id", "EDO.event_id")
+            .join("venues as VEN", "EI.venue_id", "VEN.venue_id")
+            .select("VI.vol_email",
+                    "VI.vol_first_name",
+                    "VEN.street_address",
+                    "VEN.city", // The event details should be 
+                    "VEN.state",    // a drop-down to select
+                    "VEN.zip",
+                    "EDO.start_time",
+                    "EDO.end_time",
+                    "EDO.event_date",
+                    "EI.organization_name",
+                    "EI.event_description"
+            )
+            .where("VI.vol_id", volunteerID)
+            .first();
+        if (!emaildata) {
+            return res.status(404).send("No volunteer or event data associated with vol_id")
+        }
+
+        // Converts military time to AM/PM format
+        const timeParts = emaildata.start_time.split(':');
+        const hours = parseInt(timeParts[0], 10);
+        const minutes = timeParts[1];
+        const amPM = hours >= 12 ? 'PM' : 'AM';
+        const formattedTime = `${((hours + 11) % 12 + 1)}:${minutes} ${amPM}`;
+
+        // Formats the event_date to a cleaner format
+        const eventDate = new Date(emaildata.event_date);
+        const formattedDate = eventDate.toLocaleDateString('en-US', {
+            weekday: 'long', // e.g., "Fri"
+            month: 'short',   // e.g., "Dec"
+            day: '2-digit',   // e.g., "20"
+            year: 'numeric'   // e.g., "2024"
+        });
+
+        // Renders email template with dynamic values
+        res.render('send-email', {
+            isAdmin,
+            isLoggedIn,
+            vol_email: emaildata.vol_email,
+            subject: `Volunteer Opportunity in ${emaildata.city}, ${emaildata.state} on ${formattedDate}`,
+            volunteer_name: emaildata.vol_first_name,
+            city: emaildata.city,
+            state: emaildata.state,
+            event_date: formattedDate,
+            start_time: formattedTime
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message || 'An error occured')
+    }
+});
 
 app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));
