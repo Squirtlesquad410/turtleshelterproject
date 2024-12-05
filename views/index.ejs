@@ -1,7 +1,6 @@
-<!-- THis is the landing page-->
- <!DOCTYPE html>
- <html lang="en">
- <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/output.css" rel="stylesheet">
@@ -9,22 +8,111 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Turtle Shelter Project</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Full viewport height */
+        }
+
+        .content {
+            flex: 1; /* Allows content to grow and pushes footer down */
+        }
+
+        .landing-image {
+            position: relative;
+            width: 100%;
+        }
+
+        .landing-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: brightness(0.6); /* Darken image for text visibility */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .overlay h1 {
+            margin: 10px 0;
+        }
+
+        footer {
+            background-color: #228B22; /* Turtle green */
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        footer p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer i {
+            font-size: 2rem;
+            margin: 0 15px;
+        }
     </style>
- </head>
- <body>
-      <%- include('partials/navbar') %>
-      
-      <!-- Image positioned dynamically below the navbar -->
-      <div style="position: relative;">
-         <div class="landing-image" style="position: absolute; top: 0;">
-            <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
-         </div>
-      </div>
-      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-         <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
-         <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
-      </div>
+</head>
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
 
- </body>
- </html>
+    <!-- Content Section -->
+    <div class="content">
+        <!-- Image Positioned Dynamically Below the Navbar -->
+        <div class="landing-image">
+            <img src="/images/landingpage.png" alt="Landing Page Image">
+            <div class="overlay">
+                <h1 style="font-style: italic; font-size: 30px;">Saving the lives of people battling homelessness</h1>
+                <h1 style="font-weight: bold; font-size: 40px;">BEGINS WITH YOU</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>
+            <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+                <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
+            </p>
+        </div>
+        <div>
+            <!-- Social Media Links -->
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank">
+                <i class="fab fa-facebook-square"></i>
+            </a>
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank">
+                <i class="fab fa-youtube"></i>
+            </a>
+        </div>
+    </footer>
+</body>
+</html>
