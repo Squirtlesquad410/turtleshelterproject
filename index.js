@@ -245,8 +245,13 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             .select(
                 'e.event_id',
                 knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
                 'e.organization_name',
                 'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
                 'e.organizer_email',
                 'e.event_type',
                 'e.estimated_attendance',
@@ -368,8 +373,7 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
 
 
 
-// GET route for edit-event/:id
-// GET route for edit-event.ejs
+
 // GET route to edit an event
 app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
@@ -407,7 +411,6 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const eventId = req.params.id;
     const {
         event_description,
-        notes,
         organization_name,
         organizer_first_name,
         organizer_last_name,
@@ -432,14 +435,15 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         num_sergers,
         jen_story,
         contribute_materials_cost,
-        event_status
+        event_status,
+        notes
     } = req.body;
+
     // First, update event_info table
     knex('event_info')
         .where('event_id', eventId)
         .update({
             event_description,
-            notes,
             organization_name,
             organizer_first_name,
             organizer_last_name,
@@ -456,50 +460,73 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             num_sergers,
             jen_story: jen_story ? 'Y' : 'N',
             contribute_materials_cost: contribute_materials_cost ? 'Y' : 'N',
-            event_status
+            event_status,
+            notes
         })
         .then(() => {
-            // Now, get the venue_id from the event_info record
-            knex('event_info')
+            // Get the venue_id from the event_info record
+            return knex('event_info')
                 .where('event_id', eventId)
                 .select('venue_id')
-                .first() // Get the first record (only one event record)
-                .then((event) => {
-                    if (event && event.venue_id) {
-                        // Use the venue_id from the event_info record to update the venues table
-                        const venueId = event.venue_id;
-                        knex('venues')
-                            .where('venue_id', venueId)  // Update the venue using the retrieved venue_id
-                            .update({
-                                street_address,
-                                city,
-                                state,
-                                zip,
-                                space_size
-                            })
-                            .then(() => {
-                                // After both updates are successful, redirect or render a success page
-                                res.redirect('/maintain-events/');
-                            })
-                            .catch(error => {
-                                console.error('Error updating venue:', error);
-                                res.status(500).send('Error updating venue');
+                .first();
+        })
+        .then(event => {
+            if (event && event.venue_id) {
+                const venueId = event.venue_id;
+
+                // Update the venues table
+                return knex('venues')
+                    .where('venue_id', venueId)
+                    .update({
+                        street_address,
+                        city,
+                        state,
+                        zip,
+                        space_size
+                    });
+            } else {
+                throw new Error('No venue_id found for this event');
+            }
+        })
+        .then(() => {
+            // Optionally update the event_date_options table
+            if (event_date || start_time || end_time) {
+                // Check if a record exists for this event in the event_date_options table
+                return knex('event_date_options')
+                    .where('event_id', eventId)
+                    .first()
+                    .then(existingRecord => {
+                        if (existingRecord) {
+                            // Update the record if it exists
+                            return knex('event_date_options')
+                                .where('event_id', eventId)
+                                .update({
+                                    event_date,
+                                    start_time,
+                                    end_time
+                                });
+                        } else {
+                            // Insert a new record if it doesn't exist
+                            return knex('event_date_options').insert({
+                                event_id: eventId,
+                                event_date,
+                                start_time,
+                                end_time
                             });
-                    } else {
-                        console.error('No venue_id found for this event');
-                        res.status(400).send('No venue_id found for this event');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error retrieving venue_id from event_info:', error);
-                    res.status(500).send('Error retrieving venue_id');
-                });
+                        }
+                    });
+            }
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/maintain-events');
         })
         .catch(error => {
-            console.error('Error updating event:', error);
-            res.status(500).send('Error updating event');
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
         });
 });
+
 
 
 
@@ -625,7 +652,10 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
                 'v.vol_last_name',
                 'v.vol_email',
                 'v.vol_phone',
+                'v.street_address',
                 'v.city',
+                'v.state',
+                'v.zip',
                 'sa.sewing_ability_description',
                 'v.willing_to_teach_sewing',
                 'v.willing_to_lead',
@@ -733,6 +763,9 @@ app.post('/request-an-event', async (req, res) => {
             zip,
             organization_name,
             event_description,
+            organizer_first_name,
+            organizer_last_name,
+            organizer_phone,
             organizer_email,
             event_type,
             estimated_attendance,
@@ -745,12 +778,14 @@ app.post('/request-an-event', async (req, res) => {
             num_sergers,
             jen_story,
             contribute_materials_cost,
-            event_status,
+            
             event_date,
             start_time,
             end_time,
+            notes
         } = req.body;
-    
+    const event_status='requested'
+    const date_preference_order=1
         try {
             await knex.transaction(async (trx) => {
                 // Step 1: Insert into the venues table
@@ -771,6 +806,9 @@ app.post('/request-an-event', async (req, res) => {
                         venue_id, // Reference the new venue_id
                         organization_name,
                         event_description,
+                        organizer_first_name,
+                        organizer_last_name,
+                        organizer_phone,
                         organizer_email,
                         event_type,
                         estimated_attendance: parseInt(estimated_attendance),
@@ -784,6 +822,7 @@ app.post('/request-an-event', async (req, res) => {
                         jen_story: jen_story === 'Yes',
                         contribute_materials_cost,
                         event_status,
+                        notes
                     })
                     .returning('event_id');
     
@@ -795,6 +834,7 @@ app.post('/request-an-event', async (req, res) => {
                     event_date,
                     start_time,
                     end_time,
+                    date_preference_order,
                 });
             });
     
@@ -824,7 +864,10 @@ app.post('/volunteer', async (req, res) => {
         last_name,
         email,
         phone,
+        street_address,
         city,
+        state,
+        zip,
         monthly_hours_available, // Assuming you have a `num_hours` field for available hours
         finding_source,
         sewing_ability_id,
@@ -846,7 +889,10 @@ app.post('/volunteer', async (req, res) => {
             vol_last_name: last_name,
             vol_email: email,
             vol_phone: phone,
+            street_address: street_address,
             city: city,
+            state: state,
+            zip: zip,
             monthly_hours_available: parsedNumHours,
             finding_source: parsedFindingSource,
             sewing_ability_id: parsedSewingAbilityId,
@@ -875,11 +921,96 @@ app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
 
 
 // GET route for edit-volunteer.ejs
-app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-volunteer', { isLoggedIn, isAdmin });
+app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const vol_id = req.params.id;
+
+        // Query the database to get the volunteer's details
+        const volunteer = await knex('volunteer_info')
+            .select(
+                'vol_id',
+                'vol_first_name',
+                'vol_last_name',
+                'vol_email',
+                'vol_phone',
+                'street_address',
+                'city',
+                'state',
+                'zip',
+                'monthly_hours_available',
+                'finding_source',
+                'sewing_ability_id',
+                'willing_to_teach_sewing',
+                'willing_to_lead'
+            )
+            .where('vol_id', vol_id)
+            .first();
+
+        if (!volunteer) {
+            return res.status(404).send('Volunteer not found');
+        }
+
+        // Render the edit form with the volunteer's details
+        res.render('edit-volunteer', { isLoggedIn, isAdmin, volunteer });
+    } catch (err) {
+        console.error('Error fetching volunteer:', err);
+        res.status(500).send('An error occurred while fetching the volunteer.');
+    }
 });
+
+
+// post route for edit-volunteer
+app.post('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const vol_id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            vol_first_name,
+            vol_last_name,
+            vol_email,
+            vol_phone,
+            street_address,
+            city,
+            state,
+            zip,
+            monthly_hours_available,
+            finding_source,
+            sewing_ability_id,
+            willing_to_teach_sewing,
+            willing_to_lead
+        } = req.body;
+
+        // Update the volunteer's details in the database
+        await knex('volunteer_info')
+            .where('vol_id', vol_id)
+            .update({
+                vol_first_name,
+                vol_last_name,
+                vol_email,
+                vol_phone,
+                street_address,
+                city,
+                state,
+                zip,
+                monthly_hours_available,
+                finding_source,
+                sewing_ability_id,
+                willing_to_teach_sewing: willing_to_teach_sewing ? 'Y' : 'N',
+                willing_to_lead: willing_to_lead ? 'Y' : 'N',
+            });
+
+        // Redirect to a success page or back to the volunteer list
+        res.redirect('/maintain-volunteers'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating volunteer:', err);
+        res.status(500).send('An error occurred while updating the volunteer.');
+    }
+});
+
+
 
 
 // GET route for edit-admin.ejs
