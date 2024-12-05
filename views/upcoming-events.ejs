@@ -185,6 +185,18 @@
         background-color: #28a745;
         cursor: default;
     }
+    .withdraw-button {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+    .withdraw-button:hover {
+    background-color: #d32f2f;
+}
     </style>
 </head>
 <body>
@@ -216,15 +228,30 @@
                     </div>
                     <div>
                         <% if (isLoggedIn) { %>
-                            <button 
-                                class="join-button <%= event.isJoined ? 'joined' : '' %>" 
-                                onclick="joinEvent(<%= event.event_id %>)">
-                                <%= event.isJoined ? 'Joined' : 'Join Event' %>
-                            </button>
+                            
+                            <% if (event.isJoined) { %>
+                                <button                                    
+                                    class="withdraw-button" 
+                                    onclick="withdrawEvent(<%= event.event_id %>)">
+                                    Withdraw
+                                </button>
+                            <% } else { %>
+                                <button 
+                                    class="join-button" 
+                                    onclick="joinEvent(<%= event.event_id %>)">
+                                    Join Event
+                                    
+                                </button>
+                                <button                                    
+                                    class="withdraw-button" id="withdraw-button"
+                                    onclick="withdrawEvent(<%= event.event_id %>)" hidden>
+                                    Withdraw
+                                </button>
+                            <% } %>
                         <% } else { %>
                             <button 
                                 class="join-button" 
-                                onclick="location.href='/login'">
+                                onclick="location.href='/signin'">
                                 Join Event
                             </button>
                         <% } %>
@@ -261,6 +288,7 @@
             button.textContent = 'Joined';
             button.classList.add('joined');
             button.disabled = true; // Prevent multiple clicks
+            document.getElementById('withdraw-button').hidden=false
         } else {
             const errorMessage = await response.text();
             alert(errorMessage || 'Failed to join event.');
@@ -270,7 +298,26 @@
         alert('An error occurred while trying to join the event.');
     }
 }
-
+// Withdraw from an event
+async function withdrawEvent(eventId) {
+        try {
+            const response = await fetch('/withdraw-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventId })
+            });
+            if (response.ok) {
+                const button = document.querySelector(`button[onclick="withdrawEvent(${eventId})"]`);
+                button.textContent = 'Join Event';
+                button.className = 'join-button';
+                button.setAttribute('onclick', `joinEvent(${eventId})`);
+            } else {
+                alert('Failed to withdraw from the event.');
+            }
+        } catch (error) {
+            console.error('Error withdrawing from event:', error);
+        }
+    }
     </script>
 </body>
 </html>

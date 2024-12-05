@@ -216,8 +216,13 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
         
         const currentDate = moment().format('YYYY-MM-DD');
         const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
-        const { email } = req.session.email;
-        const { vol_id } =knex('volunteer_info').select('vol_id').where('email',email)
+        const { email } = req.session;
+        const volunteer = await knex('volunteer_info')
+        .select('vol_id')
+        .where('vol_email', email)
+        .first();
+    
+        const vol_id = volunteer?.vol_id;
         // Fetch events for the next month
         const events = await knex('event_info as e').join('event_date_options as eo', function() {
             this.on('e.event_id', '=', 'eo.event_id')
@@ -239,11 +244,17 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
 
         // Check which events the volunteer has joined
-        const joinedEvents = vol_id
-            ? await knex('volunteer_participation')
-                  .where({ vol_id })
-                  .pluck('event_id')
-            : [];
+        for (let event of events) {
+            if (vol_id) {
+                const participation = await knex('volunteer_participation')
+                    .where({ vol_id, event_id: event.event_id })
+                    .first();
+                event.isJoined = !!participation; // true if participation exists
+            } else {
+                event.isJoined = false; // Not logged in, default to false
+            }
+        }
+
 
         // Add additional formatting and flags for the frontend
         const formattedEvents = events.map(event => ({
@@ -251,7 +262,7 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             date_formatted: moment(event.date).format('MMMM DD, YYYY'),
             start_time_formatted: moment(event.start_time, 'HH:mm:ss').format('h:mm A'),
             end_time_formatted: moment(event.end_time, 'HH:mm:ss').format('h:mm A'),
-            isJoined: joinedEvents.includes(event.event_id),
+            
         }));
 
         // Get unique cities for filtering
@@ -262,6 +273,7 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             cities,
             isUser,
             isLoggedIn
+            
              // Pass session for login status check
         });
     } catch (err) {
@@ -292,10 +304,6 @@ app.post('/join-event', async (req, res) => {
             return res.status(400).send('Event ID is required.');
         }
         
-        // if (!vol_id) {
-        //     return res.status(401).send('Unauthorized. Please log in.');
-        // }
-
         // Check if the user is already signed up for the event
         const existingParticipation = await knex('volunteer_participation')
             .where({ vol_id, event_id: eventId })
@@ -317,6 +325,38 @@ app.post('/join-event', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.post('/withdraw-event', async (req, res) => {
+    try {
+        // Retrieve volunteer ID from the session
+        const { email } = req.session;
+        const vol = await knex('volunteer_info').select('vol_id').where('vol_email', email).first();
+
+        if (!vol) {
+            return res.status(401).send('Unauthorized. Please log in.');
+        }
+
+        const { eventId } = req.body;
+        if (!eventId) {
+            return res.status(400).send('Event ID is missing.');
+        }
+
+        // Delete participation record
+        const result = await knex('volunteer_participation')
+            .where({ vol_id: vol.vol_id, event_id: eventId })
+            .del();
+
+        if (result) {
+            res.status(200).send('Successfully withdrew from the event.');
+        } else {
+            res.status(404).send('Participation record not found.');
+        }
+    } catch (err) {
+        console.error('Error withdrawing from event:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 // Route for Add Admin Page
 app.get('/add-admin', (req, res) => {
@@ -1099,6 +1139,8 @@ app.post('/volunteer', async (req, res) => {
         sewing_ability_id,
         willing_to_teach_sewing,
         willing_to_lead,
+        username,
+        password,
     } = req.body;
 
     // Convert required fields to the correct types
@@ -1108,24 +1150,38 @@ app.post('/volunteer', async (req, res) => {
     const teachSewing = willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
     const lead = willing_to_lead === 'Y'; // Convert checkbox to boolean
 
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     try {
         // Insert the new volunteer into the database
-        await knex('volunteer_info').insert({
-            vol_first_name: first_name,
-            vol_last_name: last_name,
-            vol_email: email,
-            vol_phone: phone,
-            street_address: street_address,
-            city: city,
-            state: state,
-            zip: zip,
-            monthly_hours_available: parsedNumHours,
-            finding_source: parsedFindingSource,
-            sewing_ability_id: parsedSewingAbilityId,
-            willing_to_teach_sewing: teachSewing,
-            willing_to_lead: lead,
+        await knex.transaction(async (trx) => {
+            await trx('volunteer_info').insert({
+                vol_first_name: first_name,
+                vol_last_name: last_name,
+                vol_email: email,
+                vol_phone: phone,
+                street_address: street_address,
+                city: city,
+                state: state,
+                zip: zip,
+                monthly_hours_available: parsedNumHours,
+                finding_source: parsedFindingSource,
+                sewing_ability_id: parsedSewingAbilityId,
+                willing_to_teach_sewing: teachSewing,
+                willing_to_lead: lead,
+            });
+        
+            await trx('users').insert({
+                first_name: first_name,
+                last_name: last_name,
+                email: email,
+                username: username,
+                password: hashedPassword,
+            });
         });
-        await knex('users')
+        
 
         // Redirect to the home page or a thank-you page
         res.redirect('/');
