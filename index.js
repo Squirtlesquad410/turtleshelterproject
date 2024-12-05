@@ -70,6 +70,11 @@ app.get('/jen', (req,res) => {
     const isAdmin = req.session.userRole === 'admin';
     res.render("jen", { isLoggedIn, isAdmin });
 });
+app.get('/about-us', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("about-us", { isLoggedIn, isAdmin });
+});
 
 app.get('/donate', (req,res) => {
     const isLoggedIn = req.session.isLoggedIn || false;

@@ -135,5 +135,8 @@
     "postinstall": "npm install dotenv"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "directories": {
+    "test": "tests"
+  }
 }
