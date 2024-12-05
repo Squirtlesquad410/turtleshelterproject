@@ -6,7 +6,9 @@
     <title>Volunteer Here!</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-
+        body {
+            font-family: Arial, sans-serif;
+        }
 
         /* Space below the navbar */
         .content {
@@ -78,11 +80,6 @@
             background-color: #196619;
         }
     
-        /* Align radio buttons with labels */
-        .event_type {
-            font-family: Arial, sans-serif; /* Optional for cleaner styling */
-        }
-
     </style>
 </head>
 <body>
@@ -92,50 +89,59 @@
 
     <div style="padding-top: 100px; padding-bottom: 100px;">
         <form action="/volunteer" method="POST">
-            <h1>Volunteer Here!</h1>
+            <h1>Volunteer Sign Up</h1>
             <div class="input-container">
                 <!--Labels for input boxes for the form
                 NOTE: num_people should be changed to meet the column name in the database
                 for normalization (it will make it a lot easier to know what's being referenced
                 and where this input is going)-->
 
+                <!-- Username and password fields-->
+                <label for="username">Create a username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+                <br><br>
+
+                <label for="password">Create a password:</label>
+                <input type="text" id="password" name="password" placeholder="Enter your password" required autofocus>
+                <br><br>
+
                 <!--User First Name (text input)-->
-                <label for="first_name">Enter Your First Name:</label>
+                <label for="first_name">Enter your first name:</label>
                 <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required autofocus>
                 <br><br>
 
                 <!--User Last Name (text input)-->
-                <label for="last_name">Enter Your Last Name:</label>
+                <label for="last_name">Enter your last name:</label>
                 <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
                 <br><br>
 
                 <!--If they want to be contacted by email (text input)-->
-                <label for="email">Enter Your Email:</label>
-                <input type="text" style="width: 325px;" id="email" name="email" placeholder="Enter email if you would like to be contacted via email" required>
+                <label for="email">Enter your email:</label>
+                <input type="text" id="email" name="email" placeholder="Enter your email" required>
                 <br><br>
 
                 <!--User Phone Number (number input)-->
-                <label for="phone">What is a good phone number to contact you at?:</label>
+                <label for="phone">Enter your phone number:</label>
                 <input type="number" id="phone" name="phone" placeholder="Enter your phone number" style="width: 175px;" required>
                 <br><br>
 
             <!--Street Address (text input)-->
-            <label for="street_address">Please enter your street address:</label>
+            <label for="street_address">Enter your street address:</label>
             <input type="text" id="street_address" name="street_address" placeholder="Enter street address" required>
             <br><br>
 
                 <!--City (text input)-->
-                <label for="city">Please enter your city:</label>
+                <label for="city">Enter your city:</label>
                 <input type="text" id="city" name="city" placeholder="Enter city" required>
                 <br><br>
 
                 <!--State (text input)-->
-                <label for="state">Please enter you state (i.e, CA):</label>
+                <label for="state">Enter your state (i.e, CA):</label>
                 <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
                 <br><br>
 
             <!--ZIP (text input)-->
-            <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
+            <label for="zip">Enter your zip code:</label>
             <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" min="0" required>
             <br><br>
             
@@ -147,7 +153,7 @@
 
 
                 <!--Finding Source (How did you hear about the project. Drop down.)-->
-                <label for="finding_source">How did you find out about us?:</label>
+                <label for="finding_source">How did you find out about the project?:</label>
                 <select id="finding_source" name="finding_source" required>
                     <option value="1">Facebook</option>
                     <option value="2">Google Search</option>
