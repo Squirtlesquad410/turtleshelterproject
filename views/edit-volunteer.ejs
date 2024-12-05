@@ -5,20 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Volunteer Record</title>
     <style>
-body {
-    font-family: 'Poppins', sans-serif;
-    padding: 20px;
-    background-color: #f3f4f6;
-}
+          body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-label {
-    display: block;
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 5px;
-}
+        /* Space below the navbar */
+        .content {
+            padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align form at the top of the space, not center vertically */
+            min-height: 100vh; /* Ensure it covers the full viewport */
+        }
 
+        /* Form container styling */
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+            margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+/* Add other styles as needed */
+
+    
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    
+        textarea {
+            resize: vertical;
+        }
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 auto;
+            text-align: center;
+        }
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
+        }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
+        }
 
     </style>
 </head>
