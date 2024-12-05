@@ -6,191 +6,197 @@
     <title>Volunteer Here!</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+
         }
 
-        /* Body styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
-            background-size: 400% 400%;
-            height: 100%;
+        /* Space below the navbar */
+        .content {
+            padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            color: white;
-            transition: all 0.3s ease-in-out;
+            justify-content: center;
+            align-items: flex-start; /* Align form at the top of the space, not center vertically */
+            min-height: 100vh; /* Ensure it covers the full viewport */
         }
 
-        /* Main content */
+        /* Form container styling */
         form {
-            flex: 1; /* Pushes footer to the bottom */
-            padding: 50px 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+            margin: 0 auto; /* Center horizontally if flexbox isn't applied */
         }
 
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+/* Add other styles as needed */
+
+    
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    
         label {
             display: block;
-            font-size: 18px;
-            font-weight: 500;
-            color: #000000;
-            margin-bottom: 5px;
-        }
-
-        /* Header styling */
-        h1 {
-            font-size: 3.5em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: -50px;
-            margin-bottom: 20px;
-        }
-
-        /* Paragraph styling */
-        p {
-            font-size: 1.2em;
-            font-weight: 500;
-            line-height: 1.6;
-            margin-top: 20px;
-            color: #f7f7f7;
-            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Button styling */
-        .btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #ff5733;
-            color: white;
-            font-size: 1.2em;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #ff3e1d;
-            transform: scale(1.05);
-        }
-
-        /* Footer styling */
-        .footer {
-            background-color: #228B22; /* Turtle green */
-            color: white;
-            text-align: center;
-            padding: 20px 10px;
-            margin-top: auto;
-        }
-
-        .footer p {
-            margin: 5px 0;
-            font-size: 1rem;
-        }
-
-        .footer a {
-            color: white;
-            text-decoration: none;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    
+        textarea {
+            resize: vertical;
+        }
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 auto;
+            text-align: center;
+        }
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
+        }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
         }
 
-        .footer a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <%- include('partials/navbar') %>
 
-    <!-- Main Content -->
-    <form action="/volunteer" method="POST">
-        <h1>Volunteer Here!</h1>
-        <div class="input-container">
-            <label for="first_name">Enter Your First Name:</label>
-            <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required autofocus>
+
+    <div style="padding-top: 100px; padding-bottom: 100px;">
+        <form action="/volunteer" method="POST">
+            <h1>Volunteer Here!</h1>
+            <div class="input-container">
+                <!--Labels for input boxes for the form
+                NOTE: num_people should be changed to meet the column name in the database
+                for normalization (it will make it a lot easier to know what's being referenced
+                and where this input is going)-->
+
+                <!--User First Name (text input)-->
+                <label for="first_name">Enter Your First Name:</label>
+                <input type="text" id="first_name" name="first_name" placeholder="Enter first name" required autofocus>
+                <br><br>
+
+                <!--User Last Name (text input)-->
+                <label for="last_name">Enter Your Last Name:</label>
+                <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
+                <br><br>
+
+                <!--If they want to be contacted by email (text input)-->
+                <label for="email">Enter Your Email:</label>
+                <input type="text" style="width: 325px;" id="email" name="email" placeholder="Enter email if you would like to be contacted via email" required>
+                <br><br>
+
+                <!--User Phone Number (number input)-->
+                <label for="phone">What is a good phone number to contact you at?:</label>
+                <input type="number" id="phone" name="phone" placeholder="Enter your phone number" style="width: 175px;" required>
+                <br><br>
+
+            <!--Street Address (text input)-->
+            <label for="street_address">Please enter your street address:</label>
+            <input type="text" id="street_address" name="street_address" placeholder="Enter street address" required>
             <br><br>
 
-            <label for="last_name">Enter Your Last Name:</label>
-            <input type="text" id="last_name" name="last_name" placeholder="Enter last name" required>
-            <br><br>
+                <!--City (text input)-->
+                <label for="city">Please enter your city:</label>
+                <input type="text" id="city" name="city" placeholder="Enter city" required>
+                <br><br>
 
-            <label for="email">Enter Your Email:</label>
-            <input type="text" style="width: 325px;" id="email" name="email" placeholder="Enter email if you would like to be contacted via email" required>
-            <br><br>
+                <!--State (text input)-->
+                <label for="state">Please enter you state (i.e, CA):</label>
+                <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
+                <br><br>
 
-            <label for="phone">What is a good phone number to contact you at?:</label>
-            <input type="number" id="phone" name="phone" placeholder="Enter your phone number" style="width: 175px;" required>
+            <!--ZIP (text input)-->
+            <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
+            <input type="text" id="zip" name="zip" placeholder="Enter ZIP Code" min="0" required>
             <br><br>
-
-            <label for="city">Please enter your city:</label>
-            <input type="text" id="city" name="city" placeholder="Enter city" required>
-            <br><br>
-
-            <label for="state">Please enter you state (i.e, CA):</label>
-            <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
-            <br><br>
+            
+            <!--Monthly Hours Available (drop-down maybe?, that way people can't put in like 100000 hours)-->
 
             <label for="monthly_hours_available">How many hours are you available per month?:</label>
             <input type="number" id="monthly_hours_available" name="monthly_hours_available" placeholder="Enter the number of hours you are available per month" min="1" max="500" style="width: 350px;" required>
             <br><br>
 
-            <label for="finding_source">How did you find out about us?:</label>
-            <select id="finding_source" name="finding_source" required>
-                <option value="1">Facebook</option>
-                <option value="2">Google Search</option>
-                <option value="3">Word of Mouth</option>
-                <option value="4">Friend</option>
-                <option value="5">Family</option>
-                <option value="6">Other...</option>
-            </select>
-            <br><br>
 
-            <label for="sewing_ability_id">Select your sewing ability:</label>
-            <select id="sewing_ability_id" name="sewing_ability_id" required>
-                <option value="1">No sewing; can cut, pin, and mark vest components</option>
-                <option value="2">Beginning sewing; just learning to use a sewing machine</option>
-                <option value="3">Basic sewing; can sew a straight stitch</option>
-                <option value="4">Advanced sewing; can handle challenging sewing tasks</option>
-            </select>
-            <br><br>
+                <!--Finding Source (How did you hear about the project. Drop down.)-->
+                <label for="finding_source">How did you find out about us?:</label>
+                <select id="finding_source" name="finding_source" required>
+                    <option value="1">Facebook</option>
+                    <option value="2">Google Search</option>
+                    <option value="3">Word of Mouth</option>
+                    <option value="4">Friend</option>
+                    <option value="5">Family</option>
+                    <option value="6">Other...</option>
+                </select>
+                <br><br>
 
-            <label for="willing_to_teach_sewing"><b>Are you willing to teach sewing?:</b></label>
-            <input type="checkbox" id="willing_to_teach_sewing" name="willing_to_teach_sewing" value="Y">
-            <label for="willing_to_teach_sewing" style="display: inline;">Yes</label>
-            <br><br>
+                <!--Sewing Ability (drop-down)-->
+                <label for="sewing_ability_id">Select your sewing ability:</label>
+                <select id="sewing_ability_id" name="sewing_ability_id" required>
+                    <option value="1">No sewing; can cut, pin, and mark vest components</option>
+                    <option value="2">Beginning sewing; just learning to use a sewing machine</option>
+                    <option value="3">Basic sewing; can sew a straight stitch</option>
+                    <option value="4">Advanced sewing; can handle challenging sewing tasks</option>
+                </select>
+                <br><br>
 
-            <label for="willing_to_lead"><b>Would you be willing to lead an event?:</b></label>
-            <input type="checkbox" id="willing_to_lead" name="willing_to_lead" value="Y">
-            <label for="willing_to_lead" style="display: inline;">Yes</label>
-            <br><br>
+                <!--Willing to Teach Sewing? (Checkbox)-->
+                <label for="willing_to_teach_sewing"><b>Are you willing to teach sewing?:</b></label>
+                <br>
+                <div style="display: flex; flex-direction: row-reverse;">
+                    <input type="checkbox" id="willing_to_teach_sewing" name="willing_to_teach_sewing" value="Y" >
+                    <label for="willing_to_teach_sewing" style="display: inline;">Yes</label>
+                </div>
+                <br><br>
 
-            <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
-        </div>
-    </form>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
-            <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
-        </p>
-        <div>
-            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank" style="color: white; margin: 0 15px;">
-                <i class="fab fa-facebook-square" style="font-size: 2rem;"></i>
-            </a>
-            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank" style="color: white; margin: 0 15px;">
-                <i class="fab fa-instagram" style="font-size: 2rem;"></i>
-            </a>
-            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank" style="color: white; margin: 0 15px;">
-                <i class="fab fa-youtube" style="font-size: 2rem;"></i>
-            </a>
-        </div>
-    </footer>
+                <!--Willing to LEAD? (Checkbox)-->
+                    <label for="willing_to_lead"><b>Would you be willing to lead an event?:</b></label>
+                    <br>
+                    <div style="display: flex; flex-direction: row-reverse;">
+                        <input type="checkbox" id="willing_to_lead" name="willing_to_lead" value="Y" >
+                        <label for="willing_to_lead">Yes</label>
+                    </div>
+                <br><br>
+                
+                <!--Submit Button-->
+                <br><br>
+                <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
