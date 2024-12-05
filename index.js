@@ -226,6 +226,7 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
         })
             .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin('volunteer_participation as vp', 'e.event_id', 'vp.event_id') // Join for counting
     
         .select(
             'e.event_id',
@@ -236,9 +237,23 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             knex.raw(
                 "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
             ),
-            'v.city'
-        )
-        .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
+            'v.city',
+            knex.raw('COUNT(vp.vol_id) as volunteer_count') // Count of volunteers per event
+            )
+            .whereBetween('eo.event_date', [currentDate, nextMonthDate])
+            .where('event_status','approved')
+            .groupBy(
+                'e.event_id',
+                'e.event_description',
+                'eo.event_date',
+                'eo.start_time',
+                'eo.end_time',
+                'v.city',
+                'v.street_address',
+                'v.state',
+                'v.zip'
+            )
+        
     try {
         
         
@@ -522,32 +537,6 @@ app.post('/add-user', async (req, res) => {
     }
 });
 
-// Route to add new user to database
-// app.post('/add-user', async (req, res) => {
-//     try {
-//         // Extract data from the form
-//         const { email, first_name, last_name, username, password } = req.body;
-
-//         // Hash the password
-//         const saltRounds = 10;
-//         const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-//         // Insert into the database
-//         await knex('users').insert({
-//             email,
-//             first_name,
-//             last_name,
-//             username,
-//             hashed_password: hashedPassword
-//         });
-
-//         // Redirect to the admin page or confirmation
-//         res.redirect('/maintain-users');
-//     } catch (error) {
-//         console.error('Error adding user:', error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// });
 
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
@@ -1116,7 +1105,7 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
         const totalVolunteers = await countQuery.first();
         const totalPages = Math.ceil(totalVolunteers.count / itemsPerPage);
 
-        // Render the maintain-events page with events, pagination data, and filter values
+        // Render the volunteers page with events, pagination data, and filter values
         res.render('maintain-volunteers', {
             isLoggedIn,
             isLoggedIn,
@@ -1189,7 +1178,7 @@ app.post('/request-an-event', async (req, res) => {
             end_time,
             notes
         } = req.body;
-    const event_status='requested'
+    const event_status='pending'
     const date_preference_order=1
         try {
             await knex.transaction(async (trx) => {
@@ -1631,6 +1620,280 @@ app.get('/view-participants/:id', checkAuthenticationStatus, async (req, res) =>
         console.error(error);
         res.status(500).send('An error occurred while fetching participant data.');
     }
+});
+app.get('/record-events', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { address, description, organization, city, state, zip, event_date } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Subquery to aggregate items produced
+        const itemsSubquery = knex('items_produced')
+            .select('event_id')
+            .select(
+                knex.raw(`
+                    json_agg(
+                        json_build_object(
+                            'item_description', item_description, 
+                            'quantity', quantity
+                        )
+                    ) as items_produced
+                `)
+            )
+            .groupBy('event_id');
+
+        // Start building the base query
+        let query = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin(itemsSubquery.as('ip'), 'e.event_id', 'ip.event_id')
+            .select(
+                'e.event_id',
+                knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
+                'e.organization_name',
+                'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
+                'e.organizer_email',
+                'e.event_type',
+                'e.estimated_attendance',
+                'e.num_children_under_10',
+                'e.num_teens',
+                'e.num_help_set_up',
+                'e.num_sewers',
+                'sa.sewing_ability_description',
+                'e.num_sewing_machines',
+                'e.num_sergers',
+                knex.raw("CONCAT(v.street_address, ', ', v.city, ', ', v.state, ' ', v.ZIP) AS full_address"),
+                'e.notes',
+                'e.event_status',
+                'e.jen_story',
+                'e.contribute_materials_cost',
+                'ip.items_produced'
+                
+            )
+            .where('e.event_status', 'approved')
+            .orderBy('eo.event_date')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+        // Apply filters if they exist
+        if (address) {
+            query = query.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            query = query.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            query = query.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            query = query.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            query = query.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            // Ensure the date is in the format YYYY-MM-DD for comparison
+            query = query.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+        // Execute the query to fetch the filtered and paginated events
+        const events = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .count('e.event_id as count');
+
+        if (address) {
+            countQuery = countQuery.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            countQuery = countQuery.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            countQuery = countQuery.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            countQuery = countQuery.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            countQuery = countQuery.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            countQuery = countQuery.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            countQuery = countQuery.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+        const totalEvents = await countQuery.first();
+        const totalPages = Math.ceil(totalEvents.count / itemsPerPage);
+
+        // Render the record-events page with events, pagination data, and filter values
+        res.render('record-events', {
+            isLoggedIn,
+            isAdmin,
+            events,
+            currentPage,
+            totalPages,
+            addressFilter: address,
+            descriptionFilter: description,
+            organizationFilter: organization,
+            cityFilter: city,
+            stateFilter: state,
+            zipFilter: zip,
+            dateFilter: event_date,
+            
+        });
+
+    } catch (err) {
+        console.error('Error fetching events:', err);
+        res.status(500).send('An error occurred while fetching events.');
+    }
+});
+
+// complete event route
+app.get('/complete-event/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const id = req.params.id;
+    // Fetch the main event info
+    knex('event_info')
+        .where('event_id', id)
+        .first()
+        .then(events => {
+            if (!events) {
+                return res.status(404).send('Event not found');
+            }
+            // Fetch the venue and event_date_options in parallel
+            return Promise.all([
+                knex('items_produced').where('event_id', events.event_id)
+            ]).then(([items_produced]) => {
+             // Transform items_produced into an object for easy access in template
+                const itemsProducedObj = {};
+                items_produced.forEach(item => {
+                    itemsProducedObj[item.item_description.toLowerCase()] = item.quantity;
+                });
+                // Render the edit-event form with all required data
+                res.render('complete-event', {
+                    isLoggedIn,
+                    isAdmin,
+                    events,
+                    items_produced: itemsProducedObj
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            res.status(500).send('Internal Server Error');
+        });
+});
+app.post('/complete-event/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const eventId = req.params.id;
+    const {
+        
+        estimated_attendance,
+        pockets_quantity,
+        collars_quantity,
+        envelopes_quantity,
+        vests_quantity,
+       
+    } = req.body;
+    const event_status ='completed'
+    const itemsToInsert = [];
+    const itemTypes = [
+        { name: 'Pockets', quantity: pockets_quantity },
+        { name: 'Collars', quantity: collars_quantity },
+        { name: 'Envelopes', quantity: envelopes_quantity },
+        { name: 'Vests', quantity: vests_quantity }
+    ];
+    // First, update event_info table
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            
+            estimated_attendance,
+            event_status
+
+        })
+        
+        .then(() => {
+            return knex('items_produced')
+                .where('event_id', eventId)
+                .del();
+        })
+        .then(() => {
+            // Insert new items with non-zero quantities
+            const itemsToInsert = itemTypes
+                .filter(item => item.quantity > 0)
+                .map(item => ({
+                    event_id: eventId,
+                    item_description: item.name,
+                    quantity: item.quantity
+                }));
+
+            // Only insert if there are items to insert
+            if (itemsToInsert.length > 0) {
+                return knex('items_produced').insert(itemsToInsert);
+            }
+        })
+        
+            
+        
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/record-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+app.post('/disapprove-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const event_status ='pending'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            
+            event_status
+
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/record-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
 });
 
 
