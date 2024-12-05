@@ -149,7 +149,7 @@ app.post('/signin', async (req, res) => {
                 req.session.userRole = 'user';
                 req.session.username = user.username;
                 req.session.email=user.email
-                return res.redirect('/user-dashboard');
+                return res.redirect('/');
             }
         }
 
@@ -1392,6 +1392,7 @@ app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
         const isLoggedIn = req.session.isLoggedIn || false;
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
         const vol_id = req.params.id;
+        let errorMessage = null
 
         // Query the database to get the volunteer's details
         const volunteer = await knex('volunteer_info')
