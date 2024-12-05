@@ -909,6 +909,11 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
             willing_to_teach_sewing,
             willing_to_lead } = req.query;
 
+
+        // Convert 'true' / 'false' string to boolean so my filters can work
+        const willing_to_teach_sewingFilter = willing_to_teach_sewing === 'true' ? true : willing_to_teach_sewing === 'false' ? false : undefined;
+        const willing_to_leadFilter = willing_to_lead === 'true' ? true : willing_to_lead === 'false' ? false : undefined;
+        
         // Calculate the offset for pagination
         const offset = (currentPage - 1) * itemsPerPage;
 
@@ -945,11 +950,11 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
         if (city) {
             query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
         }
-        if (willing_to_teach_sewing) {
-            query = query.whereRaw('LOWER(v.willing_to_teach_sewing) LIKE ?', [`%${willing_to_teach_sewing.toLowerCase()}%`]);
+        if (willing_to_teach_sewingFilter !== undefined) {
+            query = query.where('v.willing_to_teach_sewing', willing_to_teach_sewingFilter);
         }
-        if (willing_to_lead) {
-            query = query.whereRaw('LOWER(v.willing_to_lead) LIKE ?', [`%${willing_to_lead.toLowerCase()}%`]);
+        if (willing_to_leadFilter !== undefined) {
+            query = query.where('v.willing_to_lead', willing_to_leadFilter);
         }
 
         // Execute the query to fetch the filtered and paginated events
@@ -957,24 +962,23 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
 
         // Query the total number of events for pagination controls, applying the same filters
         let countQuery = knex('volunteer_info as v')
-
             .join('sewing_ability as sa', 'v.sewing_ability_id', 'sa.sewing_ability_id')
             .count('v.vol_id as count');
 
             if (vol_first_name) {
-                query = query.whereRaw('LOWER(v.vol_first_name) LIKE ?', [`%${vol_first_name.toLowerCase()}%`]);
+                countQuery = countQuery.whereRaw('LOWER(v.vol_first_name) LIKE ?', [`%${vol_first_name.toLowerCase()}%`]);
             }
             if (vol_last_name) {
-                query = query.whereRaw('LOWER(v.vol_last_name) LIKE ?', [`%${vol_last_name.toLowerCase()}%`]);
+                countQuery = countQuery.whereRaw('LOWER(v.vol_last_name) LIKE ?', [`%${vol_last_name.toLowerCase()}%`]);
             }
             if (city) {
-                query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+                countQuery = countQuery.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
             }
-            if (willing_to_teach_sewing) {
-                query = query.whereRaw('LOWER(v.willing_to_teach_sewing) LIKE ?', [`%${willing_to_teach_sewing.toLowerCase()}%`]);
+            if (willing_to_teach_sewingFilter !== undefined) {
+                countQuery = countQuery.where('v.willing_to_teach_sewing', willing_to_teach_sewingFilter);
             }
-            if (willing_to_lead) {
-                query = query.whereRaw('LOWER(v.willing_to_lead) LIKE ?', [`%${willing_to_lead.toLowerCase()}%`]);
+            if (willing_to_leadFilter !== undefined) {
+                countQuery = countQuery.where('v.willing_to_lead', willing_to_leadFilter);
             }
 
         const totalVolunteers = await countQuery.first();
