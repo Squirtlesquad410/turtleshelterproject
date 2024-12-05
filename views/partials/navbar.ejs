@@ -95,7 +95,6 @@
         <a href="/volunteer">Volunteer</a>
         <a href="/donate">Donate</a>
         <a href="/request-an-event">Request Event</a>
-        <a href="/send-email">Email Volunteers</a>
         
         <% if (!isLoggedIn) { %>
             <a href="/signin">Sign in</a>
@@ -103,6 +102,10 @@
 
         <% if (isLoggedIn) { %>
             <a href="/signout">Sign Out</a>
+            <a href="/upcoming-events">Upcoming Events</a>
+        <% } %>
+
+        <% if (isAdmin) { %>
             <a id="slideOut" href="#">Admin Menu</a>
             <!-- Slide-out menu -->
             <div id="slideOutMenu" class="slide-out-menu">
@@ -110,6 +113,7 @@
                     <li><a href="/maintain-events">Maintain Events</a></li>
                     <li><a href="/maintain-users">Maintain Users</a></li>
                     <li><a href="/maintain-volunteers">Maintain Volunteers</a></li>
+                    <li><a href="/upcoming-events">Upcoming Events</a></li>
                 </ul>
             </div>
         <% } %>

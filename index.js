@@ -128,6 +128,7 @@ app.post('/signin', async (req, res) => {
                 // If admin login is successful
                 req.session.isLoggedIn = true;
                 req.session.userRole = 'admin';
+                req.session.isAdmin = true;
                 req.session.username = admin.username;
                 return res.redirect('/admin');
             }
@@ -212,6 +213,7 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
 app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
     const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
     const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     try {
         
         const currentDate = moment().format('YYYY-MM-DD');
@@ -272,7 +274,8 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             events: formattedEvents,
             cities,
             isUser,
-            isLoggedIn
+            isLoggedIn,
+            isAdmin
             
              // Pass session for login status check
         });
