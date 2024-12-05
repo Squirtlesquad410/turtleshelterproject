@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in Page</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         /* Reset default margins and paddings */
         * {
@@ -17,11 +18,10 @@
             background-color: #f4f4f9;
             height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            justify-content: space-between; /* Ensure footer stays at the bottom */
             color: #333;
         }
-
 
         .login-container {
             background-color: #fff;
@@ -31,6 +31,7 @@
             width: 100%;
             max-width: 400px;
             text-align: center;
+            margin: auto; /* Center the login container */
         }
 
         .login-container h2 {
@@ -96,22 +97,50 @@
         button[type="submit"]:hover {
             background-color: #45a049;
         }
+
+        /* Footer Styling */
+        .footer {
+            background-color: #228B22; /* Turtle green */
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer i {
+            font-size: 2rem;
+            margin: 0 15px;
+        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <%- include('partials/navbar') %>
-   
+
     <!-- Centered Login Form -->
     <div class="login-container">
 
-    <!--Display Login Message if not Authenticated-->
-    <% if (message) { %>
-        <div class="message-box">
-            <span class="close-btn">&times;</span> <!--"X" button to close pop-up message when not logged in-->
-            <p><%= message %></p>
-        </div>
-    <% } %>
+        <!-- Display Login Message if not Authenticated -->
+        <% if (message) { %>
+            <div class="message-box">
+                <span class="close-btn">&times;</span> <!--"X" button to close pop-up message when not logged in-->
+                <p><%= message %></p>
+            </div>
+        <% } %>
 
         <h2>Sign in</h2>
 
@@ -125,14 +154,35 @@
         </form>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div>
+            <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+                <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
+            </p>
+        </div>
+        <div>
+            <!-- Facebook Link -->
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank">
+                <i class="fab fa-facebook-square"></i>
+            </a>
+            <!-- Instagram Link -->
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <!-- Youtube Link -->
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank">
+                <i class="fab fa-youtube"></i>
+            </a>
+        </div>
+    </footer>
+
     <script>
         // Functionality to close the message box that pops up when not authenticated
         const closeBtn = document.querySelector('.close-btn');
 
-        // Add event listener to my "close" button
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                // Find the parent message box and remove it.
                 const messageBox = closeBtn.closest('.message-box');
                 messageBox.style.display = 'none';
             });

@@ -5,131 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Admin</title>
     <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+        body {
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
 
-    /* Body styling */
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
-        background-size: 400% 400%;
-        height: 100vh;
-        display: block;
-        color: white;
-        transition: all 0.3s ease-in-out;
-        padding-top: 200px;
-        padding-left: 20px;
-    }
+/* Space below the navbar */
+.content {
+    padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align form at the top of the space, not center vertically */
+    min-height: 100vh; /* Ensure it covers the full viewport */
+}
 
-    label {
-        display: block;
-        font-size: 18px;
-        font-weight: 500;
-        color: #000000;
-        margin-bottom: 5px;
-    }
+/* Form container styling */
+form {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%; /* Restrict the height to fit within the screen */
+    overflow-y: auto; /* Add scroll functionality inside the form */
+    margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+}
 
-    .admin-banner {
-        position: fixed;  /* Fix it to the top of the page */
-        top: 40px;
-        left: 0;
-        width: 100%;  /* Cover the full width */
-        height: 40px;  /* Set the height of the banner */
-        background-color: rgba(255, 165, 0, 0.8);  /* Semi-transparent dark orange (RGBA format) */
-        color: white;
-        text-align: center;
-        font-weight: bold;
-        font-size: 14px;
-        z-index: 9999;  /* Ensure it stays on top of other content */
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        padding-top: -40px;
-    }
+h1 {
+    text-align: center;
+    color: #333;
+}
 
-            /* Navbar Styles */
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: 10px 20px;
-        z-index: 10;
-    }
+/* Add other styles as needed */
 
-    .navbar ul {
-        list-style: none;
-        text-align: center;
-    }
 
-    .navbar ul li {
-        display: inline-block;
-        margin: 0 15px;
-        position: relative; /* Needed for dropdown */
-    }
+h1 {
+    text-align: center;
+    color: #333;
+}
 
-    .navbar ul li a {
-        color: white;
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
 
-    .navbar ul li a:hover {
-        color: #1e90ff;
-    }
+input,
+textarea,
+select {
+    width: calc(100% - 20px);
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
 
-    /* Dropdown Menu */
-    .navbar ul li.dropdown:hover .dropdown-menu {
-        display: block; /* Show the dropdown menu when hovering */
-    }
+textarea {
+    resize: vertical;
+}
 
-        /* Header styling */
-        h1 {
-            font-size: 3.5em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: -100px;
-            margin-bottom: 20px;
-        }
+button[type="submit"] {
+    display: block;
+    background-color: #228b22; /* Turtle green */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 auto;
+    text-align: center;
+}
 
-        /* Paragraph styling */
-        p {
-            font-size: 1.2em;
-            font-weight: 500;
-            line-height: 1.6;
-            margin-top: 20px;
-            color: #f7f7f7;
-            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
-        }
+button[type="submit"]:hover {
+    background-color: #196619;
+}
 
-        /* Button styling */
-        .btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #ff5733;
-            color: white;
-            font-size: 1.2em;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #ff3e1d;
-            transform: scale(1.05);
-        }
-    </style>
+/* Align radio buttons with labels */
+.event_type {
+    font-family: Arial, sans-serif; /* Optional for cleaner styling */
+}
+</style>
 </head>
 <body>
     <!--Banner that appears if logged in as admin,
@@ -142,24 +103,11 @@
 
     <!-- Navbar -->
     <br><br>
-    <nav class="navbar">
-    <ul>
-        <li><a href="/">Home Page</a></li>
-        <li><a href="/volunteer">Volunteer</a></li>
-        <li><a href="/request-an-event">Request Event</a></li>
-  
-      <!-- Show Admin and Sign Out links if the user is logged in and an admin -->
-      <% if (isLoggedIn && isAdmin) { %>
-        <li><a href="/admin">Admin Page</a></li>
-        <li><a href="/signout">Sign Out</a></li>
-      <% } %>
-    </ul>
-    </nav>
-    <br><br>
+    <%- include('partials/navbar') %>
 
     <h1>Edit Admin >:)</h1>
     <!--Form for edit admin functionality-->
-    <form action="/edit-admin/:id" method="POST">
+    <form action="/edit-admin/<%= admins[0].email %>" method="POST">
                 <!--Section to Edit Email-->
                 <label for="email">Admin Email:</label>
                 <input type="text" id="email" name="email" value="<%= admins[0].email %>">

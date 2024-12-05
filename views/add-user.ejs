@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <!-- Importing Google Fonts for a polished, beautiful look -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
+            background-size: 300% 300%;
+            animation: gradientAnimation 8s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Header styling */
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 150px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Paragraph styling */
+        p {
+            font-size: 1.2em;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-top: 20px;
+            color: #f7f7f7;
+            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Button styling */
+        .btn {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background-color: #ff5733;
+            color: white;
+            font-size: 1.2em;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ff3e1d;
+            transform: scale(1.05);
+        }
+
+        /* Animation for gradient background */
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <!-- Page Content -->
+    <div>
+        <h1>ADD USER</h1>
+        <form action="/add-user" method="POST">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+            <label for="first_name">First Name:</label><br>
+            <input type="text" id="first_name" name="first_name" required><br><br>
+            <label for="last_name">Last Name:</label><br>
+            <input type="text" id="last_name" name="last_name" required><br><br>
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required><br><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required><br><br>
+            <button type="submit" class="btn">Add Admin</button>
+        </form>
+    </div>
+</body>
+</html>

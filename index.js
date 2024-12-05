@@ -1,6 +1,8 @@
 let express = require('express'); 
 let app = express();
 let path = require('path'); 
+let moment = require('moment'); // Use moment.js for date/time formatting
+
 
 // Load variables from my .env file
 require('dotenv').config();
@@ -11,6 +13,7 @@ const session = require('express-session');
 const port = process.env.PORT || 3000; 
 
 app.use(express.urlencoded( {extended: true} ));
+app.use(express.json()); // Parses JSON payloads
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -65,6 +68,25 @@ const hashPassword = async (plainTextPassword) => {
 // -----> put all routes below this line
 //
 
+app.get('/jen', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("jen", { isLoggedIn, isAdmin });
+});
+app.get('/about-us', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("about-us", { isLoggedIn, isAdmin });
+});
+
+app.get('/donate', (req,res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.userRole === 'admin';
+    res.render("donate", { isLoggedIn, isAdmin });
+});
+
+
+
 app.get('/', (req,res) => {
     // Pass whether the user is logged in or not and if they are admin or not through session variables.
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
@@ -88,38 +110,50 @@ app.get('/signin', (req, res) => {
     res.render('signin', { message, isAdmin, isLoggedIn });
 });
 
-const username=process.env.DB_USERNAME
-const password=process.env.DB_PASSWORD
 
 // Logic for verifying username and password
 app.post('/signin', async (req, res) => {
-    const usernameLogin = username//req.body.username || ;
-    const passwordLogin = password // req.body.password || ;
+    const usernameLogin = req.body.username;
+    const passwordLogin = req.body.password;
 
     try {
-        // Query the database to find the user by username
+        // First, check admin users
         const admin = await knex('admins').where('username', usernameLogin).first();
 
-        if (!admin) {
-            // If the username does not exist, send an error message
-            req.session.message = 'Invalid username or password.';
-            return res.redirect('/signin');
+        if (admin) {
+            // Compare the provided password with the hashed password for admin
+            const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
+
+            if (isPasswordCorrect) {
+                // If admin login is successful
+                req.session.isLoggedIn = true;
+                req.session.userRole = 'admin';
+                req.session.username = admin.username;
+                return res.redirect('/admin');
+            }
         }
 
-        // Compare the provided password with the hashed password
-        const isPasswordCorrect = true//await bcrypt.compare(passwordLogin, admin.hashed_password);
+        // If not an admin, check regular users
+        const user = await knex('users').where('username', usernameLogin).first();
 
-        if (isPasswordCorrect) {
-            // If login is successful
-            req.session.isLoggedIn = true; // Mark the session as logged in
-            req.session.userRole = 'admin'; // Set the user role
-            req.session.username = admin.username; // Optional: Store the username
-            res.redirect('/admin'); // Redirect to the admin page
-        } else {
-            // If the password is incorrect
-            req.session.message = 'Invalid username or password.';
-            res.redirect('/signin');
+        if (user) {
+            // Compare the provided password with the hashed password for user
+            const isPasswordCorrect = await bcrypt.compare(passwordLogin, user.hashed_password);
+
+            if (isPasswordCorrect) {
+                // If user login is successful
+                req.session.isLoggedIn = true;
+                req.session.userRole = 'user';
+                req.session.username = user.username;
+                req.session.email=user.email
+                return res.redirect('/user-dashboard');
+            }
         }
+
+        // If no matching user found in either admin or users table
+        req.session.message = 'Invalid username or password.';
+        res.redirect('/signin');
+
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).send('Internal Server Error');
@@ -167,6 +201,122 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
     // Check if the user is authenticated (in a session)
         res.render('admin', { isAdmin, isLoggedIn });    // Render the page is admin is logged in
 });
+app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
+    const isUser = req.session.isLoggedIn && (req.session.userRole === 'user'|| req.session.userRole === 'admin');
+    const isLoggedIn = req.session.isLoggedIn || false;
+// Check if the user is authenticated (in a session)
+    res.render('user-dashboard', { isUser, isLoggedIn });    // Render the page is admin is logged in
+});
+
+// route for upcoming events
+app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
+    const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
+    const isLoggedIn = req.session.isLoggedIn || false;
+    try {
+        
+        const currentDate = moment().format('YYYY-MM-DD');
+        const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+        const { email } = req.session.email;
+        const { vol_id } =knex('volunteer_info').select('vol_id').where('email',email)
+        // Fetch events for the next month
+        const events = await knex('event_info as e').join('event_date_options as eo', function() {
+            this.on('e.event_id', '=', 'eo.event_id')
+                .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+                .join('venues as v', 'e.venue_id', 'v.venue_id')
+        
+            .select(
+                'e.event_id',
+                'e.event_description',
+                'eo.event_date',
+                'eo.start_time',
+                'eo.end_time',
+                knex.raw(
+                    "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
+                ),
+                'v.city'
+            )
+            .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
+
+        // Check which events the volunteer has joined
+        const joinedEvents = vol_id
+            ? await knex('volunteer_participation')
+                  .where({ vol_id })
+                  .pluck('event_id')
+            : [];
+
+        // Add additional formatting and flags for the frontend
+        const formattedEvents = events.map(event => ({
+            ...event,
+            date_formatted: moment(event.date).format('MMMM DD, YYYY'),
+            start_time_formatted: moment(event.start_time, 'HH:mm:ss').format('h:mm A'),
+            end_time_formatted: moment(event.end_time, 'HH:mm:ss').format('h:mm A'),
+            isJoined: joinedEvents.includes(event.event_id),
+        }));
+
+        // Get unique cities for filtering
+        const cities = [...new Set(events.map(event => event.city))];
+
+        res.render('upcoming-events', {
+            events: formattedEvents,
+            cities,
+            isUser,
+            isLoggedIn
+             // Pass session for login status check
+        });
+    } catch (err) {
+        console.error('Error fetching upcoming events:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// post route to join event
+app.post('/join-event', async (req, res) => {
+    try {
+        const { email } = req.session;
+        const { eventId } = req.body;
+        if (!email) {
+            return res.status(401).send(email);
+        }
+
+        const volunteer = await knex('volunteer_info')
+    .select('vol_id')
+    .where('vol_email', email)
+    .first();
+    
+    const vol_id = volunteer?.vol_id;
+        if (!vol_id) {
+            return res.status(404).send('Volunteer not found. Please log in.');
+        }
+        if (!eventId) {
+            return res.status(400).send('Event ID is required.');
+        }
+        
+        // if (!vol_id) {
+        //     return res.status(401).send('Unauthorized. Please log in.');
+        // }
+
+        // Check if the user is already signed up for the event
+        const existingParticipation = await knex('volunteer_participation')
+            .where({ vol_id, event_id: eventId })
+            .first();
+
+        if (existingParticipation) {
+            return res.status(400).send('You have already joined this event.');
+        }
+
+        // Insert the new participation record
+        await knex('volunteer_participation').insert({
+            vol_id,
+            event_id: eventId,
+        });
+
+        res.status(200).send('Successfully joined the event.');
+    } catch (err) {
+        console.error('Error joining event:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // Route for Add Admin Page
 app.get('/add-admin', (req, res) => {
@@ -203,6 +353,41 @@ app.post('/add-admin', async (req, res) => {
     }
 });
 
+// Route for Add user Page
+app.get('/add-user', (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
+    res.render('add-user', { isAdmin, isLoggedIn });
+});
+
+
+// Route to add new admin to database
+app.post('/add-user', async (req, res) => {
+    try {
+        // Extract data from the form
+        const { email, first_name, last_name, username, password } = req.body;
+
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Insert into the database
+        await knex('users').insert({
+            email,
+            first_name,
+            last_name,
+            username,
+            hashed_password: hashedPassword
+        });
+
+        // Redirect to the admin page or confirmation
+        res.redirect('/maintain-users');
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
 app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
@@ -220,6 +405,21 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         // Calculate the offset for pagination
         const offset = (currentPage - 1) * itemsPerPage;
 
+        // Subquery to aggregate items produced
+        const itemsSubquery = knex('items_produced')
+            .select('event_id')
+            .select(
+                knex.raw(`
+                    json_agg(
+                        json_build_object(
+                            'item_description', item_description, 
+                            'quantity', quantity
+                        )
+                    ) as items_produced
+                `)
+            )
+            .groupBy('event_id');
+
         // Start building the base query
         let query = knex('event_info as e')
             .join('event_date_options as eo', function() {
@@ -228,11 +428,17 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             })
             .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
             .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin(itemsSubquery.as('ip'), 'e.event_id', 'ip.event_id')
             .select(
                 'e.event_id',
                 knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
                 'e.organization_name',
                 'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
                 'e.organizer_email',
                 'e.event_type',
                 'e.estimated_attendance',
@@ -247,7 +453,8 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
                 'e.notes',
                 'e.event_status',
                 'e.jen_story',
-                'e.contribute_materials_cost'
+                'e.contribute_materials_cost',
+                'ip.items_produced'
             )
             .orderBy('eo.event_date')
             .limit(itemsPerPage)
@@ -354,8 +561,7 @@ app.get('/add-event', checkAuthenticationStatus, (req, res) => {
 
 
 
-// GET route for edit-event/:id
-// GET route for edit-event.ejs
+
 // GET route to edit an event
 app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
@@ -372,15 +578,22 @@ app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             // Fetch the venue and event_date_options in parallel
             return Promise.all([
                 knex('venues').where('venue_id', events.venue_id).first(),
-                knex('event_date_options').where('event_id', events.event_id)
-            ]).then(([venues, event_date_options]) => {
+                knex('event_date_options').where('event_id', events.event_id),
+                knex('items_produced').where('event_id', events.event_id)
+            ]).then(([venues, event_date_options, items_produced]) => {
+             // Transform items_produced into an object for easy access in template
+                const itemsProducedObj = {};
+                items_produced.forEach(item => {
+                    itemsProducedObj[item.item_description.toLowerCase()] = item.quantity;
+                });
                 // Render the edit-event form with all required data
                 res.render('edit-event', {
                     isLoggedIn,
                     isAdmin,
                     events,
                     venues,
-                    event_date_options
+                    event_date_options,
+                    items_produced: itemsProducedObj
                 });
             });
         })
@@ -393,7 +606,6 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const eventId = req.params.id;
     const {
         event_description,
-        notes,
         organization_name,
         organizer_first_name,
         organizer_last_name,
@@ -418,14 +630,25 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         num_sergers,
         jen_story,
         contribute_materials_cost,
-        event_status
+        event_status,
+        notes,
+        pockets_quantity,
+        collars_quantity,
+        envelopes_quantity,
+        vests_quantity
     } = req.body;
+    const itemsToInsert = [];
+    const itemTypes = [
+        { name: 'Pockets', quantity: pockets_quantity },
+        { name: 'Collars', quantity: collars_quantity },
+        { name: 'Envelopes', quantity: envelopes_quantity },
+        { name: 'Vests', quantity: vests_quantity }
+    ];
     // First, update event_info table
     knex('event_info')
         .where('event_id', eventId)
         .update({
             event_description,
-            notes,
             organization_name,
             organizer_first_name,
             organizer_last_name,
@@ -442,50 +665,94 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             num_sergers,
             jen_story: jen_story ? 'Y' : 'N',
             contribute_materials_cost: contribute_materials_cost ? 'Y' : 'N',
-            event_status
+            event_status,
+            notes,
+
         })
         .then(() => {
-            // Now, get the venue_id from the event_info record
-            knex('event_info')
+            // Get the venue_id from the event_info record
+            return knex('event_info')
                 .where('event_id', eventId)
                 .select('venue_id')
-                .first() // Get the first record (only one event record)
-                .then((event) => {
-                    if (event && event.venue_id) {
-                        // Use the venue_id from the event_info record to update the venues table
-                        const venueId = event.venue_id;
-                        knex('venues')
-                            .where('venue_id', venueId)  // Update the venue using the retrieved venue_id
-                            .update({
-                                street_address,
-                                city,
-                                state,
-                                zip,
-                                space_size
-                            })
-                            .then(() => {
-                                // After both updates are successful, redirect or render a success page
-                                res.redirect('/maintain-events/');
-                            })
-                            .catch(error => {
-                                console.error('Error updating venue:', error);
-                                res.status(500).send('Error updating venue');
+                .first();
+                
+        })
+        .then(() => {
+            return knex('items_produced')
+                .where('event_id', eventId)
+                .del();
+        })
+        .then(() => {
+            // Insert new items with non-zero quantities
+            const itemsToInsert = itemTypes
+                .filter(item => item.quantity > 0)
+                .map(item => ({
+                    event_id: eventId,
+                    item_description: item.name,
+                    quantity: item.quantity
+                }));
+
+            // Only insert if there are items to insert
+            if (itemsToInsert.length > 0) {
+                return knex('items_produced').insert(itemsToInsert);
+            }
+        })
+        .then(event => {
+            if (event && event.venue_id) {
+                const venueId = event.venue_id;
+
+                // Update the venues table
+                return knex('venues')
+                    .where('venue_id', venueId)
+                    .update({
+                        street_address,
+                        city,
+                        state,
+                        zip,
+                        space_size
+                    });
+            } 
+            
+        })
+        .then(() => {
+            // Optionally update the event_date_options table
+            if (event_date || start_time || end_time) {
+                // Check if a record exists for this event in the event_date_options table
+                return knex('event_date_options')
+                    .where('event_id', eventId)
+                    .first()
+                    .then(existingRecord => {
+                        if (existingRecord) {
+                            // Update the record if it exists
+                            return knex('event_date_options')
+                                .where('event_id', eventId)
+                                .update({
+                                    event_date,
+                                    start_time,
+                                    end_time
+                                });
+                        } else {
+                            // Insert a new record if it doesn't exist
+                            return knex('event_date_options').insert({
+                                event_id: eventId,
+                                event_date,
+                                start_time,
+                                end_time
                             });
-                    } else {
-                        console.error('No venue_id found for this event');
-                        res.status(400).send('No venue_id found for this event');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error retrieving venue_id from event_info:', error);
-                    res.status(500).send('Error retrieving venue_id');
-                });
+                        }
+                    });
+            }
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/maintain-events');
         })
         .catch(error => {
-            console.error('Error updating event:', error);
-            res.status(500).send('Error updating event');
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
         });
 });
+
 
 
 
@@ -611,7 +878,10 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
                 'v.vol_last_name',
                 'v.vol_email',
                 'v.vol_phone',
+                'v.street_address',
                 'v.city',
+                'v.state',
+                'v.zip',
                 'sa.sewing_ability_description',
                 'v.willing_to_teach_sewing',
                 'v.willing_to_lead',
@@ -719,6 +989,9 @@ app.post('/request-an-event', async (req, res) => {
             zip,
             organization_name,
             event_description,
+            organizer_first_name,
+            organizer_last_name,
+            organizer_phone,
             organizer_email,
             event_type,
             estimated_attendance,
@@ -731,12 +1004,14 @@ app.post('/request-an-event', async (req, res) => {
             num_sergers,
             jen_story,
             contribute_materials_cost,
-            event_status,
+            
             event_date,
             start_time,
             end_time,
+            notes
         } = req.body;
-    
+    const event_status='requested'
+    const date_preference_order=1
         try {
             await knex.transaction(async (trx) => {
                 // Step 1: Insert into the venues table
@@ -757,6 +1032,9 @@ app.post('/request-an-event', async (req, res) => {
                         venue_id, // Reference the new venue_id
                         organization_name,
                         event_description,
+                        organizer_first_name,
+                        organizer_last_name,
+                        organizer_phone,
                         organizer_email,
                         event_type,
                         estimated_attendance: parseInt(estimated_attendance),
@@ -770,6 +1048,7 @@ app.post('/request-an-event', async (req, res) => {
                         jen_story: jen_story === 'Yes',
                         contribute_materials_cost,
                         event_status,
+                        notes
                     })
                     .returning('event_id');
     
@@ -781,6 +1060,7 @@ app.post('/request-an-event', async (req, res) => {
                     event_date,
                     start_time,
                     end_time,
+                    date_preference_order,
                 });
             });
     
@@ -810,8 +1090,11 @@ app.post('/volunteer', async (req, res) => {
         last_name,
         email,
         phone,
+        street_address,
         city,
-        monthly_hours_available, // Assuming you have a `num_hours` field for available hours
+        state,
+        zip,
+        monthly_hours_available, 
         finding_source,
         sewing_ability_id,
         willing_to_teach_sewing,
@@ -832,13 +1115,17 @@ app.post('/volunteer', async (req, res) => {
             vol_last_name: last_name,
             vol_email: email,
             vol_phone: phone,
+            street_address: street_address,
             city: city,
+            state: state,
+            zip: zip,
             monthly_hours_available: parsedNumHours,
             finding_source: parsedFindingSource,
             sewing_ability_id: parsedSewingAbilityId,
             willing_to_teach_sewing: teachSewing,
             willing_to_lead: lead,
         });
+        await knex('users')
 
         // Redirect to the home page or a thank-you page
         res.redirect('/');
@@ -861,11 +1148,96 @@ app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
 
 
 // GET route for edit-volunteer.ejs
-app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-volunteer', { isLoggedIn, isAdmin });
+app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const vol_id = req.params.id;
+
+        // Query the database to get the volunteer's details
+        const volunteer = await knex('volunteer_info')
+            .select(
+                'vol_id',
+                'vol_first_name',
+                'vol_last_name',
+                'vol_email',
+                'vol_phone',
+                'street_address',
+                'city',
+                'state',
+                'zip',
+                'monthly_hours_available',
+                'finding_source',
+                'sewing_ability_id',
+                'willing_to_teach_sewing',
+                'willing_to_lead'
+            )
+            .where('vol_id', vol_id)
+            .first();
+
+        if (!volunteer) {
+            return res.status(404).send('Volunteer not found');
+        }
+
+        // Render the edit form with the volunteer's details
+        res.render('edit-volunteer', { isLoggedIn, isAdmin, volunteer });
+    } catch (err) {
+        console.error('Error fetching volunteer:', err);
+        res.status(500).send('An error occurred while fetching the volunteer.');
+    }
 });
+
+
+// post route for edit-volunteer
+app.post('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const vol_id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            vol_first_name,
+            vol_last_name,
+            vol_email,
+            vol_phone,
+            street_address,
+            city,
+            state,
+            zip,
+            monthly_hours_available,
+            finding_source,
+            sewing_ability_id,
+            willing_to_teach_sewing,
+            willing_to_lead
+        } = req.body;
+
+        // Update the volunteer's details in the database
+        await knex('volunteer_info')
+            .where('vol_id', vol_id)
+            .update({
+                vol_first_name,
+                vol_last_name,
+                vol_email,
+                vol_phone,
+                street_address,
+                city,
+                state,
+                zip,
+                monthly_hours_available,
+                finding_source,
+                sewing_ability_id,
+                willing_to_teach_sewing: willing_to_teach_sewing ? 'Y' : 'N',
+                willing_to_lead: willing_to_lead ? 'Y' : 'N',
+            });
+
+        // Redirect to a success page or back to the volunteer list
+        res.redirect('/maintain-volunteers'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating volunteer:', err);
+        res.status(500).send('An error occurred while updating the volunteer.');
+    }
+});
+
+
 
 
 // GET route for edit-admin.ejs
@@ -889,23 +1261,34 @@ app.get('/edit-admin/:id', checkAuthenticationStatus, (req, res) => {
 });
 
 // POST route for edit-admin.ejs
-app.post('/edit-admin/:id', (req, res) => {
-    const {
-        email,
-        first_name,
-        last_name,
-        username
-    } = req.body;
-    
-    knex("admins")
-    .where("email", id)
-    .update({
-        email,
-        first_name,
-        last_name,
-        username
-    });
-    res.redirect('/maintain-users');
+app.post('/edit-admin/:id', async  (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            email,
+            first_name,
+            last_name,
+            username
+        } = req.body;
+
+        // Update the user's details in the database
+        await knex('admins')
+            .where('email', id)
+            .update({
+                email,
+                first_name,
+                last_name,
+                username
+            });
+
+        // Redirect to a success page or back to the user list
+        res.redirect('/maintain-users'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).send('An error occurred while updating the user.');
+    }
 });
 
 app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {

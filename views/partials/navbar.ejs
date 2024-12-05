@@ -20,12 +20,13 @@
             margin: 0;
             font-weight: bold;
             color: white; /* Ensure the text color is white */
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
     
         .navbar a {
             color: white;
             text-decoration: none;
-            
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
             margin-right: 40px; 
             font-size: large;
         }
@@ -89,9 +90,9 @@
 <div class="navbar">
     <h2><a href="/">TURTLE SHELTER PROJECT</a></h2>
     <div class="banner">
-        <a href="#">About Us</a>
-        <a href="#">Jen's Story</a>
-        <a href="#">Volunteer</a>
+        <a href="/about-us">About Us</a>
+        <a href="/jen">Jen's Story</a>
+        <a href="/volunteer">Volunteer</a>
         <a href="/donate">Donate</a>
         <a href="/request-an-event">Request Event</a>
         <a href="/send-email">Email Volunteers</a>
@@ -102,14 +103,13 @@
 
         <% if (isLoggedIn) { %>
             <a href="/signout">Sign Out</a>
-            <a id="slideOut" href="#">Admin Page</a>
+            <a id="slideOut" href="#">Admin Menu</a>
             <!-- Slide-out menu -->
             <div id="slideOutMenu" class="slide-out-menu">
                 <ul>
                     <li><a href="/maintain-events">Maintain Events</a></li>
                     <li><a href="/maintain-users">Maintain Users</a></li>
                     <li><a href="/maintain-volunteers">Maintain Volunteers</a></li>
-                    <li><a href="/add-admin">Add Admin</a></li>
                 </ul>
             </div>
         <% } %>

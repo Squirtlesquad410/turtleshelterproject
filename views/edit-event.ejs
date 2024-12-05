@@ -5,24 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Event Record</title>
     <style>
-body {
-    font-family: 'Poppins', sans-serif;
-    padding: 20px;
-    background-color: #f3f4f6;
-}
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-label {
-    display: block;
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 5px;
-}
+        /* Space below the navbar */
+        .content {
+            padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align form at the top of the space, not center vertically */
+            min-height: 100vh; /* Ensure it covers the full viewport */
+        }
+
+        /* Form container styling */
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+            margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+/* Add other styles as needed */
+
+    
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    
+        textarea {
+            resize: vertical;
+        }
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 auto;
+            text-align: center;
+        }
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
+        }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
+        }
 
     </style>
 </head>
 <body>
     <%- include('partials/navbar') %>
+
+<div style="padding-top: 100px; padding-bottom: 100px;">
     <form action="/edit-event/<%= events.event_id %>" method="POST">
         <h1>Edit Event</h1>
         <div class="input-container">
@@ -37,18 +111,19 @@ label {
             <br><br>
             <!--Organization Name (text input)-->
             <label for="organization_name">Enter Your Organization Name (or your own full name):</label>
-            <input type="text" id="organization_name" name="organization_name" placeholder="Enter first name" value="<%= events.organization_name %>" required>
+            <input type="text" id="organization_name" name="organization_name" placeholder="Enter organization name" value="<%= events.organization_name %>" required>
             <br><br>
             <!--Organizer First Name (text input)-->
             <label for="organizer_first_name">First Name:</label>
-            <input type="text" id="organizer_first_name" name="organizer_first_name" placeholder="Enter first name" value="<%= events.organization_name %>" required>
+            <input type="text" id="organizer_first_name" name="organizer_first_name" placeholder="Enter first name" value="<%= events.organizer_first_name %>" required>
+
             <!--Organizer Last Name (text input)-->
             <label for="organizer_last_name">Last Name:</label>
-            <input type="text" id="organizer_last_name" name="organizer_last_name" placeholder="Enter last name" required>
+            <input type="text" id="organizer_last_name" name="organizer_last_name" placeholder="Enter last name" value="<%= events.organizer_last_name %>" required>
             <br><br>
             <!--Organizer Phone Number (number input)-->
             <label for="organizer_phone">What is a good phone number to contact you at?:</label>
-            <input type="number" id="organizer_phone" name="organizer_phone" placeholder="Enter your phone number" style="width: 175px;" value="<%= events.organizer_phone %>" required>
+            <input type="text" id="organizer_phone" name="organizer_phone" placeholder="Enter your phone number" style="width: 175px;" value="<%= events.organizer_phone %>" required>
             <br><br>
             <!--Organizer email (text input)-->
             <label for="organizer_email">Enter Organization Email (optional):</label>
@@ -59,119 +134,143 @@ label {
                 <!--Venue Street Address (text input)-->
                 <label for="street_address">Please enter the street address of the event:</label>
                 <input type="text" id="street_address" name="street_address" placeholder="Enter street address" value="<%= venues.street_address %>" required style="width: 250px;">
+                    <br><br>
+                    <!--Venue City (text input)-->
+                    <label for="city">Please enter the event city:</label>
+                    <input type="text" id="city" name="city" placeholder="Enter city" value="<%= venues.city %>" required>
+                    <br><br>
+                    <!--Venue State (text input)-->
+                    <label for="state">Please enter the event state (i.e, CA):</label>
+                    <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" value="<%= venues.state %>" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
+                    <br><br>
+                    <!--Venue ZIP Code (number input)-->
+                    <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
+                    <input type="number" id="zip" name="zip" placeholder="Enter ZIP Code" min="0" value="<%= venues.zip %>" required>
+                    <br><br>
+                    <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
+                    <label for="space_size">Select the size of your venue (estimated):</label>
+                    <select id="space_size" name="space_size" required>
+                        <option value="1" <%= venues.space_size === 1 ? 'selected' : '' %>>Living Room -- 600 sq. ft</option>
+                        <option value="2" <%= venues.space_size === 2 ? 'selected' : '' %>>Large Garage -- 600-1000 sq. ft</option>
+                        <option value="3" <%= venues.space_size === 3 ? 'selected' : '' %>>Basketball Court -- 4000-6000 sq. ft</option>
+                        <option value="4" <%= venues.space_size === 4 ? 'selected' : '' %>>Banquet Hall -- 3000-10000 sq. ft</option>
+                        <option value="5" <%= venues.space_size === 5 ? 'selected' : '' %>>Warehouse -- 10000-15000</option>
+                        <option value="6" <%= venues.space_size === 6 ? 'selected' : '' %>>Events Center -- 20000-50000+ sq. ft</option>
+                    </select>
+                    <br><br>
+
+                <br><br><br><br>
+                <!--Event Type (Sewing, Non-Sewing or Both) (Radio Input)-->
+                <label for="event_type" style="font-weight: bold;">Would you like to do Sewing, Non-Sewing, or Both during the event?:</label>
+                    <select id="event_type" name="event_type" placeholder="Enter event type" required style="width: 225px;">
+                        <option value="sewing" <%= events.event_type.toLowerCase() === "sewing" ? 'selected' : '' %>>Sewing</option>
+                        <option value="non-sewing" <%= events.event_type.toLowerCase() === "non-sewing" ? 'selected' : '' %>>Non-Sewing</option>
+                        <option value="both" <%= events.event_type.toLowerCase() === "both" ? 'selected' : '' %>>Both</option>
+                    </select>
                 <br><br>
-                <!--Venue City (text input)-->
-                <label for="city">Please enter the event city:</label>
-                <input type="text" id="city" name="city" placeholder="Enter city" value="<%= venues.city %>" required>
+                <!--Event Date/Time Preferences-->
+                <div>
+
+                        <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
+                        <input type="date" id="event_date" name="event_date" placeholder="Enter date" value="<%= new Date(event_date_options[0].event_date).toISOString().split('T')[0] %>"  required>
+                        <br><br>
+                        <label for="start_time">Event Start time:</label>
+                        <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" value="<%= event_date_options[0].start_time %>" required>
+                        <br><br>
+                        <label for="end_time">Event End time:</label>
+                        <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" value="<%= event_date_options[0].end_time %>" required>
+
+                    <br>
+
+                    <h2>Attendee Information</h2>
+                    <!--How many people will attend (number input)-->
+                    <label for="estimated_attendance">How many people will be in attendance? (can be a rough estimate):</label>
+                    <input type="number" id="estimated_attendance" name="estimated_attendance" placeholder="Enter estimated attendance" min="0" value="<%= events.estimated_attendance %>" required style="width: 185px;">
+                    <br><br>
+    <!--How many participants under 10 years old?-->
+                    <label for="num_children_under_10">How many attendees are under 10 years old?:</label>
+                    <input type="number" id="num_children_under_10" name="num_children_under_10" placeholder="Enter number of participants under 10" min="0" value="<%= events.num_children_under_10 %>" required style="width: 250px;">
+                    <br><br>
+                    <!--How many participants are between 10-18 years old?-->
+                    <label for="num_teens">How many attendees are between 10-18 years old?:</label>
+                    <input type="number" id="num_teens" name="num_teens" placeholder="Enter number of participants between 10-18" min="0" value="<%= events.num_teens %>" required style="width: 275px;">
+                    <br><br>
+                    <!--How many people can come an hour early to help set up?-->
+                    <label for="num_help_set_up">How many attendees can come in early to help set up?:</label>
+                    <input type="number" id="num_help_set_up" name="num_help_set_up" placeholder="Enter number of participants that can help set up" min="0" value="<%= events.num_help_set_up %>" required style="width: 315px;">
+                    <br><br>
+                    <!--How many people can sew?-->
+                    <label for="num_sewers">How many attendees can sew (rough estimate is fine)?:</label>
+                    <input type="number" id="num_sewers" name="num_sewers" placeholder="Enter number of participants that can sew" min="0" value="<%= events.num_sewers %>" required style="width: 265px;">
+                    <br><br>
+                    <!--Average Sewing Ability (drop-down)-->
+                    <label for="sewing_ability_id">Select your (AVG?) sewing ability...*********:</label>
+                    <select id="sewing_ability_id" name="sewing_ability_id" required>
+                        <option value="1" <%= events.sewing_ability_id === '1' ? 'checked' : '' %>>No sewing; can cut, pin, and mark vest components</option>
+                        <option value="2" <%= events.sewing_ability_id === '2' ? 'checked' : '' %>>Beginning sewing; just learning to use a sewing machine</option>
+                        <option value="3" <%= events.sewing_ability_id === '3' ? 'checked' : '' %>>Basic sewing; can sew a straight stitch</option>
+                        <option value="4" <%= events.sewing_ability_id === '4' ? 'checked' : '' %>>Advanced sewing; can handle challenging sewing tasks</option>
+                    </select>
+                    <br><br>
+                    <!--Number of Sewing Machines-->
+                    <label for="num_sewing_machines">How many sewing machines do you have?:</label>
+                    <input type="number" id="num_sewing_machines" name="num_sewing_machines" placeholder="Enter number of sewing machines" min="0" value="<%= events.num_sewing_machines %>" required style="width: 225px;">
+                    <br><br>
+                    <!--Number of Sergers-->
+                    <label for="num_sergers">How many sewing machines do you have?:</label>
+                    <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="0" value="<%= events.num_sergers %>" required style="width: 185px;">
+                    <br><br>
+        <fieldset>
+                <legend>Items Produced at the Event</legend>
+                <!--Pockets-->
+                <label for="pockets_quantity">Number of Pockets Produced:</label>
+                <input type="number" id="pockets_quantity" name="pockets_quantity" placeholder="Enter number of pockets" min="0" value="<%= items_produced && items_produced.pockets ? items_produced.pockets : 0 %>" style="width: 225px;">
                 <br><br>
-                <!--Venue State (text input)-->
-                <label for="state">Please enter the event state (i.e, CA):</label>
-                <input type="text" id="state" name="state" placeholder="Enter state" maxlength="2" style="text-transform: uppercase;" value="<%= venues.state %>" required oninput="this.value = this.value.replace(/[^A-Za-z]/g, '')">
+                
+                <!--Collars-->
+                <label for="collars_quantity">Number of Collars Produced:</label>
+                <input type="number" id="collars_quantity" name="collars_quantity" placeholder="Enter number of collars" min="0" value="<%= items_produced && items_produced.collars ? items_produced.collars : 0 %>" style="width: 225px;">
                 <br><br>
-                <!--Venue ZIP Code (number input)-->
-                <label for="zip">Please enter the event ZIP code (i.e., 60489):</label>
-                <input type="number" id="zip" name="zip" placeholder="Enter ZIP Code" min="0" value="<%= venues.zip %>" required>
+                
+                <!--Envelopes-->
+                <label for="envelopes_quantity">Number of Envelopes Produced:</label>
+                <input type="number" id="envelopes_quantity" name="envelopes_quantity" placeholder="Enter number of envelopes" min="0" value="<%= items_produced && items_produced.envelopes ? items_produced.envelopes : 0 %>" style="width: 225px;">
                 <br><br>
-                <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
-                <label for="space_size">Select the size of your venue (estimated):</label>
-                <select id="space_size" name="space_size" required>
-                    <option value="1" <%= venues.space_size === 1 ? 'selected' : '' %>>Living Room -- 600 sq. ft</option>
-                    <option value="2" <%= venues.space_size === 2 ? 'selected' : '' %>>Large Garage -- 600-1000 sq. ft</option>
-                    <option value="3" <%= venues.space_size === 3 ? 'selected' : '' %>>Basketball Court -- 4000-6000 sq. ft</option>
-                    <option value="4" <%= venues.space_size === 4 ? 'selected' : '' %>>Banquet Hall -- 3000-10000 sq. ft</option>
-                    <option value="5" <%= venues.space_size === 5 ? 'selected' : '' %>>Warehouse -- 10000-15000</option>
-                    <option value="6" <%= venues.space_size === 6 ? 'selected' : '' %>>Events Center -- 20000-50000+ sq. ft</option>
-                </select>
+                
+                <!--Vests-->
+                <label for="vests_quantity">Number of Vests Produced:</label>
+                <input type="number" id="vests_quantity" name="vests_quantity" placeholder="Enter number of vests" min="0" value="<%= items_produced && items_produced.vests ? items_produced.vests : 0 %>" style="width: 225px;">
                 <br><br>
             </fieldset>
-            <br><br><br><br>
-            <!--Event Type (Sewing, Non-Sewing or Both) (Radio Input)-->
-            <label for="event_type" style="font-weight: bold;">Would you like to do Sewing, Non-Sewing, or Both during the event?:</label>
-                <select id="event_type" name="event_type" placeholder="Enter event type" required style="width: 225px;">
-                    <option value="sewing" <%= events.event_type.toLowerCase() === "sewing" ? 'selected' : '' %>>Sewing</option>
-                    <option value="non-sewing" <%= events.event_type.toLowerCase() === "non-sewing" ? 'selected' : '' %>>Non-Sewing</option>
-                    <option value="both" <%= events.event_type.toLowerCase() === "both" ? 'selected' : '' %>>Both</option>
             <br><br>
-            <!--Event Date/Time Preferences-->
-            <div>
-                <!--Date Option #1-->
-                <fieldset>
-                    <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
-                    <input type="date" id="event_date" name="event_date" placeholder="Enter date" value="<%= new Date(event_date_options[0].event_date).toISOString().split('T')[0] %>"  required>
-                    <br><br>
-                    <label for="start_time">Event Start time:</label>
-                    <input type="time" id="start_time" name="start_time" placeholder="Enter start time" style="width: 100px;" value="<%= event_date_options[0].start_time %>" required>
-                    <br><br>
-                    <label for="end_time">Event End time:</label>
-                    <input type="time" id="end_time" name="end_time" placeholder="Enter end time" style="width: 100px;" value="<%= event_date_options[0].end_time %>" required>
-                </fieldset>
+
+                <br><br>
+                <!--Would you like Jen to share her story? (boolean/checkbox input)-->
+                <label for="jen_story">Would you like Jen to share her story?</label>
+                <input
+                    type="checkbox"
+                    id="jen_story"
+                    name="jen_story"
+                    value="Y"
+                    <%= events.jen_story === 'Y' ? 'checked' : '' %>
+                >
+                <label for="jen_story" style="display: inline;">Yes</label>
+                <br><br>
+                <!--Are you willing to contribute to the cost of materials (For the vests)?-->
+                <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
                 <br>
-            <fieldset>
-                <h2>Attendee Information</h2>
-                <!--How many people will attend (number input)-->
-                <label for="estimated_attendance">How many people will be in attendance? (can be a rough estimate):</label>
-                <input type="number" id="estimated_attendance" name="estimated_attendance" placeholder="Enter estimated attendance" min="0" value="<%= events.estimated_attendance %>" required style="width: 185px;">
+                <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" <%= events.jen_story === 'Y' ? 'checked' : '' %>>
+                <label for="contribute_materials_cost" style="display: inline;">Yes</label>
                 <br><br>
-<!--How many participants under 10 years old?-->
-                <label for="num_children_under_10">How many attendees are under 10 years old?:</label>
-                <input type="number" id="num_children_under_10" name="num_children_under_10" placeholder="Enter number of participants under 10" min="0" value="<%= events.num_children_under_10 %>" required style="width: 250px;">
-                <br><br>
-                <!--How many participants are between 10-18 years old?-->
-                <label for="num_teens">How many attendees are between 10-18 years old?:</label>
-                <input type="number" id="num_teens" name="num_teens" placeholder="Enter number of participants between 10-18" min="0" value="<%= events.num_teens %>" required style="width: 275px;">
-                <br><br>
-                <!--How many people can come an hour early to help set up?-->
-                <label for="num_help_set_up">How many attendees can come in early to help set up?:</label>
-                <input type="number" id="num_help_set_up" name="num_help_set_up" placeholder="Enter number of participants that can help set up" min="0" value="<%= events.num_help_set_up %>" required style="width: 315px;">
-                <br><br>
-                <!--How many people can sew?-->
-                <label for="num_sewers">How many attendees can sew (rough estimate is fine)?:</label>
-                <input type="number" id="num_sewers" name="num_sewers" placeholder="Enter number of participants that can sew" min="0" value="<%= events.num_sewers %>" required style="width: 265px;">
-                <br><br>
-                <!--Average Sewing Ability (drop-down)-->
-                <label for="sewing_ability_id">Select your (AVG?) sewing ability...*********:</label>
-                <select id="sewing_ability_id" name="sewing_ability_id" required>
-                    <option value="1" <%= events.sewing_ability_id === '1' ? 'checked' : '' %>>No sewing; can cut, pin, and mark vest components</option>
-                    <option value="2" <%= events.sewing_ability_id === '2' ? 'checked' : '' %>>Beginning sewing; just learning to use a sewing machine</option>
-                    <option value="3" <%= events.sewing_ability_id === '3' ? 'checked' : '' %>>Basic sewing; can sew a straight stitch</option>
-                    <option value="4" <%= events.sewing_ability_id === '4' ? 'checked' : '' %>>Advanced sewing; can handle challenging sewing tasks</option>
+                <!--Event Status-->
+                <label for="event_status">Current Event Status: </label>
+                <select id="event_status" name="event_status" placeholder="Enter event status" required style="width: 225px;">
+                    <option value="requested" <%= events.event_status === "requested" ? 'selected' : '' %>>Requested</option>
+                    <option value="approved" <%= events.event_status === "approved" ? 'selected' : '' %>>Approved</option>
+                    <option value="completed" <%= events.event_status === "completed" ? 'selected' : '' %>>Completed</option>
                 </select>
                 <br><br>
-                <!--Number of Sewing Machines-->
-                <label for="num_sewing_machines">How many sewing machines do you have?:</label>
-                <input type="number" id="num_sewing_machines" name="num_sewing_machines" placeholder="Enter number of sewing machines" min="0" value="<%= events.num_sewing_machines %>" required style="width: 225px;">
-                <br><br>
-                <!--Number of Sergers-->
-                <label for="num_sergers">How many sewing machines do you have?:</label>
-                <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="0" value="<%= events.num_sergers %>" required style="width: 185px;">
-                <br><br>
-            </fieldset>
-            <br><br>
-            <!--Would you like Jen to share her story? (boolean/checkbox input)-->
-            <label for="jen_story">Would you like Jen to share her story?</label>
-            <input
-                type="checkbox"
-                id="jen_story"
-                name="jen_story"
-                value="Y"
-                <%= events.jen_story === 'Y' ? 'checked' : '' %>
-            >
-            <label for="jen_story" style="display: inline;">Yes</label>
-            <br><br>
-            <!--Are you willing to contribute to the cost of materials (For the vests)?-->
-            <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
-            <br>
-            <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" <%= events.jen_story === 'Y' ? 'checked' : '' %>>
-            <label for="contribute_materials_cost" style="display: inline;">Yes</label>
-            <br><br>
-            <!--Event Status-->
-            <label for="event_status">Current Event Status: </label>
-            <select id="event_status" name="event_status" placeholder="Enter event status" required style="width: 225px;">
-                <option value="requested" <%= events.event_status === "requested" ? 'selected' : '' %>>Requested</option>
-                <option value="approved" <%= events.event_status === "approved" ? 'selected' : '' %>>Approved</option>
-                <option value="completed" <%= events.event_status === "completed" ? 'selected' : '' %>>Completed</option>
-            </select>
-            <br><br>
+
             <!--Submit Button-->
             <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
         </div>

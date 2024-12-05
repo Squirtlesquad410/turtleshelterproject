@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>about-us</title>
+    <!-- Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure the body takes the full height of the viewport */
+        }
+
+        .content {
+            flex: 1; /* Pushes the footer to the bottom if content is less */
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 20px 20px; /* Add padding to push content down */
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin: 40px 0;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 600;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: justify;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            color: #444;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #228B22; /* Turtle green */
+            color: white;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
+</head>
+<body>
+
+    <header style="text-align: center; margin-top: 20px; padding-top: 40px;">
+        <h1>About Us</h1>
+    </header>
+    <img src="/images/Transparent TSP Logo.png" alt="TSP Logo" style="width: 400px; height: auto; border-radius: 20px;">
+    <div class="video-container" style="text-align: center; margin: 30px 0;">
+        <h2>Watch Our Story</h2>
+        <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/51UNMu5S7Xw?autoplay=1" 
+            title="Turtle Shelter Project Story" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+    
+    
+
+    <div class="container" style="margin-top: 5px;">
+        <h2>What is a Turtle Shelter Vest?</h2>
+        <p>
+            A <strong>Turtle Shelter Vest</strong> is a high-tech but simple solution to help save lives. It’s a portable "shelter" you can carry with you, just like a turtle carries its shell. These vests are designed to provide warmth and protection during extreme cold, making them life-saving for individuals experiencing homelessness.
+        </p>
+        <p>
+            One winter, when <strong>Jen</strong> was homeless, she tragically lost seven of her friends who froze to death due to the unforgiving cold. Determined to make a difference, Jen found a solution: high-tech foam vests that are lightweight, inexpensive, and capable of keeping a person warm in temperatures as low as 10 degrees below zero.
+        </p>
+        <p>
+            These vests are not only designed to SAVE lives but also to alleviate suffering during harsh winters. Their affordability ensures that more people in need can access them, providing a sense of dignity and security.
+        </p>
+        <h2>How You Can Help</h2>
+        <ul>
+            <li><strong>Request Vests:</strong> You can request vests for your community to support those in need.</li>
+            <li><strong>Make Vests:</strong> You, along with your friends, business colleagues, church members, or club, can participate in making these life-saving vests.</li>
+        </ul>
+        <p>
+            Together, we can turn this innovative idea into action. Help spread warmth, save lives, and show compassion to those who need it most.
+        </p>
+        <p>
+            Total Vests Donated as of August 2021 
+
+        </p>
+        <p>
+            <li><strong> 1000 Vests and more on going! </strong></li>
+        </p>
+    </div>
+    
+    
+
+ <!-- Footer -->
+ <footer class="footer">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <p style="margin: 0; font-size: 1rem; font-family: 'Poppins', sans-serif; color: white; text-align: center;">
+            TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+            <a href="mailto:turtleshelterproject@gmail.com" style="color: white; text-decoration: none; font-weight: bold;">turtleshelterproject@gmail.com</a>
+        </p>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <!-- Facebook Link -->
+        <a href="https://www.facebook.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+            <i class="fab fa-facebook-square" style="font-size: 2rem;"></i>
+        </a>
+        <!-- Instagram Link -->
+        <a href="https://www.instagram.com/turtleshelterproject/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+            <i class="fab fa-instagram" style="font-size: 2rem;"></i>
+        </a>
+        <!-- Youtube Link -->
+        <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank" style="color: white; text-decoration: none; margin: 0 15px;">
+            <i class="fab fa-youtube" style="font-size: 2rem;"></i>
+        </a>
+    </div>
+</footer>
+
+
+
+
+</body>
+</html>
+
+
+</body>
+</html>
