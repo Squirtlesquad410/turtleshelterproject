@@ -18,11 +18,11 @@
             font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Full viewport height */
+            min-height: 100vh;
         }
 
         .content {
-            flex: 1; /* Allows content to grow and pushes footer down */
+            flex: 1;
         }
 
         .landing-image {
@@ -34,7 +34,7 @@
             width: 100%;
             height: auto;
             display: block;
-            filter: brightness(0.6); /* Darken image for text visibility */
+            filter: brightness(0.6);
         }
 
         .overlay {
@@ -44,22 +44,57 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
+            padding: 0 20px;
         }
 
         .overlay h1 {
             margin: 10px 0;
         }
 
+        .overlay h1:first-child {
+            font-size: 1.5rem;
+            font-style: italic;
+        }
+
+        .overlay h1:last-child {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .overlay div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap; /* Ensures buttons stack if needed on smaller screens */
+        }
+
+        .overlay button {
+            background-color: #228B22;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .overlay button:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
         footer {
-            background-color: #228B22; /* Turtle green */
+            background-color: #228B22;
             color: white;
             text-align: center;
             padding: 20px 10px;
+            font-size: 0.9rem;
         }
 
         footer p {
             margin: 5px 0;
-            font-size: 1rem;
         }
 
         footer a {
@@ -73,8 +108,47 @@
         }
 
         footer i {
-            font-size: 2rem;
-            margin: 0 15px;
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .overlay h1:first-child {
+                font-size: 1.2rem;
+            }
+
+            .overlay h1:last-child {
+                font-size: 1.5rem;
+            }
+
+            .overlay button {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+            }
+
+            footer p {
+                font-size: 0.8rem;
+            }
+
+            footer i {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .overlay h1:first-child {
+                font-size: 1rem;
+            }
+
+            .overlay h1:last-child {
+                font-size: 1.2rem;
+            }
+
+            .overlay button {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -84,12 +158,22 @@
 
     <!-- Content Section -->
     <div class="content">
-        <!-- Image Positioned Dynamically Below the Navbar -->
         <div class="landing-image">
-            <img src="/images/landingpage.png" alt="Landing Page Image">
+            <picture>
+               <source srcset="/images/landingpagemobile.jpeg" media="(max-width: 768px)">
+               <img src="/images/landingpage.png" alt="Landing Page Image">
+         </picture>
             <div class="overlay">
-                <h1 style="font-style: italic; font-size: 30px;">Saving the lives of people battling homelessness</h1>
-                <h1 style="font-weight: bold; font-size: 40px;">BEGINS WITH YOU</h1>
+                <h1>Saving the lives of people battling homelessness</h1>
+                <h1>BEGINS WITH YOU</h1>
+                <div>
+                    <a href="/about-us">
+                        <button>About Us</button>
+                    </a>
+                    <a href="/volunteer">
+                        <button>Become a Volunteer</button>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
