@@ -159,7 +159,7 @@
 
     <h1>Edit Admin >:)</h1>
     <!--Form for edit admin functionality-->
-    <form action="/edit-admin/:id" method="POST">
+    <form action="/edit-admin/<%= admins[0].email %>" method="POST">
                 <!--Section to Edit Email-->
                 <label for="email">Admin Email:</label>
                 <input type="text" id="email" name="email" value="<%= admins[0].email %>">
