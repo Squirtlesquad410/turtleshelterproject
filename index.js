@@ -107,38 +107,49 @@ app.get('/signin', (req, res) => {
     res.render('signin', { message, isAdmin, isLoggedIn });
 });
 
-const username=process.env.DB_USERNAME
-const password=process.env.DB_PASSWORD
 
 // Logic for verifying username and password
 app.post('/signin', async (req, res) => {
-    const usernameLogin = username//req.body.username || ;
-    const passwordLogin = password // req.body.password || ;
+    const usernameLogin = req.body.username;
+    const passwordLogin = req.body.password;
 
     try {
-        // Query the database to find the user by username
+        // First, check admin users
         const admin = await knex('admins').where('username', usernameLogin).first();
 
-        if (!admin) {
-            // If the username does not exist, send an error message
-            req.session.message = 'Invalid username or password.';
-            return res.redirect('/signin');
+        if (admin) {
+            // Compare the provided password with the hashed password for admin
+            const isPasswordCorrect = await bcrypt.compare(passwordLogin, admin.hashed_password);
+
+            if (isPasswordCorrect) {
+                // If admin login is successful
+                req.session.isLoggedIn = true;
+                req.session.userRole = 'admin';
+                req.session.username = admin.username;
+                return res.redirect('/admin');
+            }
         }
 
-        // Compare the provided password with the hashed password
-        const isPasswordCorrect = true//await bcrypt.compare(passwordLogin, admin.hashed_password);
+        // If not an admin, check regular users
+        const user = await knex('users').where('username', usernameLogin).first();
 
-        if (isPasswordCorrect) {
-            // If login is successful
-            req.session.isLoggedIn = true; // Mark the session as logged in
-            req.session.userRole = 'admin'; // Set the user role
-            req.session.username = admin.username; // Optional: Store the username
-            res.redirect('/admin'); // Redirect to the admin page
-        } else {
-            // If the password is incorrect
-            req.session.message = 'Invalid username or password.';
-            res.redirect('/signin');
+        if (user) {
+            // Compare the provided password with the hashed password for user
+            const isPasswordCorrect = await bcrypt.compare(passwordLogin, user.hashed_password);
+
+            if (isPasswordCorrect) {
+                // If user login is successful
+                req.session.isLoggedIn = true;
+                req.session.userRole = 'user';
+                req.session.username = user.username;
+                return res.redirect('/user-dashboard');
+            }
         }
+
+        // If no matching user found in either admin or users table
+        req.session.message = 'Invalid username or password.';
+        res.redirect('/signin');
+
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).send('Internal Server Error');
@@ -186,6 +197,12 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
     // Check if the user is authenticated (in a session)
         res.render('admin', { isAdmin, isLoggedIn });    // Render the page is admin is logged in
 });
+app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
+    const isUser = req.session.isLoggedIn && (req.session.userRole === 'user'|| req.session.userRole === 'admin');
+    const isLoggedIn = req.session.isLoggedIn || false;
+// Check if the user is authenticated (in a session)
+    res.render('user-dashboard', { isUser, isLoggedIn });    // Render the page is admin is logged in
+});
 
 // Route for Add Admin Page
 app.get('/add-admin', (req, res) => {
@@ -222,6 +239,41 @@ app.post('/add-admin', async (req, res) => {
     }
 });
 
+// Route for Add user Page
+app.get('/add-user', (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
+    res.render('add-user', { isAdmin, isLoggedIn });
+});
+
+
+// Route to add new admin to database
+app.post('/add-user', async (req, res) => {
+    try {
+        // Extract data from the form
+        const { email, first_name, last_name, username, password } = req.body;
+
+        // Hash the password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Insert into the database
+        await knex('users').insert({
+            email,
+            first_name,
+            last_name,
+            username,
+            hashed_password: hashedPassword
+        });
+
+        // Redirect to the admin page or confirmation
+        res.redirect('/maintain-users');
+    } catch (error) {
+        console.error('Error adding user:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
 app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
@@ -239,6 +291,21 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
         // Calculate the offset for pagination
         const offset = (currentPage - 1) * itemsPerPage;
 
+        // Subquery to aggregate items produced
+        const itemsSubquery = knex('items_produced')
+            .select('event_id')
+            .select(
+                knex.raw(`
+                    json_agg(
+                        json_build_object(
+                            'item_description', item_description, 
+                            'quantity', quantity
+                        )
+                    ) as items_produced
+                `)
+            )
+            .groupBy('event_id');
+
         // Start building the base query
         let query = knex('event_info as e')
             .join('event_date_options as eo', function() {
@@ -247,6 +314,7 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
             })
             .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
             .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin(itemsSubquery.as('ip'), 'e.event_id', 'ip.event_id')
             .select(
                 'e.event_id',
                 knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
@@ -271,7 +339,8 @@ app.get('/maintain-events', checkAuthenticationStatus, async (req, res) => {
                 'e.notes',
                 'e.event_status',
                 'e.jen_story',
-                'e.contribute_materials_cost'
+                'e.contribute_materials_cost',
+                'ip.items_produced'
             )
             .orderBy('eo.event_date')
             .limit(itemsPerPage)
@@ -395,15 +464,22 @@ app.get('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             // Fetch the venue and event_date_options in parallel
             return Promise.all([
                 knex('venues').where('venue_id', events.venue_id).first(),
-                knex('event_date_options').where('event_id', events.event_id)
-            ]).then(([venues, event_date_options]) => {
+                knex('event_date_options').where('event_id', events.event_id),
+                knex('items_produced').where('event_id', events.event_id)
+            ]).then(([venues, event_date_options, items_produced]) => {
+             // Transform items_produced into an object for easy access in template
+                const itemsProducedObj = {};
+                items_produced.forEach(item => {
+                    itemsProducedObj[item.item_description.toLowerCase()] = item.quantity;
+                });
                 // Render the edit-event form with all required data
                 res.render('edit-event', {
                     isLoggedIn,
                     isAdmin,
                     events,
                     venues,
-                    event_date_options
+                    event_date_options,
+                    items_produced: itemsProducedObj
                 });
             });
         })
@@ -441,9 +517,19 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         jen_story,
         contribute_materials_cost,
         event_status,
-        notes
+        notes,
+        pockets_quantity,
+        collars_quantity,
+        envelopes_quantity,
+        vests_quantity
     } = req.body;
-
+    const itemsToInsert = [];
+    const itemTypes = [
+        { name: 'Pockets', quantity: pockets_quantity },
+        { name: 'Collars', quantity: collars_quantity },
+        { name: 'Envelopes', quantity: envelopes_quantity },
+        { name: 'Vests', quantity: vests_quantity }
+    ];
     // First, update event_info table
     knex('event_info')
         .where('event_id', eventId)
@@ -466,7 +552,8 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             jen_story: jen_story ? 'Y' : 'N',
             contribute_materials_cost: contribute_materials_cost ? 'Y' : 'N',
             event_status,
-            notes
+            notes,
+
         })
         .then(() => {
             // Get the venue_id from the event_info record
@@ -474,6 +561,27 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
                 .where('event_id', eventId)
                 .select('venue_id')
                 .first();
+                
+        })
+        .then(() => {
+            return knex('items_produced')
+                .where('event_id', eventId)
+                .del();
+        })
+        .then(() => {
+            // Insert new items with non-zero quantities
+            const itemsToInsert = itemTypes
+                .filter(item => item.quantity > 0)
+                .map(item => ({
+                    event_id: eventId,
+                    item_description: item.name,
+                    quantity: item.quantity
+                }));
+
+            // Only insert if there are items to insert
+            if (itemsToInsert.length > 0) {
+                return knex('items_produced').insert(itemsToInsert);
+            }
         })
         .then(event => {
             if (event && event.venue_id) {
@@ -489,9 +597,8 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
                         zip,
                         space_size
                     });
-            } else {
-                throw new Error('No venue_id found for this event');
-            }
+            } 
+            
         })
         .then(() => {
             // Optionally update the event_date_options table
@@ -904,6 +1011,7 @@ app.post('/volunteer', async (req, res) => {
             willing_to_teach_sewing: teachSewing,
             willing_to_lead: lead,
         });
+        await knex('users')
 
         // Redirect to the home page or a thank-you page
         res.redirect('/');
@@ -1039,23 +1147,34 @@ app.get('/edit-admin/:id', checkAuthenticationStatus, (req, res) => {
 });
 
 // POST route for edit-admin.ejs
-app.post('/edit-admin/:id', (req, res) => {
-    const {
-        email,
-        first_name,
-        last_name,
-        username
-    } = req.body;
-    
-    knex("admins")
-    .where("email", id)
-    .update({
-        email,
-        first_name,
-        last_name,
-        username
-    });
-    res.redirect('/maintain-users');
+app.post('/edit-admin/:id', async  (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            email,
+            first_name,
+            last_name,
+            username
+        } = req.body;
+
+        // Update the user's details in the database
+        await knex('admins')
+            .where('email', id)
+            .update({
+                email,
+                first_name,
+                last_name,
+                username
+            });
+
+        // Redirect to a success page or back to the user list
+        res.redirect('/maintain-users'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).send('An error occurred while updating the user.');
+    }
 });
 
 
