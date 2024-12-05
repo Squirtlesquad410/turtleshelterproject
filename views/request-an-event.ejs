@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Request An Event</title>
     <style>
         body {
             background-color: #f4f4f9;
@@ -76,6 +76,13 @@
         button[type="submit"]:hover {
             background-color: #196619;
         }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
+        }
+
+
     </style>
     
     <%_ include('partials/navbar') %>
@@ -167,7 +174,6 @@
                     </div>
         <!--Event Date/Time Preferences-->
                     <div>
-                        <!--Date Option #1-->
                             <label for="event_date"><b>What date would you most prefer to have the event on? (if available):</b></label>
                             <input type="date" id="event_date" name="event_date" placeholder="Enter date" required>
                             <br><br>
