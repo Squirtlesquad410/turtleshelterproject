@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Event</title>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Space below the navbar */
+        .content {
+            padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align form at the top of the space, not center vertically */
+            min-height: 100vh; /* Ensure it covers the full viewport */
+        }
+
+        /* Form container styling */
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+            margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+/* Add other styles as needed */
+
+    
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    
+        textarea {
+            resize: vertical;
+        }
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 auto;
+            text-align: center;
+        }
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
+        }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
+        }
+
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+<div style="padding-top: 100px; padding-bottom: 100px;">
+    <form action="/complete-event/<%= events.event_id %>" method="POST">
+        <h1>Complete Event</h1>
+        <div class="input-container">
+            <!--Labels for input boxes for the form-->
+                    <h2>Attendee Information</h2>
+                    <!--How many people will attend (number input)-->
+                    <label for="estimated_attendance">How many people attended? (can be a rough estimate):</label>
+                    <input type="number" id="estimated_attendance" name="estimated_attendance" placeholder="Enter estimated attendance" min="0" value="<%= events.estimated_attendance %>" required style="width: 185px;">
+                    <br><br>
+        <fieldset>
+                <legend>Items Produced at the Event</legend>
+                <!--Pockets-->
+                <label for="pockets_quantity">Number of Pockets Produced:</label>
+                <input type="number" id="pockets_quantity" name="pockets_quantity" placeholder="Enter number of pockets" min="0" value="<%= items_produced && items_produced.pockets ? items_produced.pockets : 0 %>" style="width: 225px;">
+                <br><br>
+                
+                <!--Collars-->
+                <label for="collars_quantity">Number of Collars Produced:</label>
+                <input type="number" id="collars_quantity" name="collars_quantity" placeholder="Enter number of collars" min="0" value="<%= items_produced && items_produced.collars ? items_produced.collars : 0 %>" style="width: 225px;">
+                <br><br>
+                
+                <!--Envelopes-->
+                <label for="envelopes_quantity">Number of Envelopes Produced:</label>
+                <input type="number" id="envelopes_quantity" name="envelopes_quantity" placeholder="Enter number of envelopes" min="0" value="<%= items_produced && items_produced.envelopes ? items_produced.envelopes : 0 %>" style="width: 225px;">
+                <br><br>
+                
+                <!--Vests-->
+                <label for="vests_quantity">Number of Vests Produced:</label>
+                <input type="number" id="vests_quantity" name="vests_quantity" placeholder="Enter number of vests" min="0" value="<%= items_produced && items_produced.vests ? items_produced.vests : 0 %>" style="width: 225px;">
+                <br><br>
+            </fieldset>
+            <br><br>
+
+            <!--Submit Button-->
+            <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
+        </div>
+    </form>
+
+</body>
+</html>

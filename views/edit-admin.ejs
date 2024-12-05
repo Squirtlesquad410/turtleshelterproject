@@ -104,8 +104,8 @@ button[type="submit"]:hover {
     <!-- Navbar -->
     <br><br>
     <%- include('partials/navbar') %>
-
-    <h1>Edit Admin >:)</h1>
+    <div style="padding-top: 100px; padding-bottom: 100px;">
+    <h1>Edit Admin</h1>
     <!--Form for edit admin functionality-->
     <form action="/edit-admin/<%= admins[0].email %>" method="POST">
                 <!--Section to Edit Email-->
@@ -132,5 +132,6 @@ button[type="submit"]:hover {
         <!--Button to save changes-->
         <button type="submit">Save</button>
     </form>
+</div>
 </body>
 </html>

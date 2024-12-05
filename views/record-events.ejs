@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintain Events</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+            * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background-color: #4A90E2; /* Soft blue header */
+        }
+
+        thead th {
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Buttons in table rows */
+        tbody td button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #4A90E2; /* Blue for Edit */
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        tbody td button:hover {
+            background-color: #357ABD; /* Darker blue on hover */
+        }
+
+
+        /* Pagination Styling */
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .pagination a.active {
+            text-decoration: underline;
+        }
+
+        /* Add Admin Button */
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .add-admin-btn button:hover {
+            background-color: #45a049;
+        }
+
+        /* Filter Form Styling */
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .filter-form input, .filter-form select, .filter-form button {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-form button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .filter-form button:hover {
+            background-color: #45a049;
+        }
+
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <div style="padding-top: 50px; "></div>
+    <h1>Record Completed Events</h1>
+    
+        <!-- Filter Form -->
+<form method="GET" action="/record-events" class="filter-form">
+
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" placeholder="Event description" value="<%= descriptionFilter || '' %>">
+    </div>
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="organization">Organization Name:</label>
+        <input type="text" id="organization" name="organization" placeholder="Organization" value="<%= organizationFilter || '' %>">
+    </div>
+
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" placeholder="City" value="<%= cityFilter || '' %>">
+    </div>
+
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" placeholder="State" value="<%= stateFilter || '' %>" pattern="[A-Z]{2}" maxlength="2">
+    </div>
+
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="zip">ZIP Code:</label>
+        <input type="number" id="zip" name="zip" placeholder="ZIP" value="<%= zipFilter || '' %>" pattern="\d*" maxlength="5">
+    </div>
+
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <label for="event_date">Event Date:</label>
+        <input type="date" id="event_date" name="event_date" value="<%= dateFilter %>">
+    </div>
+    
+
+    <br><br>
+    <button type="submit">Apply Filters</button>
+    <button onclick="reloadPage(event)">Clear Filters</button>
+</form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Date</th>
+                    <th>Description</th>
+                    <th>Organization</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% events.forEach(event => { %>
+                    <!-- Main Row -->
+                    <tr class="clickable-row" data-id="<%= event.event_id %>">
+                        <td><%= event.event_date %></td>
+                        <td><%= event.event_description %></td>
+                        <td><%= event.organization_name %></td>
+                        <td><%= event.full_address %></td>
+                        <td>
+                            <form action="/complete-event/<%= event.event_id %>" method="GET" style="display:inline;">
+                                <button type="submit" style="background-color: #45a049;">Record</button>
+                              </form>
+                              <form action="/disapprove-event/<%= event.event_id %>" method="POST" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to change this event to pending?');" style="background-color: #c0392b;">Disapprove</button>
+                              </form>
+                        </td>
+                    </tr>
+                    <!-- Hidden Details Row -->
+                    <tr class="details-row" id="details-<%= event.event_id %>" style="display: none;">
+                        <td colspan="5">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Organizer Name:</strong></td>
+                                        <td><%= event.organizer_first_name %> <%= event.organizer_last_name %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Organizer Phone:</strong></td>
+                                        <td><%= event.organizer_phone %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Organizer Email:</strong></td>
+                                        <td><%= event.organizer_email %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Event Type:</strong></td>
+                                        <td><%= event.event_type %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Estimated Attendance:</strong></td>
+                                        <td><%= event.estimated_attendance %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Children:</strong></td>
+                                        <td><%= event.num_children_under_10 %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Teens:</strong></td>
+                                        <td><%= event.num_teens %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Help Needed for Setup:</strong></td>
+                                        <td><%= event.num_help_set_up %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Sewers:</strong></td>
+                                        <td><%= event.num_sewers %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sewing Ability:</strong></td>
+                                        <td><%= event.sewing_ability_description %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sewing Machines:</strong></td>
+                                        <td><%= event.num_sewing_machines %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sergers:</strong></td>
+                                        <td><%= event.num_sergers %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Notes:</strong></td>
+                                        <td><%= event.notes %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status:</strong></td>
+                                        <td><%= event.event_status %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Jen Story:</strong></td>
+                                        <td><%= event.jen_story %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Material Costs:</strong></td>
+                                        <td><%= event.contribute_materials_cost %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Time:</strong></td>
+                                        <td><%= event.start_time %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>End Time:</strong></td>
+                                        <td><%= event.end_time %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Items Produced:</strong></td>
+                                        <td>
+                                            <% if (event.items_produced && event.items_produced.length > 0) { %>
+                                                <table>
+                                                    <% event.items_produced.forEach(item => { %>
+                                                        <tr>
+                                                            <td><strong><%= item.item_description %>:</strong></td>
+                                                            <td><%= item.quantity %></td>
+                                                        </tr>
+                                                    <% }); %>
+                                                </table>
+                                            <% } else { %>
+                                                No items recorded
+                                            <% } %>
+                                            
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Attach click event to rows
+                document.querySelectorAll('.clickable-row').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        // Prevent the click from triggering when clicking buttons
+                        if (e.target.tagName === 'BUTTON') return;
+        
+                        const eventId = row.getAttribute('data-id');
+                        const detailsRow = document.getElementById(`details-${eventId}`);
+                        
+                        // Toggle display
+                        if (detailsRow.style.display === 'none') {
+                            detailsRow.style.display = '';
+                        } else {
+                            detailsRow.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        
+            // Edit handler (to be implemented)
+            function handleEdit(eventId) {
+                window.location.href = `/complete-event/${eventId}`; // Adjust route as needed
+            }
+        
+            // Delete handler (with confirmation)
+            function handleDelete(eventId) {
+                if (confirm("Are you sure you want to deny this event?")) {
+                    fetch(`/disapprove-event/${eventId}`, { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                alert("Event disapproved successfully!");
+                                location.reload(); // Reload the page to reflect changes
+                            } else {
+                                alert("Failed to disapprove event.");
+                            }
+                        });
+                }
+            }
+        </script>
+        
+        
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="/record-events?page=<%= currentPage - 1 %>">Previous</a>
+            <% } %>
+        
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/record-events?page=<%= i %>" 
+                   class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+            <% } %>
+        
+            <% if (currentPage < totalPages) { %>
+                <a href="/record-events?page=<%= currentPage + 1 %>">Next</a>
+            <% } %>
+        </div>
+        
+        <script>
+            function reloadPage(event) {
+                event.preventDefault();
+
+                // Redirects to main page
+                window.location.href = '/record-events';
+            }
+
+
+            // Restrict State input to uppercase letters only, and auto-capitalize
+    document.getElementById('state').addEventListener('input', function(event) {
+        // Automatically capitalize the input and remove non-uppercase letters
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+    });
+          </script>
+</body>
+</html>
