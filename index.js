@@ -1,6 +1,8 @@
 let express = require('express'); 
 let app = express();
 let path = require('path'); 
+let moment = require('moment'); // Use moment.js for date/time formatting
+
 
 // Load variables from my .env file
 require('dotenv').config();
@@ -11,6 +13,7 @@ const session = require('express-session');
 const port = process.env.PORT || 3000; 
 
 app.use(express.urlencoded( {extended: true} ));
+app.use(express.json()); // Parses JSON payloads
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -142,6 +145,7 @@ app.post('/signin', async (req, res) => {
                 req.session.isLoggedIn = true;
                 req.session.userRole = 'user';
                 req.session.username = user.username;
+                req.session.email=user.email
                 return res.redirect('/user-dashboard');
             }
         }
@@ -202,6 +206,116 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
 // Check if the user is authenticated (in a session)
     res.render('user-dashboard', { isUser, isLoggedIn });    // Render the page is admin is logged in
+});
+
+// route for upcoming events
+app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
+    const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
+    const isLoggedIn = req.session.isLoggedIn || false;
+    try {
+        
+        const currentDate = moment().format('YYYY-MM-DD');
+        const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+        const { email } = req.session.email;
+        const { vol_id } =knex('volunteer_info').select('vol_id').where('email',email)
+        // Fetch events for the next month
+        const events = await knex('event_info as e').join('event_date_options as eo', function() {
+            this.on('e.event_id', '=', 'eo.event_id')
+                .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+                .join('venues as v', 'e.venue_id', 'v.venue_id')
+        
+            .select(
+                'e.event_id',
+                'e.event_description',
+                'eo.event_date',
+                'eo.start_time',
+                'eo.end_time',
+                knex.raw(
+                    "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
+                ),
+                'v.city'
+            )
+            .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
+
+        // Check which events the volunteer has joined
+        const joinedEvents = vol_id
+            ? await knex('volunteer_participation')
+                  .where({ vol_id })
+                  .pluck('event_id')
+            : [];
+
+        // Add additional formatting and flags for the frontend
+        const formattedEvents = events.map(event => ({
+            ...event,
+            date_formatted: moment(event.date).format('MMMM DD, YYYY'),
+            start_time_formatted: moment(event.start_time, 'HH:mm:ss').format('h:mm A'),
+            end_time_formatted: moment(event.end_time, 'HH:mm:ss').format('h:mm A'),
+            isJoined: joinedEvents.includes(event.event_id),
+        }));
+
+        // Get unique cities for filtering
+        const cities = [...new Set(events.map(event => event.city))];
+
+        res.render('upcoming-events', {
+            events: formattedEvents,
+            cities,
+            isUser,
+            isLoggedIn
+             // Pass session for login status check
+        });
+    } catch (err) {
+        console.error('Error fetching upcoming events:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// post route to join event
+app.post('/join-event', async (req, res) => {
+    try {
+        const { email } = req.session;
+        const { eventId } = req.body;
+        if (!email) {
+            return res.status(401).send(email);
+        }
+
+        const volunteer = await knex('volunteer_info')
+    .select('vol_id')
+    .where('vol_email', email)
+    .first();
+    
+    const vol_id = volunteer?.vol_id;
+        if (!vol_id) {
+            return res.status(404).send('Volunteer not found. Please log in.');
+        }
+        if (!eventId) {
+            return res.status(400).send('Event ID is required.');
+        }
+        
+        // if (!vol_id) {
+        //     return res.status(401).send('Unauthorized. Please log in.');
+        // }
+
+        // Check if the user is already signed up for the event
+        const existingParticipation = await knex('volunteer_participation')
+            .where({ vol_id, event_id: eventId })
+            .first();
+
+        if (existingParticipation) {
+            return res.status(400).send('You have already joined this event.');
+        }
+
+        // Insert the new participation record
+        await knex('volunteer_participation').insert({
+            vol_id,
+            event_id: eventId,
+        });
+
+        res.status(200).send('Successfully joined the event.');
+    } catch (err) {
+        console.error('Error joining event:', err);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // Route for Add Admin Page
@@ -980,7 +1094,7 @@ app.post('/volunteer', async (req, res) => {
         city,
         state,
         zip,
-        monthly_hours_available, // Assuming you have a `num_hours` field for available hours
+        monthly_hours_available, 
         finding_source,
         sewing_ability_id,
         willing_to_teach_sewing,

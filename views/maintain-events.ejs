@@ -232,49 +232,81 @@
                     <tr class="details-row" id="details-<%= event.event_id %>" style="display: none;">
                         <td colspan="5">
                             <table>
-                                <thead>
-                                    <tr>
-                                        <th>Organizer Name</th>
-                                        <th>Organizer Phone</th>
-                                        <th>Organizer Email</th>
-                                        <th>Event Type</th>
-                                        <th>Estimated Attendance</th>
-                                        <th>Number of Children</th>
-                                        <th>Number of Teens</th>
-                                        <th>Help Needed for Setup</th>
-                                        <th>Number of Sewers</th>
-                                        <th>Sewing Ability</th>
-                                        <th>Sewing Machines</th>
-                                        <th>Sergers</th>
-                                        <th>Notes</th>
-                                        <th>Status</th>
-                                        <th>Jen Story</th>
-                                        <th>Material Costs</th>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                        <th>Items Produced</th>
-                                    </tr>
-                                </thead>
                                 <tbody>
                                     <tr>
+                                        <td><strong>Organizer Name:</strong></td>
                                         <td><%= event.organizer_first_name %> <%= event.organizer_last_name %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Organizer Phone:</strong></td>
                                         <td><%= event.organizer_phone %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Organizer Email:</strong></td>
                                         <td><%= event.organizer_email %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Event Type:</strong></td>
                                         <td><%= event.event_type %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Estimated Attendance:</strong></td>
                                         <td><%= event.estimated_attendance %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Children:</strong></td>
                                         <td><%= event.num_children_under_10 %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Teens:</strong></td>
                                         <td><%= event.num_teens %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Help Needed for Setup:</strong></td>
                                         <td><%= event.num_help_set_up %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Sewers:</strong></td>
                                         <td><%= event.num_sewers %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sewing Ability:</strong></td>
                                         <td><%= event.sewing_ability_description %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sewing Machines:</strong></td>
                                         <td><%= event.num_sewing_machines %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sergers:</strong></td>
                                         <td><%= event.num_sergers %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Notes:</strong></td>
                                         <td><%= event.notes %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status:</strong></td>
                                         <td><%= event.event_status %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Jen Story:</strong></td>
                                         <td><%= event.jen_story %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Material Costs:</strong></td>
                                         <td><%= event.contribute_materials_cost %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Time:</strong></td>
                                         <td><%= event.start_time %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>End Time:</strong></td>
                                         <td><%= event.end_time %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Items Produced:</strong></td>
                                         <td>
                                             <% if (event.items_produced && event.items_produced.length > 0) { %>
                                                 <table>
