@@ -42,12 +42,12 @@ function checkAuthenticationStatus(req, res, next) {
 const knex = require("knex")({
     client: "pg",
     connection: {
-        host: "localhost",//"awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
+        host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "wIltrac15$",//"Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
         database: "turtleshelterproject",
         port: 5432,
-        //ssl: { rejectUnauthorized: false, }
+        ssl: { rejectUnauthorized: false, }
     },
 });
 
@@ -411,7 +411,6 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
     const eventId = req.params.id;
     const {
         event_description,
-        notes,
         organization_name,
         organizer_first_name,
         organizer_last_name,
@@ -436,7 +435,8 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         num_sergers,
         jen_story,
         contribute_materials_cost,
-        event_status
+        event_status,
+        notes
     } = req.body;
 
     // First, update event_info table
@@ -444,7 +444,6 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         .where('event_id', eventId)
         .update({
             event_description,
-            notes,
             organization_name,
             organizer_first_name,
             organizer_last_name,
@@ -461,7 +460,8 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
             num_sergers,
             jen_story: jen_story ? 'Y' : 'N',
             contribute_materials_cost: contribute_materials_cost ? 'Y' : 'N',
-            event_status
+            event_status,
+            notes
         })
         .then(() => {
             // Get the venue_id from the event_info record
@@ -652,7 +652,10 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
                 'v.vol_last_name',
                 'v.vol_email',
                 'v.vol_phone',
+                'v.street_address',
                 'v.city',
+                'v.state',
+                'v.zip',
                 'sa.sewing_ability_description',
                 'v.willing_to_teach_sewing',
                 'v.willing_to_lead',
@@ -775,12 +778,14 @@ app.post('/request-an-event', async (req, res) => {
             num_sergers,
             jen_story,
             contribute_materials_cost,
-            event_status,
+            
             event_date,
             start_time,
             end_time,
+            notes
         } = req.body;
-    
+    const event_status='requested'
+    const date_preference_order=1
         try {
             await knex.transaction(async (trx) => {
                 // Step 1: Insert into the venues table
@@ -817,6 +822,7 @@ app.post('/request-an-event', async (req, res) => {
                         jen_story: jen_story === 'Yes',
                         contribute_materials_cost,
                         event_status,
+                        notes
                     })
                     .returning('event_id');
     
@@ -828,6 +834,7 @@ app.post('/request-an-event', async (req, res) => {
                     event_date,
                     start_time,
                     end_time,
+                    date_preference_order,
                 });
             });
     
@@ -857,7 +864,10 @@ app.post('/volunteer', async (req, res) => {
         last_name,
         email,
         phone,
+        street_address,
         city,
+        state,
+        zip,
         monthly_hours_available, // Assuming you have a `num_hours` field for available hours
         finding_source,
         sewing_ability_id,
@@ -879,7 +889,10 @@ app.post('/volunteer', async (req, res) => {
             vol_last_name: last_name,
             vol_email: email,
             vol_phone: phone,
+            street_address: street_address,
             city: city,
+            state: state,
+            zip: zip,
             monthly_hours_available: parsedNumHours,
             finding_source: parsedFindingSource,
             sewing_ability_id: parsedSewingAbilityId,
@@ -908,11 +921,96 @@ app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
 
 
 // GET route for edit-volunteer.ejs
-app.get('/edit-volunteer', checkAuthenticationStatus, (req, res) => {
-    const isLoggedIn = req.session.isLoggedIn || false;
-    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('edit-volunteer', { isLoggedIn, isAdmin });
+app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+        const vol_id = req.params.id;
+
+        // Query the database to get the volunteer's details
+        const volunteer = await knex('volunteer_info')
+            .select(
+                'vol_id',
+                'vol_first_name',
+                'vol_last_name',
+                'vol_email',
+                'vol_phone',
+                'street_address',
+                'city',
+                'state',
+                'zip',
+                'monthly_hours_available',
+                'finding_source',
+                'sewing_ability_id',
+                'willing_to_teach_sewing',
+                'willing_to_lead'
+            )
+            .where('vol_id', vol_id)
+            .first();
+
+        if (!volunteer) {
+            return res.status(404).send('Volunteer not found');
+        }
+
+        // Render the edit form with the volunteer's details
+        res.render('edit-volunteer', { isLoggedIn, isAdmin, volunteer });
+    } catch (err) {
+        console.error('Error fetching volunteer:', err);
+        res.status(500).send('An error occurred while fetching the volunteer.');
+    }
 });
+
+
+// post route for edit-volunteer
+app.post('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const vol_id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            vol_first_name,
+            vol_last_name,
+            vol_email,
+            vol_phone,
+            street_address,
+            city,
+            state,
+            zip,
+            monthly_hours_available,
+            finding_source,
+            sewing_ability_id,
+            willing_to_teach_sewing,
+            willing_to_lead
+        } = req.body;
+
+        // Update the volunteer's details in the database
+        await knex('volunteer_info')
+            .where('vol_id', vol_id)
+            .update({
+                vol_first_name,
+                vol_last_name,
+                vol_email,
+                vol_phone,
+                street_address,
+                city,
+                state,
+                zip,
+                monthly_hours_available,
+                finding_source,
+                sewing_ability_id,
+                willing_to_teach_sewing: willing_to_teach_sewing ? 'Y' : 'N',
+                willing_to_lead: willing_to_lead ? 'Y' : 'N',
+            });
+
+        // Redirect to a success page or back to the volunteer list
+        res.redirect('/maintain-volunteers'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating volunteer:', err);
+        res.status(500).send('An error occurred while updating the volunteer.');
+    }
+});
+
+
 
 
 // GET route for edit-admin.ejs
