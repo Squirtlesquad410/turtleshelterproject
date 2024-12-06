@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintain Events</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background-color: #4A90E2; /* Soft blue header */
+        }
+
+        thead th {
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Buttons in table rows */
+        tbody td button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #4A90E2; /* Blue for Edit */
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        tbody td button:hover {
+            background-color: #357ABD; /* Darker blue on hover */
+        }
+
+
+        /* Pagination Styling */
+        .pagination {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .pagination a.active {
+            text-decoration: underline;
+        }
+
+        /* Add Admin Button */
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .add-admin-btn button:hover {
+            background-color: #45a049;
+        }
+
+        /* Filter Form Styling */
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .filter-form input, .filter-form select, .filter-form button {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-form button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .filter-form button:hover {
+            background-color: #45a049;
+        }
+
+        .add-admin-btn {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .add-admin-btn button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .event-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 10px;
+    }
+
+    .join-button {
+        padding: 10px 15px;
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .join-button:hover {
+        background-color: #0056b3;
+    }
+
+    .join-button.joined {
+        background-color: #28a745;
+        cursor: default;
+    }
+    .withdraw-button {
+    background-color: #f44336; /* Red */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+    .withdraw-button:hover {
+    background-color: #d32f2f;
+}
+.joined-button {
+    background-color: green;
+    color: white;
+    cursor: not-allowed;
+}
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    <div style="padding-top: 50px; "></div>
+    <div class="container">
+        <h1>Upcoming Events</h1>
+        
+        <!-- Filter by City -->
+        <div class="filter">
+            <label for="cityFilter">Filter by City:</label>
+            <select id="cityFilter" onchange="filterByCity()">
+                <option value="">All Cities</option>
+                <% cities.forEach(city => { %>
+                    <option value="<%= city %>"><%= city %></option>
+                <% }); %>
+            </select>
+        </div>
+        
+        <!-- Events Grid -->
+        <% if (events.length > 0) { %>
+            <% events.forEach(event => { %>
+                <div class="event-card" data-city="<%= event.city %>">
+                    <div class="event-info">
+                        <h3><%= event.event_description %></h3>
+                        <p><strong>Date:</strong> <%= event.event_date %></p>
+                        <p><strong>Time:</strong> <%= event.start_time %> - <%= event.end_time %></p>
+                        <p><strong>Address:</strong> <%= event.full_address %></p>
+                        <p><strong>Volunteers Joined:</strong> <%= event.volunteer_count %></p>
+                    </div>
+                    <div>
+                        <% if (isLoggedIn) { %>
+                            
+                            <% if (event.isJoined) { %>
+                                
+                                <button 
+                                    class="withdraw-button" 
+                                    onclick="withdrawEvent(<%= event.event_id %>)">
+                                    Withdraw
+                                </button>
+                            <% } else { %>
+                                <button 
+                                    class="join-button" 
+                                    onclick="joinEvent(<%= event.event_id %>)">
+                                    Join Event
+                                </button>
+                            <% } %>
+                        <% } else { %>
+                            <button 
+                                class="join-button" 
+                                onclick="location.href='/signin'">
+                                Join Event
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No events scheduled for the next month.</p>
+        <% } %>
+    </div>
+
+    <script>
+        // Filter events by city
+        function filterByCity() {
+            const selectedCity = document.getElementById('cityFilter').value.toLowerCase();
+            const events = document.querySelectorAll('.event-card');
+            events.forEach(event => {
+                const city = event.dataset.city.toLowerCase();
+                event.style.display = selectedCity === '' || city === selectedCity ? 'grid' : 'none';
+            });
+        }
+
+        // Join event
+        async function joinEvent(eventId) {
+    try {
+        const response = await fetch('/join-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId }),
+        });
+
+        if (response.ok) {
+            const button = document.querySelector(`button[onclick="joinEvent(${eventId})"]`);
+            button.textContent = 'Joined';
+            button.classList.add('joined');
+            button.disabled = true; // Prevent multiple clicks
+        } else {
+            const errorMessage = await response.text();
+            alert(errorMessage || 'Failed to join event.');
+        }
+    } catch (error) {
+        console.error('Error joining event:', error);
+        alert('An error occurred while trying to join the event.');
+    }
+}
+// Withdraw from an event
+async function withdrawEvent(eventId) {
+        try {
+            const response = await fetch('/withdraw-event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventId })
+            });
+            if (response.ok) {
+                const button = document.querySelector(`button[onclick="withdrawEvent(${eventId})"]`);
+                button.textContent = 'Join Event';
+                button.className = 'join-button';
+                button.setAttribute('onclick', `joinEvent(${eventId})`);
+            } else {
+                alert('Failed to withdraw from the event.');
+            }
+        } catch (error) {
+            console.error('Error withdrawing from event:', error);
+        }
+    }
+    </script>
+</body>
+</html>
