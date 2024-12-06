@@ -16,24 +16,11 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .content {
-            flex: 1;
-        }
-
-        .landing-image {
-            position: relative;
-            width: 100%;
+            line-height: 1.6;
         }
 
         .landing-image img {
             width: 100%;
-            height: auto;
-            display: block;
             filter: brightness(0.6);
         }
 
@@ -44,112 +31,85 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
-            padding: 0 20px;
-        }
-
-        .overlay h1 {
-            margin: 10px 0;
-        }
-
-        .overlay h1:first-child {
-            font-size: 1.5rem;
-            font-style: italic;
-        }
-
-        .overlay h1:last-child {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .overlay div {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap; /* Ensures buttons stack if needed on smaller screens */
         }
 
         .overlay button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
             background-color: #228B22;
             color: white;
-            padding: 10px 15px;
-            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: opacity 0.3s ease, transform 0.2s ease;
             font-size: 1rem;
-            border-radius: 4px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
         .overlay button:hover {
-            opacity: 0.8;
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        /* Sections */
+        .section {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
             transform: scale(1.05);
         }
 
-        footer {
+        .card a {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
             background-color: #228B22;
             color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .card a:hover {
+            background-color: #1a681a;
+        }
+
+        .footer {
             text-align: center;
-            padding: 20px 10px;
-            font-size: 0.9rem;
+            padding: 20px;
+            background-color: #228B22;
+            color: white;
         }
 
-        footer p {
-            margin: 5px 0;
-        }
-
-        footer a {
+        .footer a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        footer i {
-            font-size: 1.5rem;
-            margin: 0 10px;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .overlay h1:first-child {
-                font-size: 1.2rem;
-            }
-
-            .overlay h1:last-child {
-                font-size: 1.5rem;
-            }
-
-            .overlay button {
-                font-size: 0.9rem;
-                padding: 8px 12px;
-            }
-
-            footer p {
-                font-size: 0.8rem;
-            }
-
-            footer i {
-                font-size: 1.2rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .overlay h1:first-child {
-                font-size: 1rem;
-            }
-
-            .overlay h1:last-child {
-                font-size: 1.2rem;
-            }
-
-            .overlay button {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
         }
     </style>
 </head>
@@ -157,46 +117,81 @@
     <!-- Navbar -->
     <%- include('partials/navbar') %>
 
-    <!-- Content Section -->
-    <div class="content">
-        <div class="landing-image">
-            <picture>
-               <source srcset="/images/landingpagemobile.jpeg" media="(max-width: 768px)">
-               <img src="/images/landingpage.png" alt="Landing Page Image">
-         </picture>
-            <div class="overlay">
-                <h1 style="font-size: 30px;">Saving the lives of people battling homelessness</h1>
-                <h1 style="font-size: 50px; font-weight: bold;">BEGINS WITH YOU</h1>
-                <div>
-                    <a href="/about-us">
-                        <button>About Us</button>
-                    </a>
-                    <a href="/volunteer">
-                        <button>Become a Volunteer</button>
-                    </a>
-                </div>
+    <!-- Landing Image -->
+    <div class="landing-image">
+        <picture>
+            <source srcset="/images/landingpagemobile.jpeg" media="(max-width: 768px)">
+            <img src="/images/landingpage.png" alt="Landing Page Image">
+        </picture>
+        <div class="overlay">
+            <h1>Saving the lives of people battling homelessness</h1>
+            <h1 style="font-weight: bold; font-size: 2.5rem;">BEGINS WITH YOU</h1>
+            <div>
+                <a href="/about-us"><button>About Us</button></a>
             </div>
         </div>
     </div>
 
+    <!-- Section: Our Mission -->
+    <section class="section" style="background-color: #f4f4f4;">
+        <h2>Our Mission</h2>
+        <p>
+            What is a turtle shelter vest? a high tech but simple solution to help save lives -
+a portable "shelter" you can carry with you, just like a turtle...
+
+        </p>
+        <p>and YOU can help!  </p>
+        <br>
+        <p>One winter when Jen was homeless, 7 of her friends froze to death.  </p>
+
+    <p>Jen is no longer homeless and has figured out a solution:</p>
+<p> High tech foam vests that are inexpensive,
+            keep a person warm to 10 degree below zero, help SAVE lives and alleviate suffering.</p>
+        <p>
+            YOU can request vests for your community - and you can make vests and have your friends, business colleagues, church members or club make vests, too! </p>
+    </section>
+
+    <!-- Section: How You Can Help -->
+    <section class="section">
+        <h2>How You Can Help</h2>
+        <div class="cards">
+            <div class="card">
+                <img src="/images/vvvest.jpg" alt="volunteer" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Volunteer</h3>
+                <p>Join our team of dedicated volunteers and help us provide essential services.</p>
+                <a href="/volunteer">Learn More</a>
+            </div>
+            <div class="card">
+                <img src="/images/vvest.jpg" alt="donate" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Donate</h3>
+                <p>Your donations directly support our programs and services.</p>
+                <a href="/donate">Donate Now</a>
+            </div>
+            <div class="card">
+                <img src="/images/sewing.jpg" alt="sewing" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Host an Event</h3>
+                <p>Partner with us to host an event that helps our community.</p>
+                <a href="/request-an-event">Request Event</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Recent Updates -->
+    <section class="section" style="background-color: #f4f4f4;">
+        <h2>Recent Updates</h2>
+        <p>Stay tuned for our latest events, stories, and updates from the field.</p>
+        <a href="/upcoming-events" style="text-decoration: underline; color: #228B22;">View Upcoming Events</a>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
+        <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+            <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
+        </p>
         <div>
-            <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
-                <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
-            </p>
-        </div>
-        <div>
-            <!-- Social Media Links -->
-            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank">
-                <i class="fab fa-facebook-square"></i>
-            </a>
-            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank">
-                <i class="fab fa-instagram"></i>
-            </a>
-            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank">
-                <i class="fab fa-youtube"></i>
-            </a>
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank"><i class="fab fa-facebook-square"></i></a>
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank"><i class="fab fa-youtube"></i></a>
         </div>
     </footer>
 </body>
