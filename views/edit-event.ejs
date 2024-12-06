@@ -265,7 +265,8 @@
                 <!--Event Status-->
                 <label for="event_status">Current Event Status: </label>
                 <select id="event_status" name="event_status" placeholder="Enter event status" required style="width: 225px;">
-                    <option value="requested" <%= events.event_status === "requested" ? 'selected' : '' %>>Requested</option>
+                    <option value="pending" <%= events.event_status === "pending" ? 'selected' : '' %>>Pending</option>
+                    <option value="declined" <%= events.event_status === "declined" ? 'selected' : '' %>>Declined</option>
                     <option value="approved" <%= events.event_status === "approved" ? 'selected' : '' %>>Approved</option>
                     <option value="completed" <%= events.event_status === "completed" ? 'selected' : '' %>>Completed</option>
                 </select>
