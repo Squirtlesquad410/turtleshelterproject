@@ -231,9 +231,9 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
         .select(
             'e.event_id',
             'e.event_description',
-            'eo.event_date',
-            'eo.start_time',
-            'eo.end_time',
+            knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+            knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+            knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
             knex.raw(
                 "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
             ),
@@ -283,10 +283,9 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
         // Add additional formatting and flags for the frontend
         const formattedEvents = events.map(event => ({
             ...event,
-            date_formatted: moment(event.date).format('MMMM DD, YYYY'),
+            date_formatted: moment(event.event_date).format('MMMM DD, YYYY'), // Use event_event_date
             start_time_formatted: moment(event.start_time, 'HH:mm:ss').format('h:mm A'),
             end_time_formatted: moment(event.end_time, 'HH:mm:ss').format('h:mm A'),
-            
         }));
 
         // Get unique cities for filtering
