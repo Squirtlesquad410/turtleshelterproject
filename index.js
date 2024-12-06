@@ -837,6 +837,7 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         envelopes_quantity,
         vests_quantity
     } = req.body;
+    
     const itemsToInsert = [];
     const itemTypes = [
         { name: 'Pockets', quantity: pockets_quantity },
@@ -1048,17 +1049,20 @@ app.post('/delete-event/:id', (req, res) => {
 });
 
 // POST route to delete a user
-app.post('/delete-admin/:id', (req, res) => {
-    const admin_id = req.params.id;
+
+
+  // POST route to delete a user
+app.post('/delete-user/:id', (req, res) => {
+    const email = req.params.id;
   
-    knex('admins')
-      .where('email', admin_id)
-      .del() // Deletes the adminwith the specified ID
+    knex('users')
+      .where('email', email)
+      .del() // Deletes the user with the specified ID
       .then(() => {
         res.redirect('/maintain-users'); // Redirect to a relevant page after deletion
       })
       .catch(error => {
-        console.error('Error deleting admin:', error);
+        console.error('Error deleting user:', error);
         res.status(500).send('Internal Server Error');
       });
   });
@@ -1205,6 +1209,7 @@ app.post('/request-an-event', async (req, res) => {
             city,
             state,
             zip,
+            space_size,
             organization_name,
             event_description,
             organizer_first_name,
@@ -1228,6 +1233,7 @@ app.post('/request-an-event', async (req, res) => {
             end_time,
             notes
         } = req.body;
+    
     const event_status='pending'
     const date_preference_order=1
         try {
@@ -1239,6 +1245,7 @@ app.post('/request-an-event', async (req, res) => {
                         city,
                         state,
                         zip: parseInt(zip),
+                        space_size: space_size
                     })
                     .returning('venue_id'); // Adjust based on your table schema
     
@@ -1282,7 +1289,7 @@ app.post('/request-an-event', async (req, res) => {
                 });
             });
     
-            res.redirect('/admin');
+            res.redirect('/');
         } catch (error) {
             console.error('Error creating event:', error);
             res.status(500).send('Internal Server Error');
