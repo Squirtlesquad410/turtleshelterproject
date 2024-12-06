@@ -165,24 +165,6 @@ app.post('/signin', async (req, res) => {
 
 
 
-// // Logic for verifying username and password
-// app.post('/signin', (req, res) => {
-//     const usernameLogin = req.body.username;
-//     const passwordLogin = req.body.password;
-
-//     // Check if submitted credentials match login info stored in the .env file
-//     if (usernameLogin === myUsername && passwordLogin === myPassword) {
-//         // if successful login do THIS
-//         req.session.isLoggedIn = true;  // sets session variable to true with correct login
-//         req.session.userRole = 'admin';
-//         res.redirect('/admin');     // goes to the admin page if login is correct
-//     } else {
-//         // If failed login
-//         res.status(403).send('<h1>403 Forbidden <3</h1>');
-//     }
-// });
-
-
 // GET Route to SIGN OUT (logs admin out of session in this case)
 app.get('/signout', (req, res) => {
     // Logs out of the session
@@ -204,12 +186,7 @@ app.get('/admin', checkAuthenticationStatus, (req, res) => {
     // Check if the user is authenticated (in a session)
         res.render('admin', { isAdmin, isLoggedIn });    // Render the page is admin is logged in
 });
-app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
-    const isUser = req.session.isLoggedIn && (req.session.userRole === 'user'|| req.session.userRole === 'admin');
-    const isLoggedIn = req.session.isLoggedIn || false;
-// Check if the user is authenticated (in a session)
-    res.render('user-dashboard', { isUser, isLoggedIn });    // Render the page is admin is logged in
-});
+
 
 // route for upcoming events
 app.get('/upcoming-events',  async (req, res) => {
