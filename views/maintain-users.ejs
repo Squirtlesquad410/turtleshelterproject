@@ -150,10 +150,10 @@
                     <td><%= admin.username %></td>
                     <td><%= admin.role %></td>
                     <td>
-                        <form action="/edit-admin/<%= admin.email %>" method="GET" style="display:inline;">
+                        <form action="/edit-<%= admin.role %>/<%= admin.email %>" method="GET" style="display:inline;">
                             <button type="submit" style="background-color: #45a049;">Edit</button>
                         </form>
-                        <form action="/delete-admin/<%= admin.email %>" method="POST" style="display:inline;">
+                        <form action="/delete-<%= admin.role %>/<%= admin.email %>" method="POST" style="display:inline;">
                             <button type="submit" onclick="return confirm('Are you sure you want to delete this record?');" style="background-color: red;">Delete</button>
                         </form>
                     </td>

@@ -197,6 +197,11 @@
     .withdraw-button:hover {
     background-color: #d32f2f;
 }
+.joined-button {
+    background-color: green;
+    color: white;
+    cursor: not-allowed;
+}
     </style>
 </head>
 <body>
@@ -231,8 +236,8 @@
                         <% if (isLoggedIn) { %>
                             
                             <% if (event.isJoined) { %>
+                                
                                 <button 
-                                    
                                     class="withdraw-button" 
                                     onclick="withdrawEvent(<%= event.event_id %>)">
                                     Withdraw

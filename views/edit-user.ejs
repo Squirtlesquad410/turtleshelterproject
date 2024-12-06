@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <style>
+        body {
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Space below the navbar */
+.content {
+    padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align form at the top of the space, not center vertically */
+    min-height: 100vh; /* Ensure it covers the full viewport */
+}
+
+/* Form container styling */
+form {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%; /* Restrict the height to fit within the screen */
+    overflow-y: auto; /* Add scroll functionality inside the form */
+    margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Add other styles as needed */
+
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+input,
+textarea,
+select {
+    width: calc(100% - 20px);
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button[type="submit"] {
+    display: block;
+    background-color: #228b22; /* Turtle green */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 auto;
+    text-align: center;
+}
+
+button[type="submit"]:hover {
+    background-color: #196619;
+}
+
+/* Align radio buttons with labels */
+.event_type {
+    font-family: Arial, sans-serif; /* Optional for cleaner styling */
+}
+</style>
+</head>
+<body>
+    <!--Banner that appears if logged in as admin,
+    that way you can make sure you have admin permissions-->
+   <% if (isAdmin) { %>
+    <div class="admin-banner">
+        <p>Viewing page as admin</p>
+    </div>
+    <% } %>
+
+    <!-- Navbar -->
+    <br><br>
+    <%- include('partials/navbar') %>
+    <div style="padding-top: 100px; padding-bottom: 100px;">
+    <h1>Edit User</h1>
+    <!--Form for edit user functionality-->
+    <form action="/edit-user/<%= users[0].email %>" method="POST">
+                <!--Section to Edit Email-->
+                <label for="email">User Email:</label>
+                <input type="text" id="email" name="email" value="<%= users[0].email %>">
+                <br><br>
+
+                <!--Section to Edit First Name-->
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="<%= users[0].first_name %>">
+                <br><br>
+
+                <!--Section to Edit Last Name-->
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="<%= users[0].last_name %>">
+                <br><br>
+
+                <!--Section to Edit Username-->
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="<%= users[0].username %>">
+                <br><br>              
+        <br>
+
+        <!--Button to save changes-->
+        <button type="submit">Save</button>
+    </form>
+</div>
+</body>
+</html>
