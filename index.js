@@ -47,7 +47,7 @@ const knex = require("knex")({
     connection: {
         host: "awseb-e-wx74xhj2vt-stack-awsebrdsdatabase-dbcyxq8zvwk9.c3okg6w2omlf.us-west-2.rds.amazonaws.com",
         user: "postgres",
-        password: "Sigmaturtles410!", // CHANGE BACK BEFORE PUSH
+        password: "Sigmaturtles410!", 
         database: "turtleshelterproject",
         port: 5432,
         ssl: { rejectUnauthorized: false, }
