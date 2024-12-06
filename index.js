@@ -536,6 +536,56 @@ app.post('/add-user', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+// GET route for edit-admin.ejs
+app.get('/edit-user/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+    knex.select("email",
+                "first_name",
+                "last_name",
+                "username"
+                )
+        .from("users")
+        .where("email", req.params.id)
+        .then(users => {
+            res.render('edit-user', { isLoggedIn, isAdmin, users });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({err});
+        });
+});
+
+// POST route for edit-admin.ejs
+app.post('/edit-user/:id', async  (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            email,
+            first_name,
+            last_name,
+            username
+        } = req.body;
+
+        // Update the user's details in the database
+        await knex('users')
+            .where('email', id)
+            .update({
+                email,
+                first_name,
+                last_name,
+                username
+            });
+
+        // Redirect to a success page or back to the user list
+        res.redirect('/maintain-users'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).send('An error occurred while updating the user.');
+    }
+});
 
 
 // GET route for maintain-events page
@@ -948,7 +998,7 @@ app.post('/delete-event/:id', (req, res) => {
                 'a.last_name',
                 'a.email',
                 'a.username',
-                knex.raw('\'Admin\' as role')
+                knex.raw('\'admin\' as role')
             )
             .union([knex.from('users as u')
             .select(
@@ -957,7 +1007,7 @@ app.post('/delete-event/:id', (req, res) => {
                 'u.last_name',
                 'u.email',
                 'u.username',
-                knex.raw('\'User\' as role')
+                knex.raw('\'user\' as role')
             )])
             .limit(itemsPerPage)
             .offset((currentPage - 1) * itemsPerPage);

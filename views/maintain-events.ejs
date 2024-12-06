@@ -220,7 +220,8 @@
         <label for="event_status">Event Status:</label>
         <select id="event_status" name="event_status" value="<%= eventStatusFilter || '' %>">
             <option value="" <%= !eventStatusFilter ? 'selected' : '' %>>--Select--</option>
-            <option value="requested" <%= eventStatusFilter === 'requested' ? 'selected' : '' %>>Requested</option>
+            <option value="pending" <%= eventStatusFilter === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="declined" <%= eventStatusFilter === 'declined' ? 'selected' : '' %>>Declined</option>
             <option value="approved" <%= eventStatusFilter === 'approved' ? 'selected' : '' %>>Approved</option>
             <option value="completed" <%= eventStatusFilter === 'selected' ? 'selected' : '' %>>Completed</option>
         </select>
