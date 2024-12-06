@@ -103,11 +103,11 @@
             <!--Labels for input boxes for the form-->
             <!--What is the event title/description/purpose?-->
             <label for="event_description">Enter the Name/Title for your Event:</label>
-            <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" value="<%= events.event_description %>" required autofocus style="width: 150px;">
+            <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" value="<%= events.event_description %>" required autofocus>
             <br><br>
             <!--Additional Notes about the Event-->
             <label for="notes">Include any additional information about the event that may be helpful:</label>
-            <input type="text" id="notes" name="notes" placeholder="Enter additional information" value="<%= events.notes %>" required style="width: 550px;">
+            <input type="text" id="notes" name="notes" placeholder="Enter additional information" value="<%= events.notes %>" required>
             <br><br>
             <!--Organization Name (text input)-->
             <label for="organization_name">Enter Your Organization Name (or your own full name):</label>
@@ -129,7 +129,6 @@
             <label for="organizer_email">Enter Organization Email (optional):</label>
             <input type="text" style="width: 275px;" id="organizer_email" name="organizer_email" placeholder="Enter organization email" value="<%= events.event_description %>" required>
             <br><br>
-            <fieldset>
                 <!-- <h2>What's the address of the event? <%= venues.venue_id %>(Event Venue or Home Address)</h2> -->
                 <!--Venue Street Address (text input)-->
                 <label for="street_address">Please enter the street address of the event:</label>
@@ -220,7 +219,7 @@
                     <label for="num_sergers">How many sewing machines do you have?:</label>
                     <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="0" value="<%= events.num_sergers %>" required style="width: 185px;">
                     <br><br>
-        <fieldset>
+
                 <legend>Items Produced at the Event</legend>
                 <!--Pockets-->
                 <label for="pockets_quantity">Number of Pockets Produced:</label>
@@ -241,31 +240,36 @@
                 <label for="vests_quantity">Number of Vests Produced:</label>
                 <input type="number" id="vests_quantity" name="vests_quantity" placeholder="Enter number of vests" min="0" value="<%= items_produced && items_produced.vests ? items_produced.vests : 0 %>" style="width: 225px;">
                 <br><br>
-            </fieldset>
             <br><br>
 
                 <br><br>
                 <!--Would you like Jen to share her story? (boolean/checkbox input)-->
                 <label for="jen_story">Would you like Jen to share her story?</label>
-                <input
-                    type="checkbox"
-                    id="jen_story"
-                    name="jen_story"
-                    value="Y"
-                    <%= events.jen_story === 'Y' ? 'checked' : '' %>
-                >
-                <label for="jen_story" style="display: inline;">Yes</label>
+                <br>
+                <div style="display: flex; flex-direction: row-reverse; align-items: center; align-content: center;">
+                    <input
+                        type="checkbox"
+                        id="jen_story"
+                        name="jen_story"
+                        value="Y"
+                        <%= events.jen_story === 'Y' ? 'checked' : '' %>
+                    >
+                    <label for="jen_story" style="display: inline;">Yes</label>
+                </div>
                 <br><br>
                 <!--Are you willing to contribute to the cost of materials (For the vests)?-->
                 <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
                 <br>
-                <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" <%= events.jen_story === 'Y' ? 'checked' : '' %>>
-                <label for="contribute_materials_cost" style="display: inline;">Yes</label>
+                <div style="display: flex; flex-direction: row-reverse; align-items: center;">
+                    <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" <%= events.jen_story === 'Y' ? 'checked' : '' %>>
+                    <label for="contribute_materials_cost" style="display: inline;">Yes</label>
+                </div>
                 <br><br>
                 <!--Event Status-->
                 <label for="event_status">Current Event Status: </label>
                 <select id="event_status" name="event_status" placeholder="Enter event status" required style="width: 225px;">
-                    <option value="requested" <%= events.event_status === "requested" ? 'selected' : '' %>>Requested</option>
+                    <option value="pending" <%= events.event_status === "pending" ? 'selected' : '' %>>Pending</option>
+                    <option value="declined" <%= events.event_status === "declined" ? 'selected' : '' %>>Declined</option>
                     <option value="approved" <%= events.event_status === "approved" ? 'selected' : '' %>>Approved</option>
                     <option value="completed" <%= events.event_status === "completed" ? 'selected' : '' %>>Completed</option>
                 </select>

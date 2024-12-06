@@ -197,6 +197,11 @@
     .withdraw-button:hover {
     background-color: #d32f2f;
 }
+.joined-button {
+    background-color: green;
+    color: white;
+    cursor: not-allowed;
+}
     </style>
 </head>
 <body>
@@ -225,13 +230,14 @@
                         <p><strong>Date:</strong> <%= event.event_date %></p>
                         <p><strong>Time:</strong> <%= event.start_time %> - <%= event.end_time %></p>
                         <p><strong>Address:</strong> <%= event.full_address %></p>
+                        <p><strong>Volunteers Joined:</strong> <%= event.volunteer_count %></p>
                     </div>
                     <div>
                         <% if (isLoggedIn) { %>
                             
                             <% if (event.isJoined) { %>
+                                
                                 <button 
-                                    
                                     class="withdraw-button" 
                                     onclick="withdrawEvent(<%= event.event_id %>)">
                                     Withdraw

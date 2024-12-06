@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Admin</title>
+    <title>Edit User</title>
     <style>
         body {
     background-color: #f4f4f9;
@@ -93,39 +93,32 @@ button[type="submit"]:hover {
 </style>
 </head>
 <body>
-    <!--Banner that appears if logged in as admin,
-    that way you can make sure you have admin permissions-->
-   <% if (isAdmin) { %>
-    <div class="admin-banner">
-        <p>Viewing page as admin</p>
-    </div>
-    <% } %>
 
     <!-- Navbar -->
     <br><br>
     <%- include('partials/navbar') %>
     <div style="padding-top: 100px; padding-bottom: 100px;">
-    <h1>Edit Admin</h1>
-    <!--Form for edit admin functionality-->
-    <form action="/edit-admin/<%= admins[0].email %>" method="POST">
+    <h1>Edit User</h1>
+    <!--Form for edit user functionality-->
+    <form action="/edit-user/<%= users[0].email %>" method="POST">
                 <!--Section to Edit Email-->
-                <label for="email">Admin Email:</label>
-                <input type="text" id="email" name="email" value="<%= admins[0].email %>">
+                <label for="email">User Email:</label>
+                <input type="text" id="email" name="email" value="<%= users[0].email %>">
                 <br><br>
 
                 <!--Section to Edit First Name-->
                 <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" value="<%= admins[0].first_name %>">
+                <input type="text" id="first_name" name="first_name" value="<%= users[0].first_name %>">
                 <br><br>
 
                 <!--Section to Edit Last Name-->
                 <label for="last_name">Last Name:</label>
-                <input type="text" id="last_name" name="last_name" value="<%= admins[0].last_name %>">
+                <input type="text" id="last_name" name="last_name" value="<%= users[0].last_name %>">
                 <br><br>
 
                 <!--Section to Edit Username-->
                 <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="<%= admins[0].username %>">
+                <input type="text" id="username" name="username" value="<%= users[0].username %>">
                 <br><br>              
         <br>
 

@@ -90,6 +90,9 @@
     <div style="padding-top: 100px; padding-bottom: 100px;">
         <form action="/volunteer" method="POST">
             <h1>Volunteer Sign Up</h1>
+            <% if (errorMessage) { %>
+                <p style="color: red;"><%= errorMessage %></p>
+            <% } %>
             <div class="input-container">
                 <!--Labels for input boxes for the form
                 NOTE: num_people should be changed to meet the column name in the database
@@ -102,7 +105,7 @@
                 <br><br>
 
                 <label for="password">Create a password:</label>
-                <input type="text" id="password" name="password" placeholder="Enter your password" required autofocus>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required autofocus>
                 <br><br>
 
                 <!--User First Name (text input)-->

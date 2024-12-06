@@ -75,7 +75,6 @@
             background-color: #357ABD; /* Darker blue on hover */
         }
 
-        
 
         /* Pagination Styling */
         .pagination {
@@ -178,14 +177,10 @@
 <body>
     <%- include('partials/navbar') %>
     <div style="padding-top: 50px; "></div>
-    <h1>Maintain Events</h1>
-    <!--INSERT CODE HERE TO ALLOW YOU TO VIEW OUR LIVE DATABASE
-    OF EVENT INFORMATION, PROVIDE AN EDIT AND DELETE EVENT BUTON IN THE TABLE
-
-    ALSO, PROVIDE AN "ADD EVENT" BUTTON BELOW THE TABLE
-        (This is like the exact same thing we did for Test 2)-->
+    <h1>Record Completed Events</h1>
+    
         <!-- Filter Form -->
-<form method="GET" action="/maintain-events" class="filter-form">
+<form method="GET" action="/record-events" class="filter-form">
 
     <div style="display: flex; flex-direction: row; align-items: center;">
         <label for="description">Description:</label>
@@ -216,24 +211,12 @@
         <input type="date" id="event_date" name="event_date" value="<%= dateFilter %>">
     </div>
     
-    <div style="display: flex; flex-direction: row; align-items: center;">
-        <label for="event_status">Event Status:</label>
-        <select id="event_status" name="event_status" value="<%= eventStatusFilter || '' %>">
-            <option value="" <%= !eventStatusFilter ? 'selected' : '' %>>--Select--</option>
-            <option value="pending" <%= eventStatusFilter === 'pending' ? 'selected' : '' %>>Pending</option>
-            <option value="declined" <%= eventStatusFilter === 'declined' ? 'selected' : '' %>>Declined</option>
-            <option value="approved" <%= eventStatusFilter === 'approved' ? 'selected' : '' %>>Approved</option>
-            <option value="completed" <%= eventStatusFilter === 'selected' ? 'selected' : '' %>>Completed</option>
-        </select>
-    </div>
 
     <br><br>
-    <button type="submit" style="padding: 10px;">Apply Filters</button>
-    <button onclick="reloadPage(event)" style="padding: 10px;">Clear Filters</button>
-    
+    <button type="submit">Apply Filters</button>
+    <button onclick="reloadPage(event)">Clear Filters</button>
 </form>
-    <a href="/pending-events"><button style="padding: 15px; background-color: #4A90E2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: large;">Approve Pending Events</button></a>
-    <a href="/record-events"><button style="padding: 15px; background-color: #4A90E2; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: large">Record Completed Events</button></a>
+<a href="/maintain-events" ><button type="button" style="padding: 15px; background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: large;">Back To All Events</button></a>
         <table>
             <thead>
                 <tr>
@@ -253,14 +236,11 @@
                         <td><%= event.organization_name %></td>
                         <td><%= event.full_address %></td>
                         <td>
-                            <form action="/edit-event/<%= event.event_id %>" method="GET" style="display:inline;">
-                                <button type="submit" style="background-color: #45a049;">Edit</button>
+                            <form action="/complete-event/<%= event.event_id %>" method="GET" style="display:inline;">
+                                <button type="submit" style="background-color: #45a049;">Record</button>
                               </form>
-                              <form action="/delete-event/<%= event.event_id %>" method="POST" style="display:inline;">
-                                <button type="submit" onclick="return confirm('Are you sure you want to delete this record?');" style="background-color: #c0392b;">Delete</button>
-                              </form>
-                              <form action="/view-participants/<%= event.event_id %>" method="GET" style="display:inline;">
-                                <button type="submit" style="background-color: blue;">View Participants</button>
+                              <form action="/disapprove-event/<%= event.event_id %>" method="POST" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to change this event to pending?');" style="background-color: #c0392b;">Disapprove</button>
                               </form>
                         </td>
                     </tr>
@@ -390,19 +370,19 @@
         
             // Edit handler (to be implemented)
             function handleEdit(eventId) {
-                window.location.href = `/edit-event/${eventId}`; // Adjust route as needed
+                window.location.href = `/complete-event/${eventId}`; // Adjust route as needed
             }
         
             // Delete handler (with confirmation)
             function handleDelete(eventId) {
-                if (confirm("Are you sure you want to delete this event?")) {
-                    fetch(`/delete-event/${eventId}`, { method: 'DELETE' })
+                if (confirm("Are you sure you want to deny this event?")) {
+                    fetch(`/disapprove-event/${eventId}`, { method: 'POST' })
                         .then(response => {
                             if (response.ok) {
-                                alert("Event deleted successfully!");
+                                alert("Event disapproved successfully!");
                                 location.reload(); // Reload the page to reflect changes
                             } else {
-                                alert("Failed to delete event.");
+                                alert("Failed to disapprove event.");
                             }
                         });
                 }
@@ -413,22 +393,17 @@
         <!-- Pagination Controls -->
         <div class="pagination">
             <% if (currentPage > 1) { %>
-                <a href="/maintain-events?page=<%= currentPage - 1 %>">Previous</a>
+                <a href="/record-events?page=<%= currentPage - 1 %>">Previous</a>
             <% } %>
         
             <% for (let i = 1; i <= totalPages; i++) { %>
-                <a href="/maintain-events?page=<%= i %>" 
-                    class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                <a href="/record-events?page=<%= i %>" 
+                   class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
             <% } %>
         
             <% if (currentPage < totalPages) { %>
-                <a href="/maintain-events?page=<%= currentPage + 1 %>">Next</a>
+                <a href="/record-events?page=<%= currentPage + 1 %>">Next</a>
             <% } %>
-        </div>
-        
-        <!-- Button to add a new event -->
-        <div class="add-admin-btn">
-            <a href="/add-event"><button style="background-color: #4A90E2;">Add New Event</button></a>
         </div>
         
         <script>
@@ -436,7 +411,7 @@
                 event.preventDefault();
 
                 // Redirects to main page
-                window.location.href = '/maintain-events';
+                window.location.href = '/record-events';
             }
 
 

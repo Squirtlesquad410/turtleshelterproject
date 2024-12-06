@@ -130,6 +130,7 @@ app.post('/signin', async (req, res) => {
                 req.session.userRole = 'admin';
                 req.session.isAdmin = true;
                 req.session.username = admin.username;
+                req.session.email=admin.email
                 return res.redirect('/admin');
             }
         }
@@ -148,7 +149,7 @@ app.post('/signin', async (req, res) => {
                 req.session.userRole = 'user';
                 req.session.username = user.username;
                 req.session.email=user.email
-                return res.redirect('/user-dashboard');
+                return res.redirect('/');
             }
         }
 
@@ -211,43 +212,60 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
 });
 
 // route for upcoming events
-app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
+app.get('/upcoming-events',  async (req, res) => {
     const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
     const isLoggedIn = req.session.isLoggedIn || false;
 
 
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const currentDate = moment().format('YYYY-MM-DD');
+    const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+    // Fetch events for the next month
+    const events = await knex('event_info as e').join('event_date_options as eo', function() {
+        this.on('e.event_id', '=', 'eo.event_id')
+            .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+        })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin('volunteer_participation as vp', 'e.event_id', 'vp.event_id') // Join for counting
+    
+        .select(
+            'e.event_id',
+            'e.event_description',
+            knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+            knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+            knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
+            knex.raw(
+                "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
+            ),
+            'v.city',
+            knex.raw('COUNT(vp.vol_id) as volunteer_count') // Count of volunteers per event
+            )
+            .whereBetween('eo.event_date', [currentDate, nextMonthDate])
+            .where('event_status','approved')
+            .groupBy(
+                'e.event_id',
+                'e.event_description',
+                'eo.event_date',
+                'eo.start_time',
+                'eo.end_time',
+                'v.city',
+                'v.street_address',
+                'v.state',
+                'v.zip'
+            )
+        
     try {
         
-        const currentDate = moment().format('YYYY-MM-DD');
-        const nextMonthDate = moment().add(1, 'month').format('YYYY-MM-DD');
+        
         const { email } = req.session;
+        if (isUser){
         const volunteer = await knex('volunteer_info')
         .select('vol_id')
         .where('vol_email', email)
         .first();
     
         const vol_id = volunteer?.vol_id;
-        // Fetch events for the next month
-        const events = await knex('event_info as e').join('event_date_options as eo', function() {
-            this.on('e.event_id', '=', 'eo.event_id')
-                .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
-            })
-                .join('venues as v', 'e.venue_id', 'v.venue_id')
         
-            .select(
-                'e.event_id',
-                'e.event_description',
-                'eo.event_date',
-                'eo.start_time',
-                'eo.end_time',
-                knex.raw(
-                    "CONCAT(street_address, ', ', city, ', ', state, ' ', zip) AS full_address"
-                ),
-                'v.city'
-            )
-            .whereBetween('eo.event_date', [currentDate, nextMonthDate]);
-
         // Check which events the volunteer has joined
         for (let event of events) {
             if (vol_id) {
@@ -259,15 +277,15 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
                 event.isJoined = false; // Not logged in, default to false
             }
         }
-
+    }
+    
 
         // Add additional formatting and flags for the frontend
         const formattedEvents = events.map(event => ({
             ...event,
-            date_formatted: moment(event.date).format('MMMM DD, YYYY'),
+            date_formatted: moment(event.event_date).format('MMMM DD, YYYY'), // Use event_event_date
             start_time_formatted: moment(event.start_time, 'HH:mm:ss').format('h:mm A'),
             end_time_formatted: moment(event.end_time, 'HH:mm:ss').format('h:mm A'),
-            
         }));
 
         // Get unique cities for filtering
@@ -278,8 +296,6 @@ app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
             cities,
             isUser,
             isLoggedIn,
-
-
             isAdmin
             
              // Pass session for login status check
@@ -370,16 +386,59 @@ app.post('/withdraw-event', async (req, res) => {
 app.get('/add-admin', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
-    res.render('add-admin', { isAdmin, isLoggedIn });
+    let errorMessage= null
+    res.render('add-admin', { errorMessage, isAdmin, isLoggedIn });
 });
 
 
 // Route to add new admin to database
 app.post('/add-admin', async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
 
+        // Check for existing user with the same email or username
+        const existingAdminOrUser = async (email, username) => {
+            try {
+                // Check in the admins table
+                const adminMatch = await knex('admins')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Check in the users table
+                const userMatch = await knex('users')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Return true if a match is found in either table
+                return adminMatch || userMatch;
+            } catch (error) {
+            console.error('Error checking for existing admin or user:', error);
+            throw error;
+        }
+    };
+    const existingRecord = await existingAdminOrUser(email,username);
+        
+    
+        if (existingRecord) {
+            // Email or username already exists
+            let errorMessage = 'An account with this ';
+            if (existingRecord.email === email) {
+                errorMessage += 'email ';
+            }
+            if (existingRecord.username === username) {
+                errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+            }
+            errorMessage += 'already exists. Please try again with different credentials.';
+            
+            return res.status(400).render('add-admin', { 
+                errorMessage,isAdmin, isLoggedIn
+            });
+        }
         // Hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -405,63 +464,57 @@ app.post('/add-admin', async (req, res) => {
 app.get('/add-user', checkAuthenticationStatus, (req, res) => {
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     const isLoggedIn = req.session.isLoggedIn || false;
-    res.render('add-user', { isAdmin, isLoggedIn });
+    let errorMessage= null
+    res.render('add-user', { errorMessage, isAdmin, isLoggedIn });
 });
 
-// app.post('/add-user', async (req, res) => {
-//     try {
-//         // Extract data from the form
-//         const { email, first_name, last_name, username, password } = req.body;
-
-//         // Check for existing user with the same email or username
-//         const existingUser = await knex('users')
-//             .where('email', email)
-//             .orWhere('username', username)
-//             .first();
-
-//         if (existingUser) {
-//             // Email or username already exists
-//             let errorMessage = 'An account with this ';
-//             if (existingUser.email === email) {
-//                 errorMessage += 'email ';
-//             }
-//             if (existingUser.username === username) {
-//                 errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
-//             }
-//             errorMessage += 'already exists. Please try again with different credentials.';
-
-//             return res.status(400).render('add-user', { 
-//                 errorMessage,
-//             });
-//         }
-
-//         // Hash the password
-//         const saltRounds = 10;
-//         const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-//         // Insert into the database
-//         await knex('users').insert({
-//             email,
-//             first_name,
-//             last_name,
-//             username,
-//             hashed_password: hashedPassword
-//         });
-
-//         // Redirect to the admin page or confirmation
-//         res.redirect('/maintain-users');
-//     } catch (error) {
-//         console.error('Error adding user:', error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// });
-
-// Route to add new user to database
 app.post('/add-user', async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
     try {
         // Extract data from the form
         const { email, first_name, last_name, username, password } = req.body;
 
+        // Check for existing user with the same email or username
+        // Check for existing user with the same email or username
+        const existingAdminOrUser = async (email, username) => {
+            try {
+                // Check in the admins table
+                const adminMatch = await knex('admins')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Check in the users table
+                const userMatch = await knex('users')
+                    .where('email', email)
+                    .orWhere('username', username)
+                    .first();
+        
+                // Return true if a match is found in either table
+                return adminMatch || userMatch;
+            } catch (error) {
+            console.error('Error checking for existing admin or user:', error);
+            throw error;
+        }
+    };
+            const existingRecord = await existingAdminOrUser(email,username);
+    
+        if (existingRecord) {
+            // Email or username already exists
+            let errorMessage = 'An account with this ';
+            if (existingRecord.email === email) {
+                errorMessage += 'email ';
+            }
+            if (existingRecord.username === username) {
+                errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+            }
+            errorMessage += 'already exists. Please try again with different credentials.';
+            
+            return res.status(400).render('add-user', { 
+                errorMessage,isAdmin, isLoggedIn
+            });
+        }
         // Hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -482,6 +535,57 @@ app.post('/add-user', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+// GET route for edit-admin.ejs
+app.get('/edit-user/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+    knex.select("email",
+                "first_name",
+                "last_name",
+                "username"
+                )
+        .from("users")
+        .where("email", req.params.id)
+        .then(users => {
+            res.render('edit-user', { isLoggedIn, isAdmin, users });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({err});
+        });
+});
+
+// POST route for edit-admin.ejs
+app.post('/edit-user/:id', async  (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // Extract updated values from the request body
+        const {
+            email,
+            first_name,
+            last_name,
+            username
+        } = req.body;
+
+        // Update the user's details in the database
+        await knex('users')
+            .where('email', id)
+            .update({
+                email,
+                first_name,
+                last_name,
+                username
+            });
+
+        // Redirect to a success page or back to the user list
+        res.redirect('/maintain-users'); // Adjust the redirection as needed
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).send('An error occurred while updating the user.');
+    }
+});
+
 
 // GET route for maintain-events page
 //          When I call "checkAuthenticationStatus" it checks if I am logged in as admin
@@ -732,6 +836,7 @@ app.post('/edit-event/:id', checkAuthenticationStatus, (req, res) => {
         envelopes_quantity,
         vests_quantity
     } = req.body;
+    
     const itemsToInsert = [];
     const itemTypes = [
         { name: 'Pockets', quantity: pockets_quantity },
@@ -884,34 +989,48 @@ app.post('/delete-event/:id', (req, res) => {
             username,
             } = req.query;
 
-        // Calculate the offset for pagination
-        const offset = (currentPage - 1) * itemsPerPage;
 
         // Start building the base query
         let query = knex('admins as a')
             .select(
-                'a.admin_id',
+                'a.admin_id as id',
                 'a.first_name',
                 'a.last_name',
                 'a.email',
                 'a.username',
+                knex.raw('\'admin\' as role')
             )
-            .orderBy('a.last_name')
+            .union([knex.from('users as u')
+            .select(
+                'u.user_id as id',
+                'u.first_name',
+                'u.last_name',
+                'u.email',
+                'u.username',
+                knex.raw('\'user\' as role')
+            )])
             .limit(itemsPerPage)
-            .offset(offset);
-
+            .offset((currentPage - 1) * itemsPerPage);
+            
+            
 
         // Execute the query to fetch the filtered and paginated events
         const admins = await query;
 
-        // Query the total number of events for pagination controls, applying the same filters
+        // Now adjust the count query to include both tables
         let countQuery = knex('admins as a')
+        .union([
+            knex('users as u')
+                .select('u.user_id') // Just a placeholder column for count
+        ])
+        .count('* as count');
 
-           
-            .count('a.admin_id as count');
+        // Get the total count of users and admins
+        const totalCountResult = await countQuery.first();
+        const totalCount = totalCountResult.count;
 
-        const totalAdmins = await countQuery.first();
-        const totalPages = Math.ceil(totalAdmins.count / itemsPerPage);
+        // Calculate total pages
+        const totalPages = Math.ceil(totalCount / itemsPerPage);
 
         // Render the maintain-events page with events, pagination data, and filter values
         res.render('maintain-users', {
@@ -929,17 +1048,20 @@ app.post('/delete-event/:id', (req, res) => {
 });
 
 // POST route to delete a user
-app.post('/delete-admin/:id', (req, res) => {
-    const admin_id = req.params.id;
+
+
+  // POST route to delete a user
+app.post('/delete-user/:id', (req, res) => {
+    const email = req.params.id;
   
-    knex('admins')
-      .where('email', admin_id)
-      .del() // Deletes the adminwith the specified ID
+    knex('users')
+      .where('email', email)
+      .del() // Deletes the user with the specified ID
       .then(() => {
         res.redirect('/maintain-users'); // Redirect to a relevant page after deletion
       })
       .catch(error => {
-        console.error('Error deleting admin:', error);
+        console.error('Error deleting user:', error);
         res.status(500).send('Internal Server Error');
       });
   });
@@ -1036,7 +1158,7 @@ app.get('/maintain-volunteers', checkAuthenticationStatus, async (req,res) => {
         const totalVolunteers = await countQuery.first();
         const totalPages = Math.ceil(totalVolunteers.count / itemsPerPage);
 
-        // Render the maintain-events page with events, pagination data, and filter values
+        // Render the volunteers page with events, pagination data, and filter values
         res.render('maintain-volunteers', {
             isLoggedIn,
             isLoggedIn,
@@ -1086,6 +1208,7 @@ app.post('/request-an-event', async (req, res) => {
             city,
             state,
             zip,
+            space_size,
             organization_name,
             event_description,
             organizer_first_name,
@@ -1109,7 +1232,8 @@ app.post('/request-an-event', async (req, res) => {
             end_time,
             notes
         } = req.body;
-    const event_status='requested'
+    
+    const event_status='pending'
     const date_preference_order=1
         try {
             await knex.transaction(async (trx) => {
@@ -1120,6 +1244,7 @@ app.post('/request-an-event', async (req, res) => {
                         city,
                         state,
                         zip: parseInt(zip),
+                        space_size: space_size
                     })
                     .returning('venue_id'); // Adjust based on your table schema
     
@@ -1163,7 +1288,7 @@ app.post('/request-an-event', async (req, res) => {
                 });
             });
     
-            res.redirect('/admin');
+            res.redirect('/');
         } catch (error) {
             console.error('Error creating event:', error);
             res.status(500).send('Internal Server Error');
@@ -1176,13 +1301,15 @@ app.post('/request-an-event', async (req, res) => {
 app.get('/volunteer', (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.userRole === 'admin';
-
-    res.render('volunteer', {
+    let errorMessage= null
+    res.render('volunteer', { errorMessage,
         isLoggedIn: isLoggedIn,
         isAdmin: isAdmin
     });
 });
 app.post('/volunteer', async (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
     // Extract form values from req.body with destructuring
     const {
         first_name,
@@ -1209,10 +1336,51 @@ app.post('/volunteer', async (req, res) => {
     const teachSewing = willing_to_teach_sewing === 'Y'; // Convert checkbox to boolean
     const lead = willing_to_lead === 'Y'; // Convert checkbox to boolean
 
+    // Check for existing user with the same email or username
+    const existingAdminOrUser = async (email, username) => {
+        try {
+            // Check in the admins table
+            const adminMatch = await knex('admins')
+                .where('email', email)
+                .orWhere('username', username)
+                .first();
+    
+            // Check in the users table
+            const userMatch = await knex('users')
+                .where('email', email)
+                .orWhere('username', username)
+                .first();
+    
+            // Return true if a match is found in either table
+            return adminMatch || userMatch;
+        } catch (error) {
+        console.error('Error checking for existing admin or user:', error);
+        throw error;
+    }
+};
+const existingRecord = await existingAdminOrUser(email,username);
+    
+
+    if (existingRecord) {
+        // Email or username already exists
+        let errorMessage = 'An account with this ';
+        if (existingRecord.email === email) {
+            errorMessage += 'email ';
+        }
+        if (existingRecord.username === username) {
+            errorMessage += (errorMessage.includes('email') ? 'and ' : '') + 'username ';
+        }
+        errorMessage += 'already exists. Please try again with different credentials.';
+        
+        return res.status(400).render('volunteer', { 
+            errorMessage,isAdmin, isLoggedIn
+        });
+    }
+
     // Hash the password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+    
     try {
         // Insert the new volunteer into the database
         await knex.transaction(async (trx) => {
@@ -1257,7 +1425,8 @@ app.post('/volunteer', async (req, res) => {
 app.get('/add-volunteer', checkAuthenticationStatus, (req, res) => {
     const isLoggedIn = req.session.isLoggedIn || false;
     const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
-    res.render('add-volunteer', { isLoggedIn, isAdmin });
+    let errorMessage= null
+    res.render('add-volunteer', { errorMessage, isLoggedIn, isAdmin });
 });
 
 
@@ -1268,6 +1437,7 @@ app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
         const isLoggedIn = req.session.isLoggedIn || false;
         const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
         const vol_id = req.params.id;
+        let errorMessage = null
 
         // Query the database to get the volunteer's details
         const volunteer = await knex('volunteer_info')
@@ -1295,7 +1465,7 @@ app.get('/edit-volunteer/:id', checkAuthenticationStatus, async (req, res) => {
         }
 
         // Render the edit form with the volunteer's details
-        res.render('edit-volunteer', { isLoggedIn, isAdmin, volunteer });
+        res.render('edit-volunteer', { errorMessage, isLoggedIn, isAdmin, volunteer });
     } catch (err) {
         console.error('Error fetching volunteer:', err);
         res.status(500).send('An error occurred while fetching the volunteer.');
@@ -1480,5 +1650,486 @@ app.get('/send-email/:id', checkAuthenticationStatus, async (req, res) => {
     }
 });
 
+app.get('/view-participants/:id', checkAuthenticationStatus, async (req, res) => {
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const isLoggedIn = req.session.isLoggedIn || false;
 
-app.listen(port, () => console.log('Chat, our SIGMA Server is started...'));
+    const eventID = parseInt(req.params.id);
+
+    try {
+        const eventParticipationData = await knex('volunteer_info as v')
+            .join('volunteer_participation as vp', 'v.vol_id', 'vp.vol_id')
+            .join('event_info as e', 'vp.event_id', 'e.event_id')
+            .select(
+                'v.vol_first_name',
+                'v.vol_last_name',
+                'v.vol_email',
+                'v.vol_phone',
+                'e.event_description',
+                'e.organization_name'
+            )
+            .where('vp.event_id', eventID);
+
+        // Pass the data to the template
+        res.render('view-participants', { eventParticipationData, isLoggedIn, isAdmin });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while fetching participant data.');
+    }
+});
+app.get('/record-events', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { address, description, organization, city, state, zip, event_date } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Subquery to aggregate items produced
+        const itemsSubquery = knex('items_produced')
+            .select('event_id')
+            .select(
+                knex.raw(`
+                    json_agg(
+                        json_build_object(
+                            'item_description', item_description, 
+                            'quantity', quantity
+                        )
+                    ) as items_produced
+                `)
+            )
+            .groupBy('event_id');
+
+        // Start building the base query
+        let query = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .leftJoin(itemsSubquery.as('ip'), 'e.event_id', 'ip.event_id')
+            .select(
+                'e.event_id',
+                knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
+                'e.organization_name',
+                'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
+                'e.organizer_email',
+                'e.event_type',
+                'e.estimated_attendance',
+                'e.num_children_under_10',
+                'e.num_teens',
+                'e.num_help_set_up',
+                'e.num_sewers',
+                'sa.sewing_ability_description',
+                'e.num_sewing_machines',
+                'e.num_sergers',
+                knex.raw("CONCAT(v.street_address, ', ', v.city, ', ', v.state, ' ', v.ZIP) AS full_address"),
+                'e.notes',
+                'e.event_status',
+                'e.jen_story',
+                'e.contribute_materials_cost',
+                'ip.items_produced'
+                
+            )
+            .where('e.event_status', 'approved')
+            .orderBy('eo.event_date')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+        // Apply filters if they exist
+        if (address) {
+            query = query.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            query = query.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            query = query.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            query = query.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            query = query.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            // Ensure the date is in the format YYYY-MM-DD for comparison
+            query = query.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+        // Execute the query to fetch the filtered and paginated events
+        const events = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .count('e.event_id as count');
+
+        if (address) {
+            countQuery = countQuery.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            countQuery = countQuery.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            countQuery = countQuery.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            countQuery = countQuery.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            countQuery = countQuery.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            countQuery = countQuery.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            countQuery = countQuery.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+        const totalEvents = await countQuery.first();
+        const totalPages = Math.ceil(totalEvents.count / itemsPerPage);
+
+        // Render the record-events page with events, pagination data, and filter values
+        res.render('record-events', {
+            isLoggedIn,
+            isAdmin,
+            events,
+            currentPage,
+            totalPages,
+            addressFilter: address,
+            descriptionFilter: description,
+            organizationFilter: organization,
+            cityFilter: city,
+            stateFilter: state,
+            zipFilter: zip,
+            dateFilter: event_date,
+            
+        });
+
+    } catch (err) {
+        console.error('Error fetching events:', err);
+        res.status(500).send('An error occurred while fetching events.');
+    }
+});
+
+// complete event route
+app.get('/complete-event/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const id = req.params.id;
+    // Fetch the main event info
+    knex('event_info')
+        .where('event_id', id)
+        .first()
+        .then(events => {
+            if (!events) {
+                return res.status(404).send('Event not found');
+            }
+            // Fetch the venue and event_date_options in parallel
+            return Promise.all([
+                knex('items_produced').where('event_id', events.event_id)
+            ]).then(([items_produced]) => {
+             // Transform items_produced into an object for easy access in template
+                const itemsProducedObj = {};
+                items_produced.forEach(item => {
+                    itemsProducedObj[item.item_description.toLowerCase()] = item.quantity;
+                });
+                // Render the edit-event form with all required data
+                res.render('complete-event', {
+                    isLoggedIn,
+                    isAdmin,
+                    events,
+                    items_produced: itemsProducedObj
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            res.status(500).send('Internal Server Error');
+        });
+});
+app.post('/complete-event/:id', checkAuthenticationStatus, (req, res) => {
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const eventId = req.params.id;
+    const {
+        
+        estimated_attendance,
+        pockets_quantity,
+        collars_quantity,
+        envelopes_quantity,
+        vests_quantity,
+       
+    } = req.body;
+    const event_status ='completed'
+    const itemsToInsert = [];
+    const itemTypes = [
+        { name: 'Pockets', quantity: pockets_quantity },
+        { name: 'Collars', quantity: collars_quantity },
+        { name: 'Envelopes', quantity: envelopes_quantity },
+        { name: 'Vests', quantity: vests_quantity }
+    ];
+    // First, update event_info table
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            
+            estimated_attendance,
+            event_status
+
+        })
+        
+        .then(() => {
+            return knex('items_produced')
+                .where('event_id', eventId)
+                .del();
+        })
+        .then(() => {
+            // Insert new items with non-zero quantities
+            const itemsToInsert = itemTypes
+                .filter(item => item.quantity > 0)
+                .map(item => ({
+                    event_id: eventId,
+                    item_description: item.name,
+                    quantity: item.quantity
+                }));
+
+            // Only insert if there are items to insert
+            if (itemsToInsert.length > 0) {
+                return knex('items_produced').insert(itemsToInsert);
+            }
+        })
+        
+            
+        
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/record-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+app.post('/disapprove-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const event_status ='pending'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            
+            event_status
+
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/record-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+
+app.get('/pending-events', checkAuthenticationStatus, async (req, res) => {
+    try {
+        const isLoggedIn = req.session.isLoggedIn || false;
+        const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+
+        // Get the current page from the query string, default to page 1
+        const currentPage = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10; // Number of events per page
+
+        // Extract filters from the query string
+        const { address, description, organization, city, state, zip, event_date, event_status } = req.query;
+
+        // Calculate the offset for pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+
+        // Start building the base query
+        let query = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .select(
+                'e.event_id',
+                knex.raw("TO_CHAR(eo.event_date, 'MM-DD-YY') AS event_date"),
+                knex.raw("TO_CHAR(eo.start_time, 'HH12:MI am') AS start_time"),
+                knex.raw("TO_CHAR(eo.end_time, 'HH12:MI am') AS end_time"),
+                'e.organization_name',
+                'e.event_description',
+                'e.organizer_first_name',
+                'e.organizer_last_name',
+                'e.organizer_phone',
+                'e.organizer_email',
+                'e.event_type',
+                'e.estimated_attendance',
+                'e.num_children_under_10',
+                'e.num_teens',
+                'e.num_help_set_up',
+                'e.num_sewers',
+                'sa.sewing_ability_description',
+                'e.num_sewing_machines',
+                'e.num_sergers',
+                'e.event_status',
+                knex.raw("CONCAT(v.street_address, ', ', v.city, ', ', v.state, ' ', v.ZIP) AS full_address"),
+                'e.notes',
+                'e.jen_story',
+                'e.contribute_materials_cost',
+            )
+            .where('e.event_status', 'pending')
+            .orderBy('eo.event_date')
+            .limit(itemsPerPage)
+            .offset(offset);
+
+        // Apply filters if they exist
+        if (address) {
+            query = query.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            query = query.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            query = query.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            query = query.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            query = query.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            query = query.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            // Ensure the date is in the format YYYY-MM-DD for comparison
+            query = query.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+
+        // Execute the query to fetch the filtered and paginated events
+        const events = await query;
+
+        // Query the total number of events for pagination controls, applying the same filters
+        let countQuery = knex('event_info as e')
+            .join('event_date_options as eo', function() {
+                this.on('e.event_id', '=', 'eo.event_id')
+                    .andOn('eo.date_preference_order', '=', knex.raw('?', [1]));
+            })
+            .join('venues as v', 'e.venue_id', 'v.venue_id')
+            .join('sewing_ability as sa', 'e.sewing_ability_id', 'sa.sewing_ability_id')
+            .count('e.event_id as count');
+
+        if (address) {
+            countQuery = countQuery.whereRaw('LOWER(v.street_address) LIKE ?', [`%${address.toLowerCase()}%`]);
+        }
+        if (description) {
+            countQuery = countQuery.whereRaw('LOWER(e.event_description) LIKE ?', [`%${description.toLowerCase()}%`]);
+        }
+        if (organization) {
+            countQuery = countQuery.whereRaw('LOWER(e.organization_name) LIKE ?', [`%${organization.toLowerCase()}%`]);
+        }
+        if (city) {
+            countQuery = countQuery.whereRaw('LOWER(v.city) LIKE ?', [`%${city.toLowerCase()}%`]);
+        }
+        if (state) {
+            countQuery = countQuery.whereRaw('LOWER(v.state) LIKE ?', [`%${state.toLowerCase()}%`]);
+        }
+        if (zip) {
+            countQuery = countQuery.whereRaw('v.ZIP LIKE ?', [`%${zip}%`]);
+        }
+        if (event_date) {
+            countQuery = countQuery.whereRaw('TO_CHAR(eo.event_date, \'YYYY-MM-DD\') = ?', [event_date]);
+        }
+
+        const totalEvents = await countQuery.first();
+        const totalPages = Math.ceil(totalEvents.count / itemsPerPage);
+
+        // Render the maintain-events page with events, pagination data, and filter values
+        res.render('pending-events', {
+            isLoggedIn,
+            isLoggedIn,
+            isAdmin,
+            events,
+            currentPage,
+            totalPages,
+            addressFilter: address,
+            descriptionFilter: description,
+            organizationFilter: organization,
+            cityFilter: city,
+            stateFilter: state,
+            zipFilter: zip,
+            dateFilter: event_date,
+        });
+    } catch (err) {
+        console.error('Error fetching events:', err);
+        res.status(500).send('An error occurred while fetching events.');
+    }
+});
+
+app.post('/approve-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const event_status ='approved'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            event_status
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/pending-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+app.post('/decline-event/:id', checkAuthenticationStatus, (req, res) => {
+    const eventId = req.params.id;
+    const isLoggedIn = req.session.isLoggedIn || false;
+    const isAdmin = req.session.isLoggedIn && req.session.userRole === 'admin';
+    const event_status ='declined'
+    knex('event_info')
+        .where('event_id', eventId)
+        .update({
+            event_status
+        })
+        .then(() => {
+            // After all updates are successful, redirect or render a success page
+            res.redirect('/maintain-events');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred while updating the event');
+        });
+});
+
+
+app.listen(port, () => console.log('The server has started.'));
