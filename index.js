@@ -212,7 +212,7 @@ app.get('/user-dashboard', checkAuthenticationStatus, (req, res) => {
 });
 
 // route for upcoming events
-app.get('/upcoming-events', checkAuthenticationStatus, async (req, res) => {
+app.get('/upcoming-events',  async (req, res) => {
     const isUser = req.session.isLoggedIn && req.session.userRole === 'user';
     const isLoggedIn = req.session.isLoggedIn || false;
 
