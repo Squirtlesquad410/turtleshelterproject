@@ -1,7 +1,6 @@
-<!-- THis is the landing page-->
- <!DOCTYPE html>
- <html lang="en">
- <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/output.css" rel="stylesheet">
@@ -9,22 +8,191 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <title>Turtle Shelter Project</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+        }
+
+        .landing-image img {
+            width: 100%;
+            filter: brightness(0.6);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .overlay button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #228B22;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .overlay button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        /* Sections */
+        .section {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card a {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #228B22;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .card a:hover {
+            background-color: #1a681a;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #228B22;
+            color: white;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
     </style>
- </head>
- <body>
-      <%- include('partials/navbar') %>
-      
-      <!-- Image positioned dynamically below the navbar -->
-      <div style="position: relative;">
-         <div class="landing-image" style="position: absolute; top: 0;">
-            <img src="/images/landingpage.png" style="width: 100vw; height: auto; display: block; filter: brightness(.6)">
-         </div>
-      </div>
-      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-         <h1 style="font-style: italic; font-size: 30px; color: white; z-index: 30;">Saving the lives of people battling homelessness</h1>
-         <h1 style="font-weight: bold; font-size: 40px; color: white; z-index: 30;">BEGINS WITH YOU</h1>
-      </div>
+</head>
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
 
- </body>
- </html>
+    <!-- Landing Image -->
+    <div class="landing-image">
+        <picture>
+            <source srcset="/images/landingpagemobile.jpeg" media="(max-width: 768px)">
+            <img src="/images/landingpage.png" alt="Landing Page Image">
+        </picture>
+        <div class="overlay">
+            <h1>Saving the lives of people battling homelessness</h1>
+            <h1 style="font-weight: bold; font-size: 2.5rem;">BEGINS WITH YOU</h1>
+            <div>
+                <a href="/about-us"><button>About Us</button></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Our Mission -->
+    <section class="section" style="background-color: #f4f4f4;">
+        <h2>Our Mission</h2>
+        <p>
+            What is a turtle shelter vest? a high tech but simple solution to help save lives -
+a portable "shelter" you can carry with you, just like a turtle...
+
+        </p>
+        <p>and YOU can help!  </p>
+        <br>
+        <p>One winter when Jen was homeless, 7 of her friends froze to death.  </p>
+
+    <p>Jen is no longer homeless and has figured out a solution:</p>
+<p> High tech foam vests that are inexpensive,
+            keep a person warm to 10 degree below zero, help SAVE lives and alleviate suffering.</p>
+        <p>
+            YOU can request vests for your community - and you can make vests and have your friends, business colleagues, church members or club make vests, too! </p>
+    </section>
+
+    <!-- Section: How You Can Help -->
+    <section class="section">
+        <h2>How You Can Help</h2>
+        <div class="cards">
+            <div class="card">
+                <img src="/images/vvvest.jpg" alt="volunteer" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Volunteer</h3>
+                <p>Join our team of dedicated volunteers and help us provide essential services.</p>
+                <a href="/volunteer">Learn More</a>
+            </div>
+            <div class="card">
+                <img src="/images/vvest.jpg" alt="donate" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Donate</h3>
+                <p>Your donations directly support our programs and services.</p>
+                <a href="/donate">Donate Now</a>
+            </div>
+            <div class="card">
+                <img src="/images/sewing.jpg" alt="sewing" style="width: 700px; height: auto; border-radius: 10px;">
+                <h3 style="font-weight: bold; font-size: 2.5 rem;">Host an Event</h3>
+                <p>Partner with us to host an event that helps our community.</p>
+                <a href="/request-an-event">Request Event</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Recent Updates -->
+    <section class="section" style="background-color: #f4f4f4;">
+        <h2>Recent Updates</h2>
+        <p>Stay tuned for our latest events, stories, and updates from the field.</p>
+        <a href="/upcoming-events" style="text-decoration: underline; color: #228B22;">View Upcoming Events</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>TURTLE SHELTER PROJECT, PO BOX 382, KAYSVILLE, UT 84037 | 801-872-3190 | 
+            <a href="mailto:turtleshelterproject@gmail.com">turtleshelterproject@gmail.com</a>
+        </p>
+        <div>
+            <a href="https://www.facebook.com/turtleshelterproject/" target="_blank"><i class="fab fa-facebook-square"></i></a>
+            <a href="https://www.instagram.com/turtleshelterproject/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@turtleshelterproject7915/" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </footer>
+</body>
+</html>

@@ -7,81 +7,90 @@
     <!-- Importing Google Fonts for a polished, beautiful look -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Reset some default styles */
-        * {
+        body {
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
-        /* Body styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(45deg, #ff7b7b, #ff8c00, #fbbd61);
-            background-size: 300% 300%;
-            animation: gradientAnimation 8s ease infinite;
-            height: 100vh;
+        /* Space below the navbar */
+        .content {
+            padding-top: 120px; /* Adjust this value to match the navbar height + desired spacing */
             display: flex;
             justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-            transition: all 0.3s ease-in-out;
+            align-items: flex-start; /* Align form at the top of the space, not center vertically */
+            min-height: 100vh; /* Ensure it covers the full viewport */
         }
 
-        /* Header styling */
+        /* Form container styling */
+        form {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%; /* Restrict the height to fit within the screen */
+            overflow-y: auto; /* Add scroll functionality inside the form */
+            margin: 0 auto; /* Center horizontally if flexbox isn't applied */
+        }
+
         h1 {
-            font-size: 3.5em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 150px;
+            text-align: center;
+            color: #333;
+        }
+
+/* Add other styles as needed */
+
+    
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+    
+        input,
+        textarea,
+        select {
+            width: calc(100% - 20px);
             margin-bottom: 20px;
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
         }
-
-        /* Paragraph styling */
-        p {
-            font-size: 1.2em;
-            font-weight: 500;
-            line-height: 1.6;
-            margin-top: 20px;
-            color: #f7f7f7;
-            text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.2);
+    
+        textarea {
+            resize: vertical;
         }
-
-        /* Button styling */
-        .btn {
-            margin-top: 30px;
-            padding: 15px 30px;
-            background-color: #ff5733;
+    
+        button[type="submit"] {
+            display: block;
+            background-color: #228b22; /* Turtle green */
             color: white;
-            font-size: 1.2em;
-            border-radius: 50px;
-            text-transform: uppercase;
-            font-weight: 600;
             border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            margin: 0 auto;
+            text-align: center;
         }
-
-        .btn:hover {
-            background-color: #ff3e1d;
-            transform: scale(1.05);
+    
+        button[type="submit"]:hover {
+            background-color: #196619;
         }
-
-        /* Animation for gradient background */
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+    
+        /* Align radio buttons with labels */
+        .event_type {
+            font-family: Arial, sans-serif; /* Optional for cleaner styling */
         }
 
     </style>
@@ -89,9 +98,14 @@
 <body>
     <%- include('partials/navbar') %>
     <!-- Page Content -->
-    <div>
-        <h1>ADD ADMIN</h1>
+
+    
+    <div style="padding-top: 40px; padding-bottom: 80px;">
+        <h1>Add Admin</h1>
         <form action="/add-admin" method="POST">
+            <% if (errorMessage) { %>
+                <p style="color: red;"><%= errorMessage %></p>
+            <% } %>
             <label for="email">Email:</label><br>
             <input type="email" id="email" name="email" required><br><br>
             <label for="first_name">First Name:</label><br>

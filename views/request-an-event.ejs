@@ -84,14 +84,12 @@
 
 
     </style>
-    
-      
       <body>
         <%- include('partials/navbar') %>
       
-        <div class="content">
+        <div class="content" style="padding-bottom: 80px;">
             <form action="/request-an-event" method="POST">
-                <h1>Event Attendance</h1>
+                <h1>Request An Event</h1>
                 <div class="input-container">
                     <!--Labels for input boxes for the form
                     NOTE: num_people should be changed to meet the column name in the database
@@ -99,7 +97,7 @@
                     and where this input is going)-->
                     <!-- What is the event title/description/purpose? -->
                     <label for="event_description">Enter the Name/Title for your Event:</label>
-                    <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" required autofocus style="width: 150px;">
+                    <input type="text" id="event_description" name="event_description" placeholder="Enter name/title of event" required autofocus style="width: 300px;">
                     <br><br>
                     <!--Additional Notes about the Event-->
                     <label for="notes">Include any additional information about the event that may be helpful:</label>
@@ -109,6 +107,15 @@
                     <label for="organization_name">Enter Your Organization Name (or your own full name):</label>
                     <input type="text" id="organization_name" name="organization_name" placeholder="Enter first name" required>
                     <br><br>
+                    <!--Organizer First Name (text input)-->
+                    <label for="organizer_first_name">First Name:</label>
+                    <input type="text" id="organizer_first_name" name="organizer_first_name" placeholder="Enter first name" required>
+
+                    <!--Organizer Last Name (text input)-->
+                    <label for="organizer_last_name">Last Name:</label>
+                    <input type="text" id="organizer_last_name" name="organizer_last_name" placeholder="Enter last name" required>
+                    <br><br>
+
                     <!--Organizer Phone Number (number input)-->
                     <label for="organizer_phone">What is a good phone number to contact you at?:</label>
                     <input type="number" id="organizer_phone" name="organizer_phone" placeholder="Enter your phone number" style="width: 175px;" required>
@@ -137,7 +144,7 @@
                         <!--VENUE SPACE/SIZE (Include Sq. Footage & Example)-->
                         <label for="space_size">Select the size of your venue (estimated):</label>
                         <select id="space_size" name="space_size" required>
-                            <option value="1">Sigma Room -- 600 sq. ft</option>
+                            <option value="1">Living Room -- 600 sq. ft</option>
                             <option value="2">Large Garage -- 600-1000 sq. ft</option>
                             <option value="3">Basketball Court -- 4000-6000 sq. ft</option>
                             <option value="4">Banquet Hall -- 3000-10000 sq. ft</option>
@@ -193,7 +200,7 @@
                         <input type="number" id="num_sewers" name="num_sewers" placeholder="Enter number of participants that can sew" min="0" required style="width: 265px;">
                         <br><br>
                         <!--Average Sewing Ability (drop-down)-->
-                        <label for="sewing_ability_id">Select your (AVG?) sewing ability...*********:</label>
+                        <label for="sewing_ability_id">Select the average sewing ability of your group:</label>
                         <select id="sewing_ability_id" name="sewing_ability_id" required>
                             <option value="1">No sewing; can cut, pin, and mark vest components</option>
                             <option value="2">Beginning sewing; just learning to use a sewing machine</option>
@@ -202,29 +209,36 @@
                         </select>
                         <br><br>
                         <!--Number of Sewing Machines-->
-                        <label for="num_sewing_machines">How many sewing machines do you (NEED/HAVE?):</label>
+                        <label for="num_sewing_machines">How many sewing machines do you have?:</label>
                         <input type="number" id="num_sewing_machines" name="num_sewing_machines" placeholder="Enter number of sewing machines" min="0" required style="width: 225px;">
                         <br><br>
                         <!--Number of Sergers-->
-                        <label for="num_sergers">How many sewing machines do you (NEED/HAVE?):</label>
+                        <label for="num_sergers">How many sergers do you have?:</label>
                         <input type="number" id="num_sergers" name="num_sergers" placeholder="Enter number of sergers" min="0" required style="width: 185px;">
                         <br><br>
 
                     <br><br>
                     <!--Would you like Jen to share her story? (boolean/checkbox input)-->
                     <label for="jen_story">Would you like Jen to share her story?</label>
-                    <input type="checkbox" id="jen_story" name="jen_story" value="Y" >
-                    <label for="jen_story" style="display: inline;">Yes</label>
+                    <br>
+                    <div style="display: flex; flex-direction: row-reverse;">
+                        <input type="checkbox" id="jen_story" name="jen_story" value="Y" >
+                        <label for="jen_story" style="display: inline;">Yes</label>
+                    </div>
                     <br><br>
                     <!--Are you willing to contribute to the cost of materials (For the vests)?-->
                     <label for="contribute_materials_cost">Are you willing to contribute to the cost of materials (for the vests)?</label>
                     <br>
-                    <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" >
-                    <label for="contribute_materials_cost" style="display: inline;">Yes</label>
+                    <div style="display: flex; flex-direction: row-reverse;">
+                        <input type="checkbox" id="contribute_materials_cost" name="contribute_materials_cost" value="Y" >
+                        <label for="contribute_materials_cost" style="display: inline;">Yes</label>
+                    </div>
                     <br><br>
                     <!--Submit Button-->
                     <button type="submit" style="width: 140px; height: 60px; font-size: 20px;"><b>Submit</b></button>
                 </div>
             </form>
+        </div>
+
 </body>
 </html>

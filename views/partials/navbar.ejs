@@ -20,14 +20,16 @@
             margin: 0;
             font-weight: bold;
             color: white; /* Ensure the text color is white */
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: large;
         }
     
         .navbar a {
             color: white;
             text-decoration: none;
-            
-            margin-right: 40px; 
-            font-size: large;
+            font-family: Arial, Helvetica, sans-serif;
+            margin-right: 25px; 
+            font-size: medium;
         }
     
         .navbar a:hover {
@@ -89,26 +91,31 @@
 <div class="navbar">
     <h2><a href="/">TURTLE SHELTER PROJECT</a></h2>
     <div class="banner">
-        <a href="#">About Us</a>
-        <a href="#">Jen's Story</a>
-        <a href="#">Volunteer</a>
+        <a href="/about-us">About Us</a>
+        <a href="/jen">Jen's Story</a>
+        <a href="/volunteer">Volunteer</a>
         <a href="/donate">Donate</a>
         <a href="/request-an-event">Request Event</a>
         
         <% if (!isLoggedIn) { %>
-            <a href="/signin">Login</a>
+            <a href="/signin">Sign in</a>
         <% } %>
 
         <% if (isLoggedIn) { %>
             <a href="/signout">Sign Out</a>
-            <a id="slideOut" href="#">Admin Page</a>
+            <a href="/upcoming-events">Upcoming Events</a>
+        <% } %>
+
+        <% if (isAdmin) { %>
+            <a id="slideOut" href="#">Admin Menu</a>
             <!-- Slide-out menu -->
             <div id="slideOutMenu" class="slide-out-menu">
                 <ul>
+                    <li><a href="/admin">Admin Home</a></li>
                     <li><a href="/maintain-events">Maintain Events</a></li>
                     <li><a href="/maintain-users">Maintain Users</a></li>
                     <li><a href="/maintain-volunteers">Maintain Volunteers</a></li>
-                    <li><a href="/add-admin">Add Admin</a></li>
+                    <li><a href="/upcoming-events">Upcoming Events</a></li>
                 </ul>
             </div>
         <% } %>
