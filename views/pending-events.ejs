@@ -356,7 +356,7 @@
         
             // Edit handler (to be implemented)
             function handleEdit(eventId) {
-                window.location.href = `/edit-event/${eventId}`; // Adjust route as needed
+                window.location.href = `/edit-event/${eventId}`; // Adjust route as neede
             }
         
             // Delete handler (with confirmation)
@@ -379,16 +379,16 @@
         <!-- Pagination Controls -->
         <div class="pagination">
             <% if (currentPage > 1) { %>
-                <a href="/maintain-events?page=<%= currentPage - 1 %>">Previous</a>
+                <a href="/pending-events?page=<%= currentPage - 1 %>">Previous</a>
             <% } %>
         
             <% for (let i = 1; i <= totalPages; i++) { %>
-                <a href="/maintain-events?page=<%= i %>" 
+                <a href="/pending-events?page=<%= i %>" 
                     class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
             <% } %>
         
             <% if (currentPage < totalPages) { %>
-                <a href="/maintain-events?page=<%= currentPage + 1 %>">Next</a>
+                <a href="/pending-events?page=<%= currentPage + 1 %>">Next</a>
             <% } %>
         </div>
         
